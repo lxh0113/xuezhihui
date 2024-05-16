@@ -8,7 +8,6 @@
       <el-badge style="margin-top:10px;" is-dot class="item">
         <el-icon size="20"><Bell /></el-icon>
       </el-badge>
-
       <img src="@/assets/image/avatar.jpeg" alt="" />
     </div>
   </div>
@@ -16,6 +15,7 @@
 
 <script lang="ts" setup>
 import { Bell } from "@element-plus/icons-vue";
+
 </script>
 
 <style lang="scss" scoped>

@@ -1,0 +1,107 @@
+{
+  "id": "4544870",
+  "name": "xue'zhi'hui",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "752637",
+      "name": "Notice",
+      "font_class": "notice",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "1634062",
+      "name": "home",
+      "font_class": "home",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "2206466",
+      "name": "course",
+      "font_class": "course",
+      "unicode": "e71f",
+      "unicode_decimal": 59167
+    },
+    {
+      "icon_id": "4765888",
+      "name": "logout",
+      "font_class": "logout",
+      "unicode": "e78c",
+      "unicode_decimal": 59276
+    },
+    {
+      "icon_id": "7008920",
+      "name": "document",
+      "font_class": "document",
+      "unicode": "e6f3",
+      "unicode_decimal": 59123
+    },
+    {
+      "icon_id": "7009022",
+      "name": "task",
+      "font_class": "task",
+      "unicode": "e732",
+      "unicode_decimal": 59186
+    },
+    {
+      "icon_id": "7239844",
+      "name": "profile",
+      "font_class": "profile",
+      "unicode": "e745",
+      "unicode_decimal": 59205
+    },
+    {
+      "icon_id": "12934671",
+      "name": "study",
+      "font_class": "tubiaozhizuomoban-",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "19099222",
+      "name": "Interaction",
+      "font_class": "Interaction",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "22273645",
+      "name": "class",
+      "font_class": "class",
+      "unicode": "e6ec",
+      "unicode_decimal": 59116
+    },
+    {
+      "icon_id": "22427090",
+      "name": "mistakes",
+      "font_class": "mistakes",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "23701036",
+      "name": "AfterclassHomework-Outlined",
+      "font_class": "AfterclassHomework-Outlined",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "32804322",
+      "name": "examination",
+      "font_class": "examination",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "38589097",
+      "name": "question-bank",
+      "font_class": "question-bank",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    }
+  ]
+}

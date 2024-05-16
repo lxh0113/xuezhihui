@@ -1,0 +1,71 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4544870 */
+  src: url('iconfont.woff2?t=1715604011515') format('woff2'),
+       url('iconfont.woff?t=1715604011515') format('woff'),
+       url('iconfont.ttf?t=1715604011515') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-notice:before {
+  content: "\e655";
+}
+
+.icon-home:before {
+  content: "\e602";
+}
+
+.icon-course:before {
+  content: "\e71f";
+}
+
+.icon-logout:before {
+  content: "\e78c";
+}
+
+.icon-document:before {
+  content: "\e6f3";
+}
+
+.icon-task:before {
+  content: "\e732";
+}
+
+.icon-profile:before {
+  content: "\e745";
+}
+
+.icon-tubiaozhizuomoban-:before {
+  content: "\e60c";
+}
+
+.icon-Interaction:before {
+  content: "\e622";
+}
+
+.icon-class:before {
+  content: "\e6ec";
+}
+
+.icon-mistakes:before {
+  content: "\e642";
+}
+
+.icon-AfterclassHomework-Outlined:before {
+  content: "\e62d";
+}
+
+.icon-examination:before {
+  content: "\e67a";
+}
+
+.icon-question-bank:before {
+  content: "\e625";
+}
+

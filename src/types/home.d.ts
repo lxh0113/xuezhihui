@@ -28,3 +28,12 @@ export type Book={
 }
 
 export interface BooksList extends Array<Book>{}
+
+export type User={
+    id:number;
+    account:string;
+    email:string;
+    name:string;
+    avatar:string;
+    identity:string
+}

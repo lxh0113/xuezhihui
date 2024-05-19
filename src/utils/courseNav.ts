@@ -15,8 +15,8 @@ const teacherCourseNavList:NavList=[
     {path:'/home',icon:'iconfont icon-home',text:'首页'},
     {path:'/activities',icon:'iconfont icon-Interaction',text:'活动'},
     {path:'/homework',icon:'iconfont icon-AfterclassHomework-Outlined',text:'作业'},
-    {path:'/exam',icon:'iconfont icon-examination',text:'作业'},
-    {path:'/data',icon:'iconfont icon-document',text:'资料'}
+    {path:'/exam',icon:'iconfont icon-examination',text:'考试'},
+    {path:'/information',icon:'iconfont icon-document',text:'资料'}
 ]
 
 export const getCourseNavList=(identity:string):NavList=>{

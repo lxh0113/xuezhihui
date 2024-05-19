@@ -16,8 +16,11 @@ import Header from "@/views/home/components/header.vue";
 // @ts-ignore
 import Nav from "@/views/home/components/nav.vue";
 import { getNavList } from "@/utils/nav";
+import { useUserStore } from "@/stores/userStore";
 
-const navList=getNavList('teacher')
+const userStore=useUserStore()
+
+const navList=getNavList(userStore.getUserInfo()!.identity)
 </script>
 
 <style lang="scss" scoped>

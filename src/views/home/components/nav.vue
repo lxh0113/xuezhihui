@@ -2,12 +2,17 @@
   <div class="leftNav">
     <div style="height: 10px"></div>
     <el-menu
-      default-active="1"
       class="el-menu-vertical-demo"
       :collapse="isCollapse"
       router
+      :default-active="getCurrentPath()"
     >
-      <el-menu-item v-for="item in navList" :index="flag===0?item.path:'/course/'+$route.params.id+item.path">
+      <el-menu-item
+        v-for="item in navList"
+        :index="
+          flag === 0 ? item.path : '/course/' + $route.params.id + item.path
+        "
+      >
         <span
           style="margin-right: 20px; font-weight: bold"
           :class="item.icon"
@@ -28,9 +33,25 @@
 <script lang="ts" setup>
 import { type Nav, type NavList } from "@/types/home";
 import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const isCollapse = ref(false);
 const collapseText = ref("折叠");
+
+const getCurrentPath = () => {
+  let currentPath = route.path.split("/");
+
+  console.log(currentPath)
+
+    for (let i = 0; i < navList.length; i++) {
+      let path = navList[i].path.split("/");
+
+      if (path[2] == currentPath[2]) {
+        return navList[i].path;
+      }
+    }
+};
 
 watch(isCollapse, (newValue) => {
   if (newValue === false) collapseText.value = "收起";
@@ -39,12 +60,12 @@ watch(isCollapse, (newValue) => {
 
 const { navList, flag } = withDefaults(
   defineProps<{
-    navList: NavList,
-    flag?: number
+    navList: NavList;
+    flag?: number;
   }>(),
   {
-    navList: ()=>Array<Nav>(), // 设置 navList 的默认值为一个空数组
-    flag: 0 // 设置 flag 的默认值为 0
+    navList: () => Array<Nav>(), // 设置 navList 的默认值为一个空数组
+    flag: 0, // 设置 flag 的默认值为 0
   }
 );
 </script>

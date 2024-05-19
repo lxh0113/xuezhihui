@@ -8,14 +8,18 @@
       <el-badge style="margin-top:10px;" is-dot class="item">
         <el-icon size="20"><Bell /></el-icon>
       </el-badge>
-      <img src="@/assets/image/avatar.jpeg" alt="" />
+      <img :src="userStore.getUserInfo().avatar" alt="" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Bell } from "@element-plus/icons-vue";
+import { useUserStore } from "@/stores/userStore";
 
+const userStore=useUserStore()
+
+console.log(userStore.getUserInfo()?.avatar)
 </script>
 
 <style lang="scss" scoped>

@@ -9,3 +9,5 @@ declare module "*.vue" {
 }
 
 declare module '@/types/home.d.ts'
+
+declare module 'mockjs'

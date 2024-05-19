@@ -37,13 +37,14 @@ import TeacherQuestions from "@/views/teacher/questions/index.vue";
 import TeacherClass from "@/views/teacher/class/index.vue";
 import TeacherCourseLearn from "@/views/teacher/course/components/learn.vue"
 import TeacherCourseTeach from "@/views/teacher/course/components/teach.vue"
-import TeacherCourseHome from "@/views/teacher/courseHome/index.vue"
 
+import TeacherCourseHome from "@/views/teacher/courseHome/index.vue"
 import TeacherCourseHomePage from "@/views/teacher/courseHome/home/index.vue"
 import TeacherCourseActivities from "@/views/teacher/courseHome/activities/index.vue"
 import TeacherCourseHomework from "@/views/teacher/courseHome/homework/index.vue"
 import TeacherCourseExam from "@/views/teacher/courseHome/exam/index.vue"
 import TeacherCourseInformation from "@/views/teacher/courseHome/information/index.vue"
+import TeacherClassDetails from "@/views/teacher/class/components/class.vue"
 
 const route = useRoute();
 
@@ -172,7 +173,13 @@ const router = createRouter({
             },
             { path: "paper", component: TeacherPaper },
             { path: "questions", component: TeacherQuestions },
-            { path: "class", component: TeacherClass },
+            { 
+              path: "class", 
+              component: TeacherClass,
+              children:[
+                {path:':id',component:TeacherClassDetails}
+              ]
+            },
             { path: "notice", component: Notice, name: "notice" },
             {
               path: "profile",

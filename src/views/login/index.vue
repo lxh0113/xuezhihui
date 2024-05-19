@@ -31,7 +31,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button style="width: 420px;" type="primary">登录</el-button>
+          <el-button @click="login" style="width: 420px;" type="primary">登录</el-button>
         </el-form-item>
       </el-form>
 
@@ -46,13 +46,40 @@
 <script setup lang="ts">
 import { reactive } from "vue";
 import { User, Lock } from '@element-plus/icons-vue'
-import type router from "@/router";
+import { loginAPI } from "@/apis/user";
+import { ElMessage } from "element-plus";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
+
+
+const userStore=useUserStore()
+
+const router=useRouter()
 
 const form = reactive({
   email: "",
   password: "",
   type:[]
 });
+
+const login=async ()=>{
+  const res=await loginAPI({account:form.email,password:form.password})
+
+  if(res.data.code===200)
+  {
+    userStore.setUserInfo(res.data.data)
+    // console.log(res.data)
+    ElMessage.success('登录成功')
+    setTimeout(()=>{
+      router.push('/')
+    },2000)
+  }
+  else{
+    ElMessage.error(res.data.message)
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>

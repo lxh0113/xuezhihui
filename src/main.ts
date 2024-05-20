@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
+// import piniaPluginPersist from 'pinia-plugin-persist'
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 import ElementPlus from "element-plus";

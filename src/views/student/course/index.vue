@@ -1,9 +1,9 @@
 <template>
   <div class="head">
-    <router-link to="/student/course/learn">
+    <router-link active-class="active" to="/student/course/learn">
       <span>我学的课</span>
     </router-link>
-    <router-link to="/student/course/teach">
+    <router-link active-class="active" to="/student/course/teach">
       <span>我教的课</span>
     </router-link>
   </div>
@@ -14,19 +14,27 @@
 </template>
 
 <script lang='ts' setup>
+
 </script>
 
 <style lang='scss' scoped>
 a{
   text-decoration: none;
+  color:$primary-gray-text-color;
+}
+
+.active{
+  color:$primary-color;
 }
 
 .head{
   span{
-    color:$primary-color;
+    // color:$primary-color;
     margin-right: 40px;
     font-size: 16px;
   }
+
+  
 }
 .bottom{
   width: 100%;

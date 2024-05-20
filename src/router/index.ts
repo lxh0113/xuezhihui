@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useRoute } from "vue-router";
 
 // 公共模块
 import Login from "@/views/login/index.vue";
@@ -35,168 +34,263 @@ import TeacherCourse from "@/views/teacher/course/index.vue";
 import TeacherPaper from "@/views/teacher/paper/index.vue";
 import TeacherQuestions from "@/views/teacher/questions/index.vue";
 import TeacherClass from "@/views/teacher/class/index.vue";
-import TeacherCourseLearn from "@/views/teacher/course/components/learn.vue"
-import TeacherCourseTeach from "@/views/teacher/course/components/teach.vue"
+import TeacherCourseLearn from "@/views/teacher/course/components/learn.vue";
+import TeacherCourseTeach from "@/views/teacher/course/components/teach.vue";
 
-import TeacherCourseHome from "@/views/teacher/courseHome/index.vue"
-import TeacherCourseHomePage from "@/views/teacher/courseHome/home/index.vue"
-import TeacherCourseActivities from "@/views/teacher/courseHome/activities/index.vue"
-import TeacherCourseHomework from "@/views/teacher/courseHome/homework/index.vue"
-import TeacherCourseExam from "@/views/teacher/courseHome/exam/index.vue"
-import TeacherCourseInformation from "@/views/teacher/courseHome/information/index.vue"
-import TeacherClassDetails from "@/views/teacher/class/components/class.vue"
+import TeacherCourseHome from "@/views/teacher/courseHome/index.vue";
+import TeacherCourseHomePage from "@/views/teacher/courseHome/home/index.vue";
+import TeacherCourseActivities from "@/views/teacher/courseHome/activities/index.vue";
+import TeacherCourseHomework from "@/views/teacher/courseHome/homework/index.vue";
+import TeacherCourseExam from "@/views/teacher/courseHome/exam/index.vue";
+import TeacherCourseInformation from "@/views/teacher/courseHome/information/index.vue";
+import TeacherClassDetails from "@/views/teacher/class/components/class.vue";
+import TeacherQuestionsDetails from "@/views/teacher/questions/components/details.vue";
+import TeacherPaperDetails from "@/views/teacher/paper/components/details.vue";
 
-const route = useRoute();
+import NoPage from "@/views/noPage/noPage.vue";
+
+import { useUserStore } from "@/stores/userStore";
+import { storeToRefs } from "pinia";
+
+// const userStore=useUserStore()
+
+const basicRouter = [
+  {
+    path: "/login",
+    name: "login",
+    component: Login,
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: Register,
+  },
+  {
+    path: "/forget",
+    name: "forget",
+    component: ForgetPwd,
+  },
+  {
+    path: "/404",
+    name: "NoPage404",
+    component: NoPage,
+    hidden: true,
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: "/login",
-      name: "login",
-      component: Login,
-    },
-    {
-      path: "/register",
-      name: "register",
-      component: Register,
-    },
-    {
-      path: "/forget",
-      name: "forget",
-      component: ForgetPwd,
-    },
-    // {
-    //   path: "/course/:id",
-    //   // redirect:'/course/home'
-    //   component: StudentCourseHome,
-    //   children: [
-    //     { path: "home", component: StudentCourseHomePage },
-    //     {
-    //       path: "task",
-    //       component: StudentCourseTask,
-    //       redirect: (to) => {
-    //         // 重定向到on页面，并将路由参数id传递给子路由
-    //         return { name: "studentTaskHome", params: { id: to.params.id } };
-    //       },
-    //       children: [
-    //         {
-    //           path: "home",
-    //           component: StudentTaskHome,
-    //           name: "studentTaskHome",
-    //         },
-    //         { path: ":id", component: StudentTaskDetails },
-    //       ],
-    //     },
-    //     {
-    //       path: "interaction",
-    //       component: StudentCourseInteraction,
-    //     },
-    //     { path: "homework", component: StudentCourseHomework },
-    //     { path: "exam", component: StudentCourseExam },
-    //     { path: "data", component: StudentCourseData },
-    //     { path: "records", component: StudentCourseRecords },
-    //   ],
-    // },
-    // {
-    //   path: "/",
-    //   component: Home,
-    //   redirect: "/student/course",
-    //   children: [
-    //     {
-    //       path: "student",
-    //       redirect: "/student/course",
-    //       children: [
-    //         {
-    //           path: "course",
-    //           component: StudentCourse,
-    //           redirect: "/student/course/learn",
-    //           name: "StudentCourse",
-    //           children: [
-    //             { path: "learn", component: StudentCourseLearn },
-    //             { path: "teach", component: StudentCourseTeach },
-    //           ],
-    //         },
-    //         {
-    //           path: "mistakes",
-    //           component: StudentMistakes,
-    //           name: "StudentMistakes",
-    //         },
-    //         { path: "notice", component: Notice, name: "notice" },
-    //         {
-    //           path: "profile",
-    //           component: Profile,
-    //           name: "profile",
-    //           children:[
-    //             {path:'information',component:ProfileInformation},
-    //             {path:'changePassword',component:ProfileChangePassword},
-    //             {path:'verifySchool',component:ProfileVerifySchool},
-    //             {path:'byebye',component:ProfileByebye},
-    //           ]
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-    {
-      path: "/course/:id",
-      // redirect:'/course/home'
-      component: TeacherCourseHome,
-      children: [
-        { path: "home", component: TeacherCourseHomePage },
-        {
-          path: "activities",
-          component: TeacherCourseActivities,
-        },
-        { path: "homework", component: TeacherCourseHomework },
-        { path: "exam", component: TeacherCourseExam },
-        { path: "information", component: TeacherCourseInformation }
-      ],
-    },
-    {
-      path: "/",
-      component: Home,
-      redirect: "/teacher/course",
-      children: [
-        {
-          path: "teacher",
-          redirect: "/teacher/course",
-          children: [
-            {
-              path: "course",
-              component: TeacherCourse,
-              redirect:'/teacher/course/teach',
-              children: [
-                { path: "learn", component:  TeacherCourseLearn},
-                { path: "teach", component:  TeacherCourseTeach},
-              ],
-            },
-            { path: "paper", component: TeacherPaper },
-            { path: "questions", component: TeacherQuestions },
-            { 
-              path: "class", 
-              component: TeacherClass,
-              children:[
-                {path:':id',component:TeacherClassDetails}
-              ]
-            },
-            { path: "notice", component: Notice, name: "notice" },
-            {
-              path: "profile",
-              component: Profile,
-              name: "profile",
-              children: [
-                { path: "information", component: ProfileInformation },
-                { path: "changePassword", component: ProfileChangePassword },
-                { path: "verifySchool", component: ProfileVerifySchool },
-                { path: "byebye", component: ProfileByebye },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  routes: basicRouter,
+});
+
+export const clearRouter = () => {
+  router.routes = basicRouter;
+};
+
+const setRouter = async (identity: string) => {
+  return new Promise((resolve, reject) => {
+    clearRouter();
+    console.log("看谁先到222");
+    console.log(identity);
+    if (identity === "student") {
+      // router.addRoute();
+
+      router.addRoute({
+        path: "/",
+        component: Home,
+        redirect: "/student/course",
+        children: [
+          {
+            path: "/course/:id",
+            // redirect:'/course/home'
+            component: StudentCourseHome,
+            children: [
+              { path: "home", component: StudentCourseHomePage },
+              {
+                path: "task",
+                component: StudentCourseTask,
+                redirect: (to) => {
+                  // 重定向到on页面，并将路由参数id传递给子路由
+                  return {
+                    name: "studentTaskHome",
+                    params: { id: to.params.id },
+                  };
+                },
+                children: [
+                  {
+                    path: "home",
+                    component: StudentTaskHome,
+                    name: "studentTaskHome",
+                  },
+                  { path: ":id", component: StudentTaskDetails },
+                ],
+              },
+              {
+                path: "interaction",
+                component: StudentCourseInteraction,
+              },
+              { path: "homework", component: StudentCourseHomework },
+              { path: "exam", component: StudentCourseExam },
+              { path: "data", component: StudentCourseData },
+              { path: "records", component: StudentCourseRecords },
+            ],
+          },
+          {
+            path: "student",
+            redirect: "/student/course",
+            children: [
+              {
+                path: "course",
+                component: StudentCourse,
+                redirect: "/student/course/learn",
+                name: "StudentCourse",
+                children: [
+                  { path: "learn", component: StudentCourseLearn },
+                  { path: "teach", component: StudentCourseTeach },
+                ],
+              },
+              {
+                path: "mistakes",
+                component: StudentMistakes,
+                name: "StudentMistakes",
+              },
+              { path: "notice", component: Notice, name: "notice" },
+              {
+                path: "profile",
+                component: Profile,
+                name: "profile",
+                children: [
+                  { path: "information", component: ProfileInformation },
+                  { path: "changePassword", component: ProfileChangePassword },
+                  { path: "verifySchool", component: ProfileVerifySchool },
+                  { path: "byebye", component: ProfileByebye },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    } else if (identity === "teacher") {
+      // router.addRoute();
+      router.addRoute({
+        path: "/",
+        component: Home,
+        redirect: "/teacher/course",
+        children: [
+          {
+            path: "course/:id",
+            // redirect:'/course/home'
+            component: TeacherCourseHome,
+            children: [
+              { path: "home", component: TeacherCourseHomePage },
+              {
+                path: "activities",
+                component: TeacherCourseActivities,
+              },
+              { path: "homework", component: TeacherCourseHomework },
+              { path: "exam", component: TeacherCourseExam },
+              { path: "information", component: TeacherCourseInformation },
+            ],
+          },
+          {
+            path: "teacher",
+            redirect: "/teacher/course",
+            children: [
+              {
+                path: "course",
+                component: TeacherCourse,
+                redirect: "/teacher/course/teach",
+                children: [
+                  { path: "learn", component: TeacherCourseLearn },
+                  { path: "teach", component: TeacherCourseTeach },
+                ],
+              },
+              {
+                path: "paper",
+                component: TeacherPaper,
+                // children: [],
+              },
+              { path: "paper/:id", component: TeacherPaperDetails },
+              {
+                path: "questions",
+                component: TeacherQuestions,
+                children: [
+                  { path: "details", component: TeacherQuestionsDetails },
+                ],
+              },
+              {
+                path: "class",
+                component: TeacherClass,
+                children: [{ path: ":id", component: TeacherClassDetails }],
+              },
+              { path: "notice", component: Notice, name: "notice" },
+              {
+                path: "profile",
+                component: Profile,
+                name: "profile",
+                children: [
+                  { path: "information", component: ProfileInformation },
+                  { path: "changePassword", component: ProfileChangePassword },
+                  { path: "verifySchool", component: ProfileVerifySchool },
+                  { path: "byebye", component: ProfileByebye },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    }
+
+    router.addRoute({
+      path: "/:pathMatch(.*)",
+      redirect: "/404",
+    });
+
+    resolve(true);
+  });
+};
+
+router.beforeEach(async (to, from, next) => {
+  // 判断有没有登录
+  const userStore = useUserStore();
+
+  const { isLogin, user } = storeToRefs(userStore);
+  console.log(isLogin.value, user.value);
+
+  if (to.name == "login") {
+    next();
+    return;
+  }
+
+  if (user.value === null) {
+    if (to.name == "login") {
+      next();
+    } else {
+      // alert(2)
+
+      router.push("/login");
+    }
+  } else {
+    alert(2);
+    if (isLogin.value === false) {
+      alert(3);
+
+      const res = await setRouter(user.value.identity);
+
+      // changeIsLogin(true);
+      isLogin.value = true;
+
+      if (res === true) {
+        next({ ...to, replace: true });
+      } else next(false);
+
+      // next('/')
+
+      return;
+    }
+
+    next();
+  }
 });
 
 export default router;

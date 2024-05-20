@@ -14,7 +14,7 @@ function login(req: any) {
           account: "666",
           email: Random.email(),
           name: Random.cname(),
-          identity: "student",
+          identity: "teacher",
           avatar: Random.image("200*100"),
         },
       message: "登录成功",

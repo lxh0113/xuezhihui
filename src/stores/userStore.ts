@@ -3,7 +3,24 @@ import { defineStore } from 'pinia'
 import type { User } from '@/types/home'
 
 export const useUserStore = defineStore('user', () => {
-    const user=ref<User>()
+    const user=ref<User>({
+        name:'123',
+        avatar:'123',
+        id:1,
+        account:'666',
+        email:'123',
+        identity:'student'
+    })
+
+    const isLogin=ref(false);
+
+    const getIsLogin=()=>{
+        return isLogin.value
+    }
+
+    const changeIsLogin=(value:boolean)=>{
+        isLogin.value=value
+    }
 
     const setUserInfo=(data:User)=>{
         
@@ -17,8 +34,11 @@ export const useUserStore = defineStore('user', () => {
     }
 
     return {
-        setUserInfo,getUserInfo
+        user,isLogin,setUserInfo,getUserInfo,getIsLogin,changeIsLogin
     }
 },{
-    persist:true
+    persist:{
+        // enabled: true,
+        storage:localStorage
+    }
 })

@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 // @ts-ignore
 import Course from "@/views/components/course.vue";
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { type courseList } from '@/types/home'
 import { useRouter } from "vue-router";
 
@@ -26,6 +26,13 @@ const toCourse=(id:number):void=>{
   router.push(`/course/${id}`)
 }
 
+const getCourse=()=>{
+  
+}
+
+onMounted(()=>{
+
+})
 
 </script>
 

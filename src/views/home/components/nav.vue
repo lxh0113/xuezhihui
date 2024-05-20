@@ -42,15 +42,22 @@ const collapseText = ref("折叠");
 const getCurrentPath = () => {
   let currentPath = route.path.split("/");
 
-  console.log(currentPath)
+  console.log(currentPath);
 
-    for (let i = 0; i < navList.length; i++) {
-      let path = navList[i].path.split("/");
+  for (let i = 0; i < navList.length; i++) {
+    let path = navList[i].path.split("/");
 
+    if (flag === 0) {
       if (path[2] == currentPath[2]) {
         return navList[i].path;
       }
     }
+    else{
+      if (path[3] == currentPath[3]) {
+        return navList[i].path;
+      }
+    }
+  }
 };
 
 watch(isCollapse, (newValue) => {

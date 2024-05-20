@@ -67,7 +67,8 @@ const login=async ()=>{
 
   if(res.data.code===200)
   {
-    userStore.setUserInfo(res.data.data)
+    userStore.setUserInfo(res.data.data);
+    // userStore.changeIsLogin(true);
     // console.log(res.data)
     ElMessage.success('登录成功')
     setTimeout(()=>{

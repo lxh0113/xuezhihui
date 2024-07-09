@@ -73,7 +73,7 @@ const tableData: User[] = [
 
 <style lang="scss" scoped>
 .backBox {
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
   margin-right: 20px;
   background-color: $primary-white-color;
   border-radius: 5px;

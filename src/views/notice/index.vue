@@ -1,5 +1,5 @@
 <template>
-  <div class="backBox">
+  <div class="noticeBox">
     <div class="title">
       <span class="text">消息</span>
     </div>
@@ -38,7 +38,7 @@ const activities: typeList = [
 </script>
 
 <style lang="scss" scoped>
-.backBox {
+.noticeBox {
   // width: 100%;
   margin-right: 20px;
   height: calc(100vh - 120px);

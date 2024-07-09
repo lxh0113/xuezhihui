@@ -2,41 +2,53 @@
   <div class="backBox">
     <!-- 123 -->
     <div class="courseImage">
-      <img src="@/assets/image/course.jpg" alt="" />
-      <div class="courseName">人工智能</div>
+      <img :src="courseData.image" alt="" />
+      <div class="courseName">{{courseData.courseName}}</div>
     </div>
-    <div class="changeImage">更换封面</div>
+    <div class="changeImage">{{courseData.createTime}}</div>
     <hr />
 
-    <el-form
+    <!-- <el-form
       label-position="top"
       label-width="auto"
       :model="formLabelAlign"
-      style="margin-top:20px;"
+      style="margin-top: 20px"
     >
       <el-form-item label="课程名称">
-        <el-input v-model="formLabelAlign.name" />
+        <el-input v-model="courseData.courseName" />
       </el-form-item>
       <el-form-item label="授课对象">
         <el-input v-model="formLabelAlign.object" />
       </el-form-item>
 
-      <el-form-item style="margin-top:50px;">
+      <el-form-item style="margin-top: 50px">
         <el-button type="primary">修改</el-button>
       </el-form-item>
-    </el-form>
+    </el-form> -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
-import type { FormProps } from "element-plus";
+import { onMounted, reactive, ref } from "vue";
+import { ElMessage, FormProps } from "element-plus";
+import { teacherGetCourseDetailsAPI } from "@/apis/course";
+import { useRoute, useRouter } from "vue-router";
 
+const route = useRoute();
+const router = useRouter();
 const labelPosition = ref<FormProps["labelPosition"]>("right");
 
-const formLabelAlign = reactive({
-  name: "人工智能",
-  object: ""
+const courseData = ref({});
+
+const getCourseDetails = async () => {
+  const res = await teacherGetCourseDetailsAPI(parseInt(route.params.id as string));
+  if (res.data.code === 200) {
+    courseData.value = res.data.data;
+  } else ElMessage.error(res.data.message);
+};
+
+onMounted(() => {
+  getCourseDetails()
 });
 </script>
 

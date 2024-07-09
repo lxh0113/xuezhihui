@@ -38,6 +38,6 @@ a{
 }
 .bottom{
   width: 100%;
-  height:calc(100vh - 120px)
+  min-height:calc(100vh - 120px)
 }
 </style>

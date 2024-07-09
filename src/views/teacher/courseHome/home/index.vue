@@ -11,7 +11,9 @@
 </template>
 
 <script lang='ts' setup>
+// @ts-ignore
 import Edit from "./components/edit.vue"
+// @ts-ignore
 import Course from "./components/course.vue"
 </script>
 

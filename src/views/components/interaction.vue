@@ -23,10 +23,11 @@ let color={
 
 defineProps<{
     item:{
-        type:'success'|'primary'|'info',
+        type:string,
         name:string
     }
 }>()
+
 </script>
 
 <style lang='scss' scoped>
@@ -61,6 +62,7 @@ defineProps<{
         font-size: 12px;
         display: flex;
         align-items: flex-end;
+        color:$primary-gray-text-color;
     }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div class="bigBox">
     <div class="left">
-      <img src="@/assets/logo/logo.png" />
-      <span> 学智汇 </span>
+      <img src="@/assets/logo/logo.png" @click="$router.push('/')" />
+      <span @click="$router.push('/')"> 学智汇 </span>
     </div>
     <div class="right">
       <el-badge style="margin-top:10px;" is-dot class="item">

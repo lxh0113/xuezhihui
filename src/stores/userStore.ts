@@ -9,7 +9,8 @@ export const useUserStore = defineStore('user', () => {
         id:1,
         account:'666',
         email:'123',
-        identity:'student'
+        identity:1,
+        roleId:2
     })
 
     const isLogin=ref(false);

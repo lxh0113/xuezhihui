@@ -1,20 +1,20 @@
 <template>
   <div class="backBox">
     <div class="header">
-      <span>签到</span>
+      <span>作业</span>
       <span>详情></span>
     </div>
     <div class="bottom">
       <div class="right">
         <div class="top">
-          <span>6</span>
-          <span>/7次</span>
+          <span>{{ finishAssignmentNum }}</span>
+          <span>/{{ allAssignmentNum }}次</span>
         </div>
         <div class="gray">完成进度</div>
       </div>
       <div class="right">
         <div class="top">
-          <span>92.2</span>
+          <span>{{ avgAssignmentScore }}</span>
           <span>分</span>
         </div>
         <div class="gray">平均分</div>
@@ -23,14 +23,28 @@
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+// defineProps()
+withDefaults(
+  defineProps<{
+    allAssignmentNum: number;
+    finishAssignmentNum: number;
+    avgAssignmentScore: number;
+  }>(),
+  {
+    allAssignmentNum: 10,
+    finishAssignmentNum: 1,
+    avgAssignmentScore: 1,
+  }
+);
+</script>
 
 <style lang="scss" scoped>
 .backBox {
   height: 100%;
   background-color: $primary-white-color;
   box-sizing: border-box;
-  padding:20px 30px 20px 30px;
+  padding: 20px 30px 20px 30px;
   display: flex;
   flex-direction: column;
   border-radius: 5px;

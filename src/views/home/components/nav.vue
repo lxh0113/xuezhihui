@@ -8,7 +8,9 @@
       :default-active="getCurrentPath()"
     >
       <el-menu-item
+      :class="{subActive:getCurrentPath()==item.path}"
         v-for="item in navList"
+        :key="item"
         :index="
           flag === 0 ? item.path : '/course/' + $route.params.id + item.path
         "
@@ -32,7 +34,7 @@
 
 <script lang="ts" setup>
 import { type Nav, type NavList } from "@/types/home";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -42,18 +44,21 @@ const collapseText = ref("折叠");
 const getCurrentPath = () => {
   let currentPath = route.path.split("/");
 
-  console.log(currentPath);
+  // console.log(currentPath);
 
   for (let i = 0; i < navList.length; i++) {
     let path = navList[i].path.split("/");
 
+    // console.log("path",path)
+    
     if (flag === 0) {
       if (path[2] == currentPath[2]) {
         return navList[i].path;
       }
     }
     else{
-      if (path[3] == currentPath[3]) {
+      if (path[1] === currentPath[3]) {
+        
         return navList[i].path;
       }
     }
@@ -75,6 +80,10 @@ const { navList, flag } = withDefaults(
     flag: 0, // 设置 flag 的默认值为 0
   }
 );
+
+onMounted(()=>{
+  // getCurrentPath()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -108,5 +117,11 @@ const { navList, flag } = withDefaults(
 .leftNav {
   margin-left: 20px;
   margin-top: 10px;
+}
+
+.subActive{
+  color: white;;
+  // font-weight: bold;
+  background-color: $primary-color;
 }
 </style>

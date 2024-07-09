@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted } from "vue";
+import { getCurrentInstance, onMounted, onUnmounted } from "vue";
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance!.appContext.config.globalProperties.$echarts;
 
@@ -36,11 +36,11 @@ onMounted(() => {
       type: "value",
       color: ["#ff0000"],
     },
-    grid:{
-      top:10,
-      x:0,
-      x2:0,
-      y2:0
+    grid: {
+      top: 10,
+      x: 0,
+      x2: 0,
+      y2: 0,
     },
     series: [
       {
@@ -62,6 +62,16 @@ onMounted(() => {
       },
     ],
   });
+
+  window.addEventListener('resize',()=>{
+    // alert(1)
+    myChart.resize()
+
+  })
+
+  onUnmounted(() => {
+    myChart.dispose();
+  });
 });
 
 // 绘制图表
@@ -71,7 +81,7 @@ onMounted(() => {
 .bigBox {
   min-width: 520px;
   height: 320px;
-  padding:20px;
+  padding: 20px;
   background-color: $primary-white-color;
   display: flex;
   flex-direction: column;
@@ -80,29 +90,29 @@ onMounted(() => {
   border-radius: 5px;
   margin-bottom: 20px;
 
-  .title{
+  .title {
     height: 30px;
     min-width: 520px;
     display: flex;
     justify-content: space-between;
 
-    span{
+    span {
       font-weight: bold;
-      font-size:18px;
+      font-size: 18px;
     }
 
-    span:nth-child(1){
-      color:$primary-color;
+    span:nth-child(1) {
+      color: $primary-color;
     }
 
-    span:nth-child(2){
-      color:$primary-gray-text-color;
+    span:nth-child(2) {
+      color: $primary-gray-text-color;
     }
   }
 
-  #homework{
+  #homework {
     min-width: 520px;
-    flex:1;
+    flex: 1;
   }
 }
 </style>

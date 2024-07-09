@@ -19,14 +19,14 @@
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <el-icon color="#2f3ced" size="20"><Folder /></el-icon>
-            <span style="margin-left: 10px">{{ scope.row.name }}</span>
+            <span style="margin-left: 10px">{{ scope.row.content }}</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column prop="bytes" label="大小" width="180" />
-      <el-table-column prop="builder" label="创建者" />
-      <el-table-column prop="date" label="创建日期" :formatter="formatter" />
-      <el-table-column label="操作"> 
+      <el-table-column prop="creatorName" label="创建者" />
+      <el-table-column prop="createTime" label="创建日期" :formatter="formatter" />
+      <el-table-column label="操作">
         <template #default="scope">
           <el-button size="mid">下载</el-button>
           <el-button size="mid">查看</el-button>
@@ -37,37 +37,45 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Folder, FolderChecked, Search } from "@element-plus/icons-vue";
+import { ElMessage, TableColumnCtx } from "element-plus";
+import { useRoute } from "vue-router";
+import { studentGetAllResourceAPI } from "../../../../apis/resource";
+
+const route = useRoute();
 const input = ref("");
 
-import type { TableColumnCtx } from "element-plus";
-
 interface User {
-  name: string;
-  bytes: string;
-  builder: string;
-  date: string;
+  id: number;
+  courseId: number;
+  content: string;
+  createTime: string;
+  creatorId: number;
+  creatorName: string;
 }
 
 const formatter = (row: User, column: TableColumnCtx<User>) => {
-  return row.date;
+  return row.createTime;
 };
 
-const tableData: User[] = [
-  {
-    date: "2016-05-03",
-    name: "文件",
-    bytes: "--",
-    builder: "wakkk",
-  },
-  {
-    date: "2016-05-03",
-    name: "文件",
-    bytes: "--",
-    builder: "wakkk",
-  },
-];
+const tableData = ref<User[]>([]);
+
+const getAllData = async () => {
+  const res = await studentGetAllResourceAPI(parseInt(route.params.id as string));
+
+  // console.log(res.data)
+
+  if (res.data.code === 200) {
+    tableData.value = res.data.data;
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+onMounted(() => {
+  getAllData();
+});
 </script>
 
 <style lang="scss" scoped>

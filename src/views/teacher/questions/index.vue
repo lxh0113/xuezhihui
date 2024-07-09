@@ -1,99 +1,147 @@
 <template>
-  <div class="backBox">
+  <div class="bigBox">
     <div class="header">
-      <div class="title">试卷管理</div>
+      <div class="title">题库管理</div>
       <div class="button">
-        <el-button type="primary" :icon="Plus">组卷</el-button>
+        <el-button type="primary" :icon="Plus" @click="toAdd">新建题目</el-button>
+        <!-- <el-button type="primary" :icon="Delete">删除</el-button> -->
+        <el-button type="primary" :icon="Upload">智能导入</el-button>
       </div>
     </div>
     <hr />
     <div class="choose">
       <!-- <el-button style="font-size:16px;margin-right:20px;" type="primary" :icon="Upload" text="primary">上传</el-button> -->
       <el-input
+        v-model="search"
         style="width: 200px"
         placeholder="请输入关键词"
         :prefix-icon="Search"
       />
-      <el-date-picker
-        style="margin-left: 30px"
-        v-model="start"
-        type="datetime"
-        placeholder="开始时间"
-        :default-time="defaultTime"
-      />
-
-      <el-date-picker
-        style="margin-left: 30px"
-        v-model="end"
-        type="datetime"
-        placeholder="开始时间"
-        :default-time="defaultTime"
-      />
-      <!-- <el-date></el-date> -->
-
-      <el-select style="width:200px;margin-left:30px;">
-
-      </el-select>
     </div>
     <!-- <hr /> -->
     <el-table
-      :data="tableData"
+      :data="filterTableData"
       :default-sort="{ prop: 'date', order: 'descending' }"
       style="width: 100%; margin-top: 20px"
     >
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="试卷名称" prop="name" sortable />
-      <el-table-column prop="questionsBank" label="题库" />
-      <el-table-column prop="builder" label="创建人" />
-      
-      <el-table-column prop="questionsNumber" label="题量"/>
+      <!-- <el-table-column type="selection" width="55" /> -->
+      <el-table-column label="题干">
+        <template #default="scope">
+          {{ JSON.parse(scope.row.title).text }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="题目类型" width="160px" prop="type" sortable />
+      <el-table-column label="课程" width="200px" prop="courseName" sortable />
+
+      <el-table-column prop="creatorName" width="160px" label="创建人" />
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" text="primary">发布考试</el-button>
-          <el-button type="primary" text="primary">查看</el-button>
-          <el-button type="primary" text="primary">编辑</el-button>
-
+          <!-- <el-button
+            type="primary"
+            text="primary"
+            @click="$router.push('/teacher/questions/1')"
+            >查看</el-button
+          > -->
+          <el-button
+            size="large"
+            :icon="Edit"
+            type="primary"
+            text="primary"
+            @click="toEdit(scope.row)"
+            >编辑</el-button
+          >
+          <el-button
+            size="large"
+            :icon="Delete"
+            type="primary"
+            text="primary"
+            @click="toDelete(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
   </div>
+
+  
 </template>
 
 <script lang="ts" setup>
-import { Plus, Delete, Search } from "@element-plus/icons-vue";
-import { ref } from "vue";
-const input = ref("");
+import { Plus, Delete, Search, Upload, Edit } from "@element-plus/icons-vue";
+import { onMounted, ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import {
+  teacherDeleteQuestionAPI,
+  teacherViewCourseQuestionAPI,
+} from "../../../apis/question";
 
-const start = ref('')
-const end=ref('')
-const defaultTime = new Date(2000, 1, 1, 12, 0, 0)
-
-import type { TableColumnCtx } from "element-plus";
+const router = useRouter();
+const route = useRoute();
 
 interface Paper {
-  name: string;
-  questionsBank:string;
-  builder:string;
-  questionsNumber:number;
-  date:string
+  id: number;
+  type: string;
+  title: string;
+  answer: string;
+  answerAnalysis: string;
+  courseId: number;
+  courseName: string;
+  creatorId: number;
+  creatorName: string;
 }
 
-const tableData: Paper[] = [
-  {
-    name: "哇卡卡卡",
-    questionsBank:'1222',
-    builder:'lzy',
-    date:'2024-12-2',
-    questionsNumber:12
-  },
-];
+const search = ref("");
+
+const tableData = ref<Array<Paper>>();
+
+const filterTableData = computed(() =>
+  tableData.value?.filter(
+    (data) =>
+      !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
+  )
+);
+
+const getQuestions = async () => {
+  const res = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
+  if (res.data.code === 200) {
+    tableData.value = res.data.data;
+  } else ElMessage.error(res.data.message);
+};
+
+const toAdd = () => {
+  router.push("/course/" + route.params.id + "/questions/add");
+};
+
+const toEdit = (item: any) => {
+  router.push("/course/" + route.params.id + "/questions/edit/" + item.id);
+};
+
+const toDelete = async (item: any) => {
+  const res = await teacherDeleteQuestionAPI(item.id);
+
+  if (res.data.code === 200) {
+    ElMessage.success("删除成功");
+    getQuestions();
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+
+
+onMounted(() => {
+  getQuestions();
+});
 </script>
 
 <style lang="scss" scoped>
-.backBox {
-  background: $primary-white-color;
+.bigBox {
+  background-color: $primary-white-color;
   margin-right: 20px;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
+  margin-bottom: 20px;
   box-sizing: border-box;
   padding: 20px;
 

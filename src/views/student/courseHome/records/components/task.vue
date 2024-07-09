@@ -3,15 +3,15 @@
     <div class="header">章节任务点</div>
     <div class="mid">
       <div>
-        <span class="span1">0</span>
-        <span class="span2">/68个</span>
+        <span class="span1">{{ finishTaskPointNum }}</span>
+        <span class="span2">/{{ allTaskPointNum }}个</span>
       </div>
       <div>
-        <span class="span1">5</span>
+        <span class="span1">{{ classRank }}</span>
         <span class="span2">名</span>
       </div>
       <div>
-        <el-progress width="80" type="circle" :percentage="25" />
+        <el-progress width="80" type="circle" :percentage="finishTaskPointNum/allTaskPointNum*100" />
       </div>
     </div>
     <div class="bottom">
@@ -71,6 +71,19 @@ const tableData: User[] = [
     status: 3,
   },
 ];
+
+const props = withDefaults(
+  defineProps<{
+    allTaskPointNum:number;
+    finishTaskPointNum:number;
+    classRank:number;
+  }>(), // 注意这里不再传入参数
+  {
+    allTaskPointNum:1,
+    finishTaskPointNum:1,
+    classRank:1
+  }
+);
 </script>
 
 <style lang="scss" scoped>

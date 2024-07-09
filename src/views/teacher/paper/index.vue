@@ -11,65 +11,79 @@
     <hr />
     <div class="choose">
       <!-- <el-button style="font-size:16px;margin-right:20px;" type="primary" :icon="Upload" text="primary">上传</el-button> -->
-      <el-input
-        style="width: 200px"
-        placeholder="请输入关键词"
-        :prefix-icon="Search"
-      />
-      <el-date-picker
-        style="margin-left: 30px"
-        v-model="start"
-        type="datetime"
-        placeholder="开始时间"
-        :default-time="defaultTime"
-      />
+      <el-input style="width: 200px" placeholder="请输入关键词" :prefix-icon="Search" />
 
-      <el-date-picker
-        style="margin-left: 30px"
-        v-model="end"
-        type="datetime"
-        placeholder="开始时间"
-        :default-time="defaultTime"
-      />
-      <!-- <el-date></el-date> -->
-
-      <el-select style="width: 200px; margin-left: 30px"> </el-select>
+      <el-select
+        v-model="state"
+        @change="getAllExam"
+        style="width: 200px; margin-left: 30px"
+      >
+        <el-option label="草稿" :value="0"></el-option>
+        <el-option label="进行中" :value="1"></el-option>
+        <el-option label="已结束" :value="2"></el-option>
+      </el-select>
     </div>
     <!-- <hr /> -->
-    <el-table
-      :data="tableData"
-      :default-sort="{ prop: 'date', order: 'descending' }"
-      style="width: 100%; margin-top: 20px"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="试卷名称" prop="name" sortable />
-      <el-table-column prop="questionsBank" label="题库" />
-      <el-table-column prop="builder" label="创建人" />
-
-      <el-table-column prop="questionsNumber" label="题量" />
+    <el-table :data="tableData" style="width: 100%; margin-top: 20px">
+      <!-- <el-table-column type="selection" width="55" /> -->
+      <el-table-column label="课程名字" prop="courseName" sortable />
+      <el-table-column prop="title" label="试卷名称" />
+      <el-table-column label="状态">
+        <template #default="scope">
+          <el-tag v-if="scope.row.state === 0" type="warning">草稿</el-tag>
+          <el-tag v-if="scope.row.state === 1" type="danger">进行中</el-tag>
+          <el-tag v-if="scope.row.state === 0" type="primary">草稿</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="questionNum" label="题量" />
+      <el-table-column prop="creatorName" label="创建人" />
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" text="primary">发布考试</el-button>
+          <el-button type="primary" text="primary" @click="postExam(scope.row)"
+            >发布考试</el-button
+          >
           <el-button type="primary" text="primary">查看</el-button>
-          <el-button type="primary" text="primary">编辑</el-button>
+          <!-- <el-button type="primary" text="primary">编辑</el-button> -->
         </template>
       </el-table-column>
     </el-table>
   </div>
 
   <el-dialog v-model="dialogFormVisible" title="新建试卷" width="500">
-    <el-form :model="form">
+    <el-form :model="form" label-position="left">
       <el-form-item label="试卷名称" label-width="80">
         <el-input v-model="form.name" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="题库选择" label-width="80">
+      <el-form-item label="课程" label-width="80">
+        <el-select v-model="value" placeholder="选择课程">
+          <el-option
+            v-for="item in options"
+            :key="item"
+            :label="item.courseName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="addNewPaper"> 确认 </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="postDialog" title="发布考试" width="800">
+    <el-form>
+      <el-form-item label="考试对象">
         <el-select-v2
-          v-model="value"
-          :options="options"
+          v-model="classValue"
+          :options="classList"
           multiple
+          style="width: 300px"
           clearable
           collapse-tags
-          placeholder="选择题库"
+          placeholder="选择考试对象"
           popper-class="custom-header"
           :max-collapse-tags="1"
         >
@@ -84,13 +98,38 @@
           </template>
         </el-select-v2>
       </el-form-item>
+      <el-form-item label="开始时间">
+        <el-date-picker
+          v-model="form.startTime"
+          type="datetime"
+          placeholder="选择时间"
+          format="YYYY-MM-DD HH:mm:ss"
+          date-format="MMM DD, YYYY"
+          time-format="HH:mm"
+        />
+      </el-form-item>
+      <el-form-item label="截至时间">
+        <el-date-picker
+         v-model="form.endTime"
+          type="datetime"
+          placeholder="选择时间"
+          format="YYYY-MM-DD HH:mm:ss"
+          date-format="MMM DD, YYYY"
+          time-format="HH:mm"
+        />
+      </el-form-item>
+      <el-form-item label="考试时间">
+        <el-input v-model="examTime" style="width: 100px" type="number"></el-input>
+        <span style="margin-left: 20px">分钟</span>
+      </el-form-item>
+      <!-- <el-form-item label="防作弊设置">
+        <el-checkbox>禁止学生多端考试</el-checkbox>
+      </el-form-item> -->
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="addNewPaper">
-          确认
-        </el-button>
+        <el-button @click="postDialog = false">取消</el-button>
+        <el-button type="primary" @click="postDialog = false"> 发布 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -98,93 +137,127 @@
 
 <script lang="ts" setup>
 import { Plus, Delete, Search } from "@element-plus/icons-vue";
-import { ref, reactive,watch } from "vue";
-import type { CheckboxValueType } from 'element-plus'
-import { useRouter } from "vue-router";
+import { ref, reactive, watch, onMounted } from "vue";
+import { CheckboxValueType, ElMessage } from "element-plus";
+import type { TableColumnCtx } from "element-plus";
+import { useRouter, useRoute } from "vue-router";
+import { teacherViewAllCourseAssignmentAPI } from "../../../apis/assignment";
+import { useUserStore } from "@/stores/userStore";
+import { teacherViewMyTeachCourseAPI } from "@/apis/course";
+import { teacherGetAllClassAPI } from "@/apis/class";
+
+const userStore = useUserStore();
+const route = useRoute();
+const router = useRouter();
+
 const input = ref("");
+const state = ref(1);
 
 const start = ref("");
 const end = ref("");
 const defaultTime = new Date(2000, 1, 1, 12, 0, 0);
 const dialogFormVisible = ref(false);
-const router=useRouter()
 
+const postDialog = ref(false);
 
-import type { TableColumnCtx } from "element-plus";
+const currentExamData=ref()
 
-interface Paper {
-  name: string;
-  questionsBank: string;
-  builder: string;
-  questionsNumber: number;
-  date: string;
-}
+const postExam = (item:any) => {
+  postDialog.value = true;
+  currentExamData.value=item
+};
 
-const tableData: Paper[] = [
-  {
-    name: "哇卡卡卡",
-    questionsBank: "1222",
-    builder: "lzy",
-    date: "2024-12-2",
-    questionsNumber: 12,
-  },
-];
+const tableData = ref();
 
 const form = reactive({
-  name: "",
-  region: "",
-  date1: "",
-  date2: "",
-  delivery: false,
-  type: [],
-  resource: "",
-  desc: "",
+  startTime:'',
+  endTime:'',
+  examTime:120
 });
 
-const initials = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-const checkAll = ref(false)
-const indeterminate = ref(false)
-const value = ref<CheckboxValueType[]>([])
-const options = ref(
-  Array.from({ length: 1000 }).map((_, idx) => ({
-    value: `Option ${idx + 1}`,
-    label: `${initials[idx % 10]}${idx}`,
-  }))
-)
+const checkAll = ref(false);
+const indeterminate = ref(false);
 
-watch(value, (val) => {
+const classValue = ref<CheckboxValueType[]>([]);
+const classList = ref([]);
+
+const value = ref();
+const options = ref([]);
+
+watch(classValue, (val) => {
   if (val.length === 0) {
-    checkAll.value = false
-    indeterminate.value = false
-  } else if (val.length === options.value.length) {
-    checkAll.value = true
-    indeterminate.value = false
+    checkAll.value = false;
+    indeterminate.value = false;
+  } else if (val.length === classList.value.length) {
+    checkAll.value = true;
+    indeterminate.value = false;
   } else {
-    indeterminate.value = true
+    indeterminate.value = true;
   }
-})
+});
 
 const handleCheckAll = (val: CheckboxValueType) => {
-  indeterminate.value = false
+  indeterminate.value = false;
   if (val) {
-    value.value = options.value.map((_) => _.value)
+    classValue.value = classList.value.map((_) => _.value);
   } else {
-    value.value = []
+    classValue.value = [];
   }
-}
+};
 
-const addNewPaper=()=>{
-  dialogFormVisible.value = false
+const addNewPaper = () => {
+  dialogFormVisible.value = false;
 
-  router.push('/teacher/paper/1')
-}
+  router.push("/teacher/paper/1");
+};
+
+const getAllClass = async () => {
+  const res = await teacherGetAllClassAPI(userStore.getUserInfo()!.roleId);
+
+  if (res.data.code === 200) {
+    classList.value = res.data.data;
+  } else ElMessage.error(res.data.message);
+};
+
+const getAllCourse = async () => {
+  const res = await teacherViewMyTeachCourseAPI(userStore.getUserInfo()!.roleId);
+
+  if (res.data.code === 200) {
+    options.value = res.data.data;
+    console.log(options.value);
+    value.value = options.value[0];
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+const getAllExam = async () => {
+  const res = await teacherViewAllCourseAssignmentAPI(
+    userStore.getUserInfo()!.roleId,
+    state.value
+  );
+
+  if (res.data.code === 200) {
+    tableData.value = res.data.data;
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+onMounted(() => {
+  getAllExam();
+
+  getAllCourse();
+
+  getAllClass();
+});
 </script>
 
 <style lang="scss" scoped>
 .backBox {
   background: $primary-white-color;
   margin-right: 20px;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
   box-sizing: border-box;
   padding: 20px;
 

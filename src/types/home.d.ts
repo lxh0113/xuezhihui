@@ -9,11 +9,10 @@ export interface NavList extends Array<Nav>{}
 
 export type course={
     id:number,
-    url:string;
-    course:string;
-    school:string;
-    status:number;
-    object:string;
+    courseName:string;
+    createTime:string;
+    userId:number;
+    image:string
 }
 
 export interface courseList extends Array<course>{}
@@ -31,9 +30,10 @@ export interface BooksList extends Array<Book>{}
 
 export type User={
     id:number;
+    roleId:number;
     account:string;
     email:string;
     name:string;
     avatar:string;
-    identity:string
+    identity:number
 }

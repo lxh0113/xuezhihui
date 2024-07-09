@@ -27,8 +27,10 @@ const navList=getNavList(userStore.getUserInfo()!.identity)
 
 .backBox {
   background-color: $primary-background-color;
-  height: 100vh;
-  width: 100vm;
+  min-height: 100vh;
+  min-width: 100vw;
+  display: flex;
+  flex-direction: column;
 
   //   border: 0!important;
 
@@ -38,7 +40,7 @@ const navList=getNavList(userStore.getUserInfo()!.identity)
     .rightContent{
       flex:1;
       margin-left: 20px;
-      height: calc(100vh - 80px);
+      min-height: calc(100vh - 80px);
     }
   }
 }

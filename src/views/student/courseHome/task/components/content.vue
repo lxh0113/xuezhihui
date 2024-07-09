@@ -36,6 +36,14 @@
               ><Document
             /></el-icon>
             <large @click="handleNodeClick(node, data)">{{ node.label }}</large>
+            <el-icon
+              v-if="node.disabled"
+              style="margin: 0 6px 0 20px"
+              color="#2f3ced"
+              size="20"
+            >
+              <SuccessFilled />
+            </el-icon>
           </span>
         </template>
       </el-tree>
@@ -44,102 +52,22 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter,useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
+// import { studentViewAllTaskAPI } from "@/apis/student";
+import { ElMessage } from "element-plus";
+import { getAllChaptersAPI } from "@/apis/course";
 
-// 代理对象
-//  const { proxy } = getCurrentInstance()
+const route = useRoute();
+const router = useRouter();
 
-const route=useRoute()
-const router=useRouter()
-
-// 树型数据
-const treeData = ref([
-  {
-    label: "如果爱忘了",
-    expanded: true,
-    done: false,
-    path: "1",
-    children: [
-      {
-        label: "小幸运",
-        path: "2",
-        children: [
-          {
-            label: "瞬",
-            path: "3",
-          },
-          {
-            label: "句号",
-            path: "4",
-          },
-        ],
-      },
-      {
-        label: "后端开发技术",
-        done: true,
-        path: "5",
-        children: [
-          {
-            label: "Java编程技术",
-            path: "6",
-          },
-          {
-            label: "Python编程技术",
-            path: "6",
-          },
-        ],
-      },
-      {
-        label: "数据库",
-        done: true,
-        path: "7",
-        children: [
-          {
-            label: "关系型数据库",
-            children: [
-              {
-                label: "MySQL",
-                path: "8",
-              },
-              {
-                label: "Oracle",
-                path: "9",
-              },
-            ],
-          },
-          {
-            label: "非关系型数据库",
-            done: true,
-            path: "10",
-            children: [
-              {
-                label: "Redis",
-                path: "11",
-              },
-              {
-                label: "Elasticsearch",
-                path: "12",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        label: "AI人工智能",
-      },
-    ],
-  },
-  {
-    label: "火腿 iPad 泡面",
-  },
-]);
+const treeData = ref([]);
 
 // 树节点属性映射关系
 const defaultProps = {
   children: "children",
   label: "label",
-  disabled: "done"
+  // disabled: "done",
 };
 
 /**
@@ -166,11 +94,78 @@ const handleNodeClick = (node: any, data: any) => {
     data
   );
 
-  router.push('/course/'+route.params.id+'/task/'+data.path)
+  router.push("/course/" + route.params.id + "/task/" + data.id);
+};
+
+const setTreeData = (value: any) => {
+  // 第一层
+  treeData.value = value
+    .filter((item) => {
+      if (item.level === 1)
+        return {
+          label: item.chapterTitle,
+          id: item.id,
+          children: [],
+        };
+    })
+    .map((i) => {
+      return {
+        label: i.chapterTitle,
+        id: i.id,
+        children: [],
+      };
+    });
+
+  console.log(treeData.value);
+
+  treeData.value.map((item) => {
+    item.children = value
+      .filter((littleItem) => {
+        return littleItem.fatherId === item.id;
+      })
+      .map((i) => {
+        return {
+          label: i.chapterTitle,
+          id: i.id,
+          children: [],
+        };
+      });
+  });
+
+  // console.log(data.value);
+
+  for (let i = 0; i < treeData.value.length; i++) {
+    for (let j = 0; j < treeData.value[i].children.length; j++) {
+      treeData.value[i].children[j].children = value
+        .filter((item) => {
+          return item.fatherId === treeData.value[i].children[j].id;
+        })
+        .map((i) => {
+          return {
+            label: i.chapterTitle,
+            id: i.id,
+            children: [],
+          };
+        });
+    }
+  }
+
+  console.log(treeData.value);
+};
+
+const getTaskList = async () => {
+  let id: number = parseInt(route.params.id as string);
+  const res = await getAllChaptersAPI(id);
+
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+    setTreeData(res.data.data)
+    // treeData.value = res.data.data.chapterVOList;
+  } else ElMessage.error(res.data.message);
 };
 
 onMounted(() => {
-  // ...
+  getTaskList();
 });
 </script>
 
@@ -202,7 +197,7 @@ onMounted(() => {
     // background: red;
   }
 
-  .content{
+  .content {
     height: calc(100vh - 150px);
     overflow-y: scroll;
   }

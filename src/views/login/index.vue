@@ -16,7 +16,7 @@
         style="width: 420px;margin-top:20px;"
       >
         <el-form-item label="邮箱">
-          <el-input :prefix-icon="User" v-model="form.email" />
+          <el-input :prefix-icon="User" v-model="form.account" />
         </el-form-item>
         <el-form-item label="密码">
           <el-input :prefix-icon="Lock" type="password" v-model="form.password" />
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { reactive,ref } from "vue";
 import { User, Lock } from '@element-plus/icons-vue'
 import { loginAPI } from "@/apis/user";
 import { ElMessage } from "element-plus";
@@ -56,20 +56,21 @@ const userStore=useUserStore()
 
 const router=useRouter()
 
-const form = reactive({
-  email: "",
+const form = ref({
+  account: "",
   password: "",
-  type:[]
+  type:''
 });
 
 const login=async ()=>{
-  const res=await loginAPI({account:form.email,password:form.password})
+  const res=await loginAPI(form.value.account,form.value.password)
 
   if(res.data.code===200)
   {
     userStore.setUserInfo(res.data.data);
     // userStore.changeIsLogin(true);
     // console.log(res.data)
+    console.log(res.data.data)
     ElMessage.success('登录成功')
     setTimeout(()=>{
       router.push('/')

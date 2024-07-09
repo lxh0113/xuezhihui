@@ -7,33 +7,46 @@
 <script lang="ts" setup>
 // @ts-ignore
 import Course from "@/views/components/course.vue";
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref,onMounted } from "vue";
 import { type courseList } from '@/types/home'
-import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
+import { ElMessage } from "element-plus";
+import { useRoute,useRouter } from "vue-router";
+import { studentViewMyCourseAPI } from '../../../../apis/course';
 
+const userStore=useUserStore()
 const router=useRouter()
+const route=useRoute()
 
-const myCourseList=reactive<courseList>([{
+const myCourseList=ref<courseList>([{
   id:1,
-  url: 'https://huaban.com/pins/5416019016?modalImg=https%3A%2F%2Fgd-hbimg.huaban.com%2F1ccedbedf6e6a0be2073e96e2aba5038bad63e8615432-RSejDR_fw1200',
-  course: 'java',
-  school: '吉首大学',
-  status: 1,
-  object: 'asddf',
+  courseName:'java',
+  createTime:'2024-12-2',
+  userId:1,
+  image:''
 }])
 
-const toCourse=(id:number):void=>{
-  router.push(`/course/${id}`)
+const toCourse=(id:number)=>{
+  console.log(route.params)
+  router.push('/course/'+id)
 }
 
-const getCourse=()=>{
-  
+const getCourse=async()=>{
+  const res=await studentViewMyCourseAPI
+  (userStore.getUserInfo().roleId);
+  if(res.data.code===200)
+  {
+    console.log(res.data.data)
+    myCourseList.value=res.data.data
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
 }
 
 onMounted(()=>{
-
+  getCourse();
 })
-
 </script>
 
 <style lang="scss" scoped>

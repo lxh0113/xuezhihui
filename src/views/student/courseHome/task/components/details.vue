@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted } from "vue";
+import { getCurrentInstance, onMounted,onUnmounted } from "vue";
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance!.appContext.config.globalProperties.$echarts;
 
@@ -75,6 +75,16 @@ onMounted(() => {
         ],
       },
     ],
+  });
+
+  window.addEventListener('resize',()=>{
+    // alert(1)
+    myChart.resize()
+
+  })
+
+  onUnmounted(() => {
+    myChart.dispose();
   });
 });
 </script>

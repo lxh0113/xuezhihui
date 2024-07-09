@@ -18,14 +18,14 @@ import NavVue from "@/views/home/components/nav.vue";
 import { getCourseNavList } from "@/utils/courseNav";
 import { type NavList } from "@/types/home";
 
-const navList:NavList=getCourseNavList('student')
+const navList:NavList=getCourseNavList(1)
 
 </script>
 
 <style lang="scss" scoped>
 .backBox {
   background-color: $primary-background-color;
-  height: 100vh;
+  min-height: 100vh;
   width: 100vm;
 
   //   border: 0!important;
@@ -36,7 +36,8 @@ const navList:NavList=getCourseNavList('student')
     .rightContent {
       flex: 1;
       margin-left: 20px;
-      height: calc(100vh - 80px);
+      min-height: calc(100vh - 80px);
+      margin-bottom: 20px;
     }
   }
 }

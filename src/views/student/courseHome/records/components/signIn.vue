@@ -22,7 +22,14 @@
 </template>
 
 <script lang="ts" setup>
-
+// withDefaults(
+//   defineProps<
+    
+//   >(), // 注意这里不再传入参数
+//   {
+   
+//   }
+// );
 </script>
 
 <style lang="scss" scoped>

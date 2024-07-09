@@ -1,15 +1,20 @@
 <template>
   <div class="backBox">
     <div class="head">
-      <el-select tag-type="primary" :value="myClass" style="width: 240px">
-        <el-option :value="1" label="软件一班"></el-option>
-        <el-option :value="2" label="软件二班"></el-option>
+      <el-select tag-type="primary" @change="setCurrentClass" v-model="myClass" style="width: 240px">
+        <el-option
+          v-for="item in classList"
+          :key="item.id"
+          :value="item.id"
+          :label="item.className"
+        ></el-option>
       </el-select>
       <el-button
         style="margin-left: 30px; font-size: 18px"
         type="primary"
         text="primary"
         :icon="Checked"
+        @click="toSignIn"
         >签到</el-button
       >
       <el-button
@@ -17,23 +22,34 @@
         type="primary"
         text="primary"
         :icon="UserFilled"
+        @click="toChoosePeople"
         >选人</el-button
       >
     </div>
 
     <div class="activities">
       <div class="title">
-        <el-radio-group v-model="radio" class="ml-4">
+      活动
+        <!-- <el-radio-group v-model="radio" class="ml-4">
           <el-radio value="1" size="large">全部</el-radio>
           <el-radio value="2" size="large">进行中</el-radio>
           <el-radio value="3" size="large">已结束</el-radio>
-        </el-radio-group>
+        </el-radio-group> -->
       </div>
       <hr />
       <div class="interactions">
-        <interaction v-for="item in activities" :item="item">
+        <interaction
+          v-for="(item,index) in activitiesList"
+          :key="item.id"
+          :item="activities[index]"
+          @click="toView(item.id)"
+        >
           <template #mid>
-            <p>二维码签到</p>
+            <p>{{item.title}}</p>
+          </template>
+
+          <template #right>
+            {{item.beginTime}}&nbsp;&nbsp;至&nbsp;&nbsp;{{item.endTime}}
           </template>
         </interaction>
       </div>
@@ -43,20 +59,89 @@
 
 <script lang="ts" setup>
 import { Checked, UserFilled } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 // @ts-ignore
 import interaction from "@/views/components/interaction.vue";
+import { useRouter, useRoute } from "vue-router";
+import { teacherGetAllClassAPI } from "@/apis/assignment";
+import { ElMessage } from "element-plus";
+import { teacherGetAllActivityAPI } from "../../../../apis/activity";
+import { useClassStore } from '../../../../stores/classStore';
 
-const radio = ref('1')
+const classStore=useClassStore()
+const route = useRoute();
+const router = useRouter();
+const radio = ref("1");
 interface typeList
   extends Array<{ type: "success" | "primary" | "info"; name: string }> {}
 
-const activities: typeList = [
+let activities = ref<typeList>([
   { type: "success", name: "签到" },
   { type: "primary", name: "选人" },
-];
+]);
 
-const myClass = ref("1");
+const setCurrentClass=()=>{
+  classStore.setCurrentClass(myClass.value)
+}
+
+const activitiesList = ref([]);
+
+const myClass = ref();
+const classList = ref([]);
+
+const toSignIn = () => {
+  router.push("/course/" + route.params.id + "/activities/signIn");
+};
+
+const toChoosePeople = () => {
+  router.push("/course/" + route.params.id + "/activities/choosePeople");
+};
+
+const toView = (id: number) => {
+  router.push("/course/" + route.params.id + "/activities/" + id);
+};
+
+const setClassList = async () => {
+  const res = await teacherGetAllClassAPI();
+
+  if (res.data.code === 200) {
+    classList.value = res.data.data;
+    myClass.value = res.data.data[0].id;
+
+    classStore.setCurrentClass(myClass.value)
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+const getAllActivity = async () => {
+  const res = await teacherGetAllActivityAPI(
+    parseInt(route.params.id as string),
+    myClass.value
+  );
+
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+
+    //
+    activitiesList.value = res.data.data;
+
+    activities.value = activitiesList.value.map((item) => {
+      return {
+        type: item.activityType === 0 ? "success" : "primary",
+        name: item.activityType === 0 ? "签到" : "选人",
+      };
+    });
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+onMounted(async() => {
+  await setClassList();
+
+  getAllActivity();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="bigBox">
     <div class="left">
-      <router-view></router-view>
+      <router-view :key="$route.params"></router-view>
     </div>
     <div class="right">
       <Content></Content>

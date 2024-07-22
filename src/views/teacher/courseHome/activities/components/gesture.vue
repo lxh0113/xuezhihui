@@ -4,13 +4,7 @@
       <!-- <el-form-item label="要求参与人拍照">
         <el-switch v-model="ordinaryForm.photo" />
       </el-form-item> -->
-      <el-form-item label="结束时间">
-        <el-date-picker
-          v-model="ordinaryForm.endTime"
-          type="datetime"
-          placeholder="选择"
-        />
-      </el-form-item>
+      
       <!-- <el-form-item>
         <el-switch v-model="ordinaryForm.photo" />
         <span style="margin-left: 10px; margin-right: 20px">手动结束</span>
@@ -21,6 +15,15 @@
           v-model="ordinaryForm.startTime"
           type="datetime"
           placeholder="选择"
+          
+        />
+      </el-form-item>
+      <el-form-item label="结束时间">
+        <el-date-picker
+          v-model="ordinaryForm.endTime"
+          type="datetime"
+          placeholder="选择"
+          
         />
       </el-form-item>
     </el-form>
@@ -154,30 +157,30 @@ const toSaveImage = async () => {
 
 const ordinaryForm = ref({
   isFixed: false,
-  startTime: "",
+  startTime: '',
   endTime: "",
 });
 
 const toSignIn = async () => {
   // 发布签到
-  // const res = await teacherCreateSignInAPI(
-  //   parseInt(route.params.id as string),
-  //   classStore.getCurrentClass(),
-  //   userStore.getUserInfo().roleId,
-  //   "手势签到",
-  //   ordinaryForm.value.startTime,
-  //   ordinaryForm.value.endTime,
-  //   2,
-  //   JSON.stringify(answer),
-  //   url.value
-  // );
-  // if (res.data.code === 200) {
-  //   ElMessage.success("发布成功");
-  //   router.push("/course/" + route.params.id + "/activities/"+res.data.data.id);
-  //   // setTimeout(()=>{
-  //   //   router.push('/course/'+route.params.id+"/activities")
-  //   // },2000)
-  // }
+  const res = await teacherCreateSignInAPI(
+    parseInt(route.params.id as string),
+    classStore.getCurrentClass(),
+    userStore.getUserInfo().roleId,
+    "手势签到",
+    ordinaryForm.value.startTime,
+    ordinaryForm.value.endTime,
+    2,
+    JSON.stringify(answer),
+    url.value
+  );
+  if (res.data.code === 200) {
+    ElMessage.success("发布成功");
+    router.push("/course/" + route.params.id + "/activities/"+res.data.data.id);
+    // setTimeout(()=>{
+    //   router.push('/course/'+route.params.id+"/activities")
+    // },2000)
+  }
 };
 
 onMounted(() => {

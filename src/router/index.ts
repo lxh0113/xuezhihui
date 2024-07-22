@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import { getRouter } from "@/utils/router";
 
 // 公共模块
@@ -10,7 +10,8 @@ import NoPage from "@/views/noPage/noPage.vue";
 
 import { useUserStore } from "@/stores/userStore";
 import { storeToRefs } from "pinia";
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from "vue-router";
+import component from "../../env";
 
 // const userStore=useUserStore()
 
@@ -31,6 +32,11 @@ const basicRouter = [
     component: ForgetPwd,
   },
   {
+    path: "/chat",
+    name: "chat",
+    component: () => import("@/views/chat/index.vue"),
+  },
+  {
     path: "/404",
     name: "NoPage404",
     component: NoPage,
@@ -39,7 +45,7 @@ const basicRouter = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: basicRouter,
 });
 
@@ -53,11 +59,14 @@ const setRouter = async (identity: number) => {
     console.log("看谁先到222");
     console.log(identity);
 
-    const myRouter:RouteRecordRaw=getRouter(identity)
+    router.routes=basicRouter;
+    console.log(router.routes)
 
-    router.addRoute(myRouter)
+    const myRouter: RouteRecordRaw = getRouter(identity);
 
-
+    router.addRoute(myRouter);
+    
+    console.log(router.getRoutes())
     resolve(true);
   });
 };
@@ -83,22 +92,31 @@ router.beforeEach(async (to, from, next) => {
       router.push("/login");
     }
   } else {
+
+    if(user.value.account==='test')
+    {
+      router.push('/login')
+      return 
+    }
+
     if (isLogin.value === false) {
       // alert(3);
 
+      console.log(user.value.identity);
+
       const res = await setRouter(user.value.identity);
 
-      // changeIsLogin(true);
+      // (true);
       isLogin.value = true;
 
+      console.log(res)
+
       if (res === true) {
-        next({ ...to, replace: true });
+        next('/');
       } else next(false);
 
-      // next('/')
-
       return;
-    }
+    } 
 
     next();
   }
@@ -106,8 +124,7 @@ router.beforeEach(async (to, from, next) => {
 
 export default router;
 
-export const addRouters=(identity:number)=>{
-
-  console.log(getRouter(identity))
-  router.addRoute(getRouter(identity))
-}
+export const addRouters = (identity: number) => {
+  console.log(getRouter(identity));
+  router.addRoute(getRouter(identity));
+};

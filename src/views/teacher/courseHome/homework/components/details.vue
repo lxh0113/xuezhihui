@@ -3,7 +3,7 @@
     <span class="markHomeworkText">批改作业</span>
     <!-- <hr> -->
     <br />
-    <el-radio-group style="margin-bottom: 20px" v-model="status" size="large">
+    <el-radio-group style="margin-bottom: 20px" @change="getAllData" v-model="status" size="large">
       <el-radio-button label="全部" :value="2" />
 
       <el-radio-button label="待批改" :value="1" />

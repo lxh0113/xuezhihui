@@ -7,8 +7,9 @@
     <div class="mid">
       <div class="right">
         <div class="top">
-          <span>6</span>
-          <span>/{{ allExamNum }}次</span>
+          <!-- <span></span> -->
+          <!-- <span>{{ allExamNum }}次</span> -->
+           <span>1次</span>
         </div>
         <div class="gray">完成进度</div>
       </div>
@@ -106,27 +107,22 @@ const setChart = () => {
 };
 
 
-
 const props = withDefaults(
   defineProps<{
-    allExamNum:number;
-    avgExamScore:number;
-    examHistoryVoList: Array<{
-      id: number;
+    allExamNum: number;
+    avgExamScore: number;
+    examHistoryVoList: {
+      examId: number;
       examTitle: string;
       studentScore: number;
-    }>;
-  }>(), // 注意这里不再传入参数
+    }[];
+  }>(),
   {
-    allExamNum:20,
-    avgExamScore:92,
-    examHistoryVoList: [{
-      id: 1,
-      examTitle: '1',
-      studentScore: 1
-    }],
+    
   }
 );
+
+
 
 watch(props,()=>{
   setChart()

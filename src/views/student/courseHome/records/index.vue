@@ -39,6 +39,7 @@ import { onMounted, ref } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
+import { studentGetRecordsAPI } from "@/apis/course";
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -55,7 +56,7 @@ const data = ref({
   avgExamScore: 92,
   examHistoryVoList: [
     {
-      id: 1,
+      examId: 1,
       examTitle: "1",
       studentScore: 1,
     },
@@ -63,17 +64,17 @@ const data = ref({
 });
 
 const getRecords = async () => {
-  // const res = await studentGetAllStudyRecordsAPI(
-  //   userStore.getUserInfo().roleId,
-  //   parseInt(route.params.id as string)
-  // );
+  const res = await studentGetRecordsAPI(
+    userStore.getUserInfo().roleId,
+    parseInt(route.params.id as string)
+  );
 
-  // if (res.data.code === 200) {
-  //   console.log(res.data.data);
-  //   data.value = res.data.data;
-  // } else {
-  //   ElMessage.error(res.data.message);
-  // }
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+    data.value = res.data.data;
+  } else {
+    ElMessage.error(res.data.message);
+  }
 };
 
 onMounted(() => {

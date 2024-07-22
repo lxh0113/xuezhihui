@@ -8,7 +8,7 @@
         </div>
         <h3 class="title" style="margin-bottom: 20px">一、简答题</h3>
 
-        <el-checkbox-group v-model="checkboxGroup1" size="large">
+        <el-checkbox-group size="large">
           <el-checkbox-button
             style="
               margin-right: 20px;
@@ -28,11 +28,14 @@
     </div>
 
     <div class="right">
-      <h2>软件工程练习二</h2>
+      <h2>{{homeworkData.title}}</h2>
       <div class="setting">
-        <span>题量:22&nbsp;&nbsp;</span>
+        <span>题量:{{questionsList.length}}&nbsp;&nbsp;</span>
         <span>满分:100&nbsp;&nbsp;</span>
-        <span>作答时间：05-19 19:22 至 06-13 12:00&nbsp;&nbsp;</span>
+        <span
+          >作答时间：{{ homeworkData.examBeginTime }} 至
+          {{ homeworkData.examEndTime }}&nbsp;&nbsp;</span
+        >
       </div>
       <div class="questions">
         <!-- <h3>选择题</h3> -->
@@ -45,7 +48,9 @@
           :ref="setToQuestionsRefs"
         >
           <div class="question">
-            {{ index + 1 }}.&nbsp;&nbsp;&nbsp;({{item.type}})&nbsp;&nbsp;&nbsp;{{ item.title.text }}
+            {{ index + 1 }}.&nbsp;&nbsp;&nbsp;({{
+              item.type
+            }})&nbsp;&nbsp;&nbsp;{{ item.title.text }}
           </div>
           <div v-if="item.type === '单选题'" class="radio">
             <el-radio-group v-model="item.studentAnswer" size="large">
@@ -59,9 +64,9 @@
                   :label="String.fromCharCode(65 + optionIndex)"
                   :value="String.fromCharCode(65 + optionIndex)"
                 />
-                <span style="font-size: 18px; margin-left: 20px">{{
-                  option
-                }}</span>
+                <span style="font-size: 18px; margin-left: 20px">
+                  <p v-html="option"></p>
+                </span>
               </div>
             </el-radio-group>
           </div>
@@ -190,7 +195,7 @@ const getAssignmentDetails = async () => {
   );
 
   if (res.data.code === 200) {
-    // console.log(res.data.data);
+    console.log(res.data.data);
     homeworkData.value = res.data.data;
     questionsList.value = JSON.parse(res.data.data.content);
 
@@ -198,7 +203,7 @@ const getAssignmentDetails = async () => {
       item.title = JSON.parse(item.title);
       item.title.options = JSON.parse(item.title.options);
 
-      if(item.type==='多选题') item.studentAnswer=[]
+      if (item.type === "多选题") item.studentAnswer = [];
     });
 
     homeworkData.value.content = questionsList.value;
@@ -244,17 +249,31 @@ const saveHomework = async () => {
   getHomework();
 
   const res = await studentDoAssignmentAPI(
-    parseInt(homeworkData.value.studentId),
+    userStore.getUserInfo()!.roleId,
     homeworkData.value.assignmentId,
     0,
     JSON.stringify(questionsList.value),
-    2
+    2,
+    formatDateTime(new Date()),
+    formatDateTime(new Date()),
   );
 
   if (res.data.code === 200) {
     ElMessage.success("保存成功");
+    
   } else ElMessage.error("保存失败");
 };
+
+function formatDateTime(date) {
+  const year = date.getFullYear();
+  const month = ("0" + (date.getMonth() + 1)).slice(-2); // Month starts from 0
+  const day = ("0" + date.getDate()).slice(-2);
+  const hours = ("0" + date.getHours()).slice(-2);
+  const minutes = ("0" + date.getMinutes()).slice(-2);
+  const seconds = ("0" + date.getSeconds()).slice(-2);
+
+  return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
+}
 
 const handInHomework = async () => {
   let flag = confirm("您确定要提交吗？");
@@ -262,23 +281,23 @@ const handInHomework = async () => {
 
   getHomework();
 
-  
-
   const res = await studentDoAssignmentAPI(
-    parseInt(homeworkData.value.studentId),
+    userStore.getUserInfo().roleId,
     homeworkData.value.assignmentId,
     1,
     JSON.stringify(questionsList.value),
-    2
+    2,
+    formatDateTime(new Date()),
+    formatDateTime(new Date()),
   );
 
-  console.log(JSON.stringify(questionsList.value))
+  console.log(JSON.stringify(questionsList.value));
 
   if (res.data.code === 200) {
     ElMessage.success("提交成功");
 
     setTimeout(() => {
-      router.push("/course/" + route.params.id + "/homework");
+      router.push("/course/" + route.params.id + "/exam");
     }, 2000);
   } else ElMessage.error("保存失败");
 };

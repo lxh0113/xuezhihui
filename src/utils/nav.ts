@@ -14,7 +14,8 @@ const teacherNavList:NavList=[
     {path:'/teacher/course',icon:'iconfont icon-course',text:'课程'},
     {path:'/teacher/paper',icon:'iconfont icon-examination',text:'试卷管理'},
     {path:'/teacher/class',icon:'iconfont icon-class',text:'班级管理'},
-    {path:'/teacher/notice',icon:'iconfont icon-course',text:'通知'},
+    {path:'/teacher/ai',icon:'iconfont icon-X-artificial-intelligence',text:"AI出题"},
+    {path:'/teacher/notice',icon:'iconfont icon-notice',text:'通知'},
     {path:'/teacher/profile',icon:'iconfont icon-course',text:'个人信息'},
     {path:'/teacher/logout',icon:'iconfont icon-logout',text:'退出登录'}
 ]

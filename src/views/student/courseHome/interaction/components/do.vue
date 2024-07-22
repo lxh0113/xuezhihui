@@ -11,7 +11,7 @@
       </template>
     </el-result>
 
-    <el-result v-if="data.timeState === 1" icon="info" title="签到信息">
+    <el-result v-else-if="data.timeState === 1" icon="info" title="签到信息">
       <template #sub-title>
         <p>您未签到，是{{ data.signinStatus }}状态</p>
       </template>
@@ -21,35 +21,40 @@
     </el-result>
 
     <div class="signInBox">
-      <div v-if="data.type === 1" class="ordinaryBox">
+      <div
+        v-if="data.signInStatus !== '已签' && data.type === 1"
+        class="ordinaryBox"
+      >
         <span>普通签到</span>
-        <el-button type="primary">点击签到</el-button>
+        <el-button type="primary" @click="toOrdinarySignIn">点击签到</el-button>
       </div>
 
-      <div v-else-if="data.type === 3" class="signInNumberBox">
+      <div
+        v-else-if="data.signInStatus !== '已签' && data.type === 3"
+        class="signInNumberBox"
+      >
         <span>签到码签到</span>
-        <el-input style="width: 200px" placeholder="输入签到码签到"></el-input>
-        <el-button style="margin-top:20px" type="primary">签到</el-button>
+        <el-input v-model="number" style="width: 200px" placeholder="输入签到码签到"></el-input>
+        <el-button
+          style="margin-top: 20px"
+          type="primary"
+          @click="toNumberSignIn"
+          >签到</el-button
+        >
       </div>
 
-      <div v-else-if="data.type === 0" class="aiBox">
+      <div
+        v-else-if="data.signInStatus !== '已签' && data.type === 0"
+        class="aiBox"
+      >
         <span>智能考勤，请耐心等待</span>
       </div>
-
-      <!-- <div  class="gestureBox" :class="{opacityBox:data.type===2}">
-        <span>手势签到</span>
-        <div id="container" ref="container" style="width: 360px; height: 600px"></div>
-        <div class="button">
-          <el-button type="primary" @click="clearLocker">重新绘制</el-button>
-          <el-button type="success" @click="ensureLocker">确定</el-button>
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { studentGetSignInDetailsAPI } from "@/apis/activity";
+import { studentGetSignInDetailsAPI, studentSignInAPI } from "@/apis/activity";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "../../../../../stores/userStore";
 import { useRoute, useRouter } from "vue-router";
@@ -63,6 +68,8 @@ const route = useRoute();
 
 const container = ref(null);
 const imageDemo = ref("");
+
+const number=ref('')
 
 const data = ref({});
 
@@ -78,13 +85,59 @@ const getActivityDetails = async () => {
 
     if (data.value.type === 2)
       router.push(
-        "/course/" + route.params.id + "/interaction/gesture/" + route.params.activityId
+        "/course/" +
+          route.params.id +
+          "/interaction/gesture/" +
+          route.params.activityId
       );
   } else ElMessage.error(res.data.message);
 };
 
 const back = () => {
   router.push("/course/" + route.params.id + "/interaction");
+};
+
+const toOrdinarySignIn = async () => {
+  const res = await studentSignInAPI(
+    parseInt(route.params.activityId as string),
+    userStore.getUserInfo().roleId,
+    1,
+    null,
+    null
+  );
+
+  if (res.data.code === 200) {
+    ElMessage.success("签到成功");
+
+    getActivityDetails();
+  } else {
+    ElMessage.error(res.data.message)
+  }
+};
+
+const toNumberSignIn = async() => {
+
+  if(number.value===''){
+    ElMessage.error('您还未输入任何内容')
+    return
+  }
+
+  const res = await studentSignInAPI(
+    parseInt(route.params.activityId as string),
+    userStore.getUserInfo().roleId,
+    3,
+    number.value,
+    null
+  );
+
+  if (res.data.code === 200) {
+    ElMessage.success("签到成功");
+
+    getActivityDetails();
+  } else {
+    ElMessage.error(res.data.message)
+
+  }
 };
 
 onMounted(() => {

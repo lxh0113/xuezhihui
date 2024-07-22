@@ -25,12 +25,13 @@
     </div>
 
     <div class="right">
-      <h2>{{myData.title}}</h2>
+      <h2>{{ myData.title }}</h2>
       <div class="setting">
         <span>姓名：{{ myData.name }}&nbsp;&nbsp;</span>
         <span>班级：{{ myData.className }}&nbsp;&nbsp;</span>
         <span
-          >成绩：<span style="color: red; font-size: 18px; font-weight: bold"> {{myData.studentScore}} </span
+          >成绩：<span style="color: red; font-size: 18px; font-weight: bold">
+            {{ myData.studentScore }} </span
           >分</span
         >
       </div>
@@ -46,40 +47,50 @@
           style="margin-bottom: 20px"
         >
           <div class="question">{{ JSON.parse(item.title).text }}</div>
-          <div class="radio" v-if="item.type==='单选题'">
+          <div class="radio" v-if="item.type === '单选题'">
             <div
               class="radioOptions"
-              v-for="(option, optionIndex) in JSON.parse(JSON.parse(item.title).options)"
+              v-for="(option, optionIndex) in JSON.parse(
+                JSON.parse(item.title).options
+              )"
               :key="optionIndex"
             >
               <span>{{ String.fromCharCode(65 + optionIndex) }}</span>
-              <span style="font-size: 18px; margin-left: 20px">{{option}}</span>
+              <span
+                style="font-size: 18px; margin-left: 20px"
+                v-html="option"
+              ></span>
             </div>
           </div>
 
-          <div class="checkBox" v-if="item.type==='多选题'">
+          <div class="checkBox" v-if="item.type === '多选题'">
             <div
               class="checkOptions"
-              v-for="(option, optionIndex) in JSON.parse(JSON.parse(item.title).options)"
+              v-for="(option, optionIndex) in JSON.parse(
+                JSON.parse(item.title).options
+              )"
               :key="optionIndex"
             >
               <span>{{ String.fromCharCode(65 + optionIndex) }}</span>
-              <span style="font-size: 18px; margin-left: 20px">{{option}}</span>
+              <span
+                style="font-size: 18px; margin-left: 20px"
+                v-html="option"
+              ></span>
             </div>
           </div>
 
           <div class="mark">
             <div class="correctAnswer">
               <span>正确答案</span>
-              <p>{{item.answer}}</p>
+              <p>{{ item.answer }}</p>
             </div>
             <div class="answerAnalysis">
               <span>答案解析</span>
-              <p>{{item.answerAnalysis}}</p>
+              <p v-html="item.answerAnalysis"></p>
             </div>
             <div class="studentAnswer">
               <span>学生答案</span>
-              <p>{{item.studentAnswer}}</p>
+              <p>{{ item.studentAnswer }}</p>
             </div>
             <el-form>
               <el-form-item label="分数">
@@ -93,7 +104,12 @@
                 ></el-input>
               </el-form-item>
               <el-form-item label="评语">
-                <el-input v-model="item.questionComment" style="width: 500px" rows="3" type="textarea"></el-input>
+                <el-input
+                  v-model="item.questionComment"
+                  style="width: 500px"
+                  rows="3"
+                  type="textarea"
+                ></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -109,8 +125,12 @@
           max="100"
           v-model="myData.studentScore"
         ></el-input>
-        <el-button type="primary" style="margin-left: 20px" @click="mark">提交</el-button>
-        <el-button type="success" style="margin-left: 20px">提交并且查看下一个</el-button>
+        <el-button type="primary" style="margin-left: 20px" @click="mark"
+          >提交</el-button
+        >
+        <!-- <el-button type="success" style="margin-left: 20px"
+          >提交并且查看下一个</el-button
+        > -->
       </div>
     </div>
   </div>
@@ -120,8 +140,12 @@
 import { teacherViewStudentAssignmentAPI } from "@/apis/assignment";
 import { ElMessage } from "element-plus";
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute,useRouter } from "vue-router";
+import { teacherMarkAssignmentAPI } from "../../../../../apis/assignment";
+import { useUserStore } from "@/stores/userStore";
 
+const router=useRouter()
+const userStore=useUserStore()
 const route = useRoute();
 const checkboxGroup1 = ref(["1"]);
 
@@ -155,9 +179,24 @@ const getDetails = async () => {
   } else ElMessage.error(res.data.message);
 };
 
-const mark=()=>{
+const mark = async () => {
   // 去提交
-}
+
+  const res = await teacherMarkAssignmentAPI(
+    parseInt(route.params.studentId as string),
+    parseInt(route.params.assignmentId as string),
+    userStore.getUserInfo().roleId,
+    "",
+    questionList.value
+  );
+
+  if (res.data.code === 200) {
+    ElMessage.success('批阅成功')
+    router.push('/course/'+route.params.id+'/exam/details/'+route.params.assignmentId)
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
 
 onMounted(() => {
   getDetails();

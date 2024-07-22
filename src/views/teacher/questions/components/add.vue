@@ -296,7 +296,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: radioAnswer.value,
+      options: JSON.stringify(radioAnswer.value),
     });
     if (radio.value === "") {
       ElMessage.error("您还没设置答案");
@@ -311,7 +311,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: checkBoxAnswer.value,
+      options: JSON.stringify(checkBoxAnswer.value),
     });
 
     console.log(checkBoxAnswer.value);
@@ -330,12 +330,12 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: fillAnswer.value,
+      options: JSON.stringify(fillAnswer.value),
     });
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: [],
+      options: JSON.stringify([]),
     });
 
     // console.log(fillAnswer.value);
@@ -350,7 +350,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: [],
+      options: JSON.stringify([]),
     });
     questionData.answer = replyAnswer.value.add();
   } else if (choose.value === "判断题") {
@@ -359,7 +359,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: [],
+      options: JSON.stringify([]),
     });
     questionData.answer = judge.value;
   }

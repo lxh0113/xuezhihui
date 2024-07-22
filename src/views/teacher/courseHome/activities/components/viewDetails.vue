@@ -2,7 +2,8 @@
   <div class="viewSignInBox">
     <div class="detailsBox">
       <span class="titleText">活动详情</span>
-      <span class="titleText">{{ statusList[activityData.type] }}</span>
+      <span class="titleText" v-if="activityData.activityType===1">智能选人</span>
+      <span v-else class="titleText">{{ statusList[activityData.type] }}</span>
       <img
         v-if="activityData.answerImage != null"
         :src="activityData.answerImage"

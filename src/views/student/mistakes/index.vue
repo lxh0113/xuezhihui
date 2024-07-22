@@ -20,7 +20,7 @@
       <!-- <el-table-column prop="title" label="题目" sortable width="600" /> -->
       <el-table-column label="题目">
         <template #default="scope">
-          {{ JSON.parse(scope.row.title).text }}
+          <p v-html="JSON.parse(scope.row.title).text"></p>
         </template>
       </el-table-column>
       <el-table-column prop="type" label="题型" sortable/>
@@ -35,11 +35,11 @@
 
   <el-dialog v-model="dialogFormVisible" title="查看错题" width="700">
     <div class="questionBox" style="color:black;font-size:16px;;">
-      <h3>{{ mistakeData.type }}
+      <!-- <h3>{{ mistakeData.type }}
         <span style="font-weight:normal;color:#2f3ced;font-size:16px;margin-left:30px;">课程：{{ mistakeData.courseName }}</span>
-      </h3>
+      </h3> -->
       <div class="question" style="margin-top:20px;">
-        题目：{{ mistakeData.title }}
+        题目：<p style="margin-top:10px;" v-html="JSON.parse(mistakeData.title).text"></p>
       </div>
       <div style="color:red;margin-top:20px;">
         正确答案：{{ mistakeData.answer }}
@@ -94,9 +94,12 @@ const mistakeData=ref({
 const tableData = ref<Mistakes>();
 
 const viewSingle=async(id:number)=>{
+
+  console.log(id)
   const res=await studentViewQuestionDetailsAPI(id);
   if(res.data.code===200)
   {
+    console.log(res.data.data)
     mistakeData.value=res.data.data
     console.log(mistakeData.value)
     dialogFormVisible.value=true
@@ -113,6 +116,7 @@ const getMistakes = async() => {
 
   if(res.data.code===200)
   {
+    console.log(res.data.data)
     tableData.value=res.data.data
   }
   else ElMessage.error(res.data.message)

@@ -28,7 +28,10 @@
     </div>
 
     <div class="questionContent">
-      <Toolbar :editor="editorRef" style="border: 1px solid #ccc; margin-top: 20px" />
+      <Toolbar
+        :editor="editorRef"
+        style="border: 1px solid #ccc; margin-top: 20px"
+      />
       <Editor
         v-model="valueHtml"
         class="editor"
@@ -39,7 +42,11 @@
       <!--        这个是单选题 -->
       <div v-if="choose === '单选题'" class="radio">
         <el-radio-group v-model="radio" size="large">
-          <div class="radioOptions" v-for="(item, index) in radioAnswer" :key="index">
+          <div
+            class="radioOptions"
+            v-for="(item, index) in radioAnswer"
+            :key="index"
+          >
             <el-radio-button
               style="border-radius: 20px"
               :label="String.fromCharCode(65 + index)"
@@ -107,7 +114,11 @@
 
       <!-- 填空题 -->
       <div v-else-if="choose === '填空题'" class="fill">
-        <div class="fillOptions" v-for="(item, index) in fillAnswer" :key="index">
+        <div
+          class="fillOptions"
+          v-for="(item, index) in fillAnswer"
+          :key="index"
+        >
           <span>第&nbsp;{{ index + 1 }}&nbsp;空</span>
 
           <div style="margin-left: 20px" class="editor">
@@ -135,18 +146,30 @@
       <div v-else-if="choose === '判断题'" class="judge">
         <el-radio-group v-model="judge" size="large">
           <div class="judgeOptions">
-            <el-radio-button style="border-radius: 20px" label="A" value="true" />
+            <el-radio-button
+              style="border-radius: 20px"
+              label="A"
+              value="true"
+            />
             <span style="line-height: 40px; margin-left: 20px">对</span>
           </div>
           <div class="judgeOptions">
-            <el-radio-button style="border-radius: 20px" label="B" value="false" />
+            <el-radio-button
+              style="border-radius: 20px"
+              label="B"
+              value="false"
+            />
             <span style="line-height: 40px; margin-left: 20px">错</span>
           </div>
         </el-radio-group>
       </div>
 
       <!-- 这是简答题 -->
-      <div v-else-if="choose === '简答题'" class="reply" style="margin-bottom: 20px">
+      <div
+        v-else-if="choose === '简答题'"
+        class="reply"
+        style="margin-bottom: 20px"
+      >
         <span>请输入答案</span>
         <div class="replyOptions" style="margin-top: 20px">
           <div style="" class="editor">
@@ -161,7 +184,10 @@
         <span>请输入解析</span>
         <!-- <br> -->
         <div style="margin-top: 20px" class="editor">
-          <myEditor :text="questionData.answerAnalysis" ref="analysisRef"></myEditor>
+          <myEditor
+            :text="questionData.answerAnalysis"
+            ref="analysisRef"
+          ></myEditor>
         </div>
       </div>
     </div>
@@ -278,7 +304,7 @@ let questionData = {
   title: "",
   answer: "",
   answerAnalysis: "",
-  courseId: parseInt(courseIdData.value),
+  courseId: parseInt(route.params.id as string),
   courseName: currentCourseName.value,
   creatorId: userStore.getUserInfo().roleId,
   creatorName: userStore.getUserInfo().name,
@@ -286,6 +312,7 @@ let questionData = {
 
 const addNewQuestion = async () => {
   // if(choose.value==="") return
+  questionData.courseId = parseInt(route.params.id as string);
   questionData.type = choose.value;
   questionData.answerAnalysis = analysisRef.value.add();
 
@@ -302,7 +329,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: radioAnswer.value,
+      options: JSON.stringify(radioAnswer.value),
     });
     if (radio.value === "") {
       ElMessage.error("您还没设置答案");
@@ -317,7 +344,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: checkBoxAnswer.value,
+      options: JSON.stringify(checkBoxAnswer.value),
     });
 
     console.log(checkBoxAnswer.value);
@@ -336,12 +363,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: fillAnswer.value,
-    });
-
-    questionData.title = JSON.stringify({
-      text: valueHtml.value,
-      options: [],
+      options: JSON.stringify(fillAnswer.value),
     });
 
     // console.log(fillAnswer.value);
@@ -349,14 +371,14 @@ const addNewQuestion = async () => {
       .map((item) => {
         return item;
       })
-      .join("、");
+      .join(",");
   } else if (choose.value === "简答题") {
     // 简答题
     console.log(replyAnswer.value.add());
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: [],
+      options: JSON.stringify([]),
     });
     questionData.answer = replyAnswer.value.add();
   } else if (choose.value === "判断题") {
@@ -365,7 +387,7 @@ const addNewQuestion = async () => {
 
     questionData.title = JSON.stringify({
       text: valueHtml.value,
-      options: [],
+      options: JSON.stringify([]),
     });
     questionData.answer = judge.value;
   }
@@ -418,18 +440,23 @@ const getQuestionDetails = async () => {
   );
 
   if (res.data.code === 200) {
-    console.log(res.data.data)
+    console.log(res.data.data);
 
     choose.value = res.data.data.type;
     valueHtml.value = JSON.parse(res.data.data.title).text;
     questionData.answerAnalysis = res.data.data.answerAnalysis;
 
+    questionData.courseId = res.data.data.courseId;
+    console.log(questionData)
+
     if (res.data.data.type === "单选题") {
       radioAnswer.value = JSON.parse(JSON.parse(res.data.data.title).options);
       radio.value = res.data.data.answer;
     } else if (res.data.data.type === "多选题") {
-      checkboxGroup.value = JSON.parse(res.data.data.answer)||[];
-      checkBoxAnswer.value = JSON.parse(JSON.parse(res.data.data.title).options);
+      checkboxGroup.value = JSON.parse(res.data.data.answer) || [];
+      checkBoxAnswer.value = JSON.parse(
+        JSON.parse(res.data.data.title).options
+      );
     } else if (res.data.data.type === "简答题") {
       replyText.value = res.data.data.answer;
     } else if (res.data.data.type === "填空题") {
@@ -438,15 +465,23 @@ const getQuestionDetails = async () => {
       judge.value = res.data.data.answer;
     }
 
-    courseIdData.value=res.data.courseId
+    courseIdData.value = res.data.courseId;
   }
 };
 
 onMounted(() => {
-
-  getQuestionDetails()
+  getQuestionDetails();
 
   getAllOption();
+
+  // console.log(JSON.stringify(
+  //   {
+  //     text:"<p>hello</p>",
+  //     options:JSON.stringify([
+  //       "<p>1</p>","<p>1</p>","<p>1</p>"
+  //     ])
+  //   }
+  // ))
 });
 </script>
 

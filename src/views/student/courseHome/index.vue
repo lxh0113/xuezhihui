@@ -8,6 +8,8 @@
       </div>
     </div>
   </div>
+
+  <myChat></myChat>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +17,8 @@
 import Header from "@/views/home/components/header.vue";
 // @ts-ignore
 import NavVue from "@/views/home/components/nav.vue";
+// @ts-ignore
+import myChat from '@/views/chat/index.vue'
 import { getCourseNavList } from "@/utils/courseNav";
 import { type NavList } from "@/types/home";
 
@@ -34,6 +38,7 @@ const navList:NavList=getCourseNavList(1)
     display: flex;
 
     .rightContent {
+      margin-top:20px;
       flex: 1;
       margin-left: 20px;
       min-height: calc(100vh - 80px);

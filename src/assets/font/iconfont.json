@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "33600575",
+      "name": "X-artificial-intelligence",
+      "font_class": "X-artificial-intelligence",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
       "icon_id": "752637",
       "name": "Notice",
       "font_class": "notice",

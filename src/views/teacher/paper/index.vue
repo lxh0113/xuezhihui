@@ -11,7 +11,11 @@
     <hr />
     <div class="choose">
       <!-- <el-button style="font-size:16px;margin-right:20px;" type="primary" :icon="Upload" text="primary">上传</el-button> -->
-      <el-input style="width: 200px" placeholder="请输入关键词" :prefix-icon="Search" />
+      <el-input
+        style="width: 200px"
+        placeholder="请输入关键词"
+        :prefix-icon="Search"
+      />
 
       <el-select
         v-model="state"
@@ -32,17 +36,22 @@
         <template #default="scope">
           <el-tag v-if="scope.row.state === 0" type="warning">草稿</el-tag>
           <el-tag v-if="scope.row.state === 1" type="danger">进行中</el-tag>
-          <el-tag v-if="scope.row.state === 0" type="primary">草稿</el-tag>
+          <el-tag v-if="scope.row.state === 2" type="primary">已结束</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="questionNum" label="题量" />
       <el-table-column prop="creatorName" label="创建人" />
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" text="primary" @click="postExam(scope.row)"
+          <el-button v-if="scope.row.state === 0" type="primary" text="primary" @click="postExam(scope.row)"
             >发布考试</el-button
           >
-          <el-button type="primary" text="primary">查看</el-button>
+          <el-button
+            type="primary"
+            text="primary"
+            @click="toViewExam(scope.row)"
+            >查看</el-button
+          >
           <!-- <el-button type="primary" text="primary">编辑</el-button> -->
         </template>
       </el-table-column>
@@ -106,20 +115,26 @@
           format="YYYY-MM-DD HH:mm:ss"
           date-format="MMM DD, YYYY"
           time-format="HH:mm"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item label="截至时间">
         <el-date-picker
-         v-model="form.endTime"
+          v-model="form.endTime"
           type="datetime"
           placeholder="选择时间"
           format="YYYY-MM-DD HH:mm:ss"
           date-format="MMM DD, YYYY"
           time-format="HH:mm"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item label="考试时间">
-        <el-input v-model="examTime" style="width: 100px" type="number"></el-input>
+        <el-input
+          v-model="form.examTime"
+          style="width: 100px"
+          type="number"
+        ></el-input>
         <span style="margin-left: 20px">分钟</span>
       </el-form-item>
       <!-- <el-form-item label="防作弊设置">
@@ -129,7 +144,7 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="postDialog = false">取消</el-button>
-        <el-button type="primary" @click="postDialog = false"> 发布 </el-button>
+        <el-button type="primary" @click="toPublish"> 发布 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -141,7 +156,10 @@ import { ref, reactive, watch, onMounted } from "vue";
 import { CheckboxValueType, ElMessage } from "element-plus";
 import type { TableColumnCtx } from "element-plus";
 import { useRouter, useRoute } from "vue-router";
-import { teacherViewAllCourseAssignmentAPI } from "../../../apis/assignment";
+import {
+  teacherPublishAssignmentAPI,
+  teacherViewAllCourseAssignmentAPI,
+} from "../../../apis/assignment";
 import { useUserStore } from "@/stores/userStore";
 import { teacherViewMyTeachCourseAPI } from "@/apis/course";
 import { teacherGetAllClassAPI } from "@/apis/class";
@@ -160,25 +178,27 @@ const dialogFormVisible = ref(false);
 
 const postDialog = ref(false);
 
-const currentExamData=ref()
+const currentExamData = ref();
 
-const postExam = (item:any) => {
+const postExam = (item: any) => {
+  console.log(item)
   postDialog.value = true;
-  currentExamData.value=item
+  currentExamData.value = item;
 };
 
 const tableData = ref();
 
 const form = reactive({
-  startTime:'',
-  endTime:'',
-  examTime:120
+  name: "",
+  startTime: "",
+  endTime: "",
+  examTime: 120,
 });
 
 const checkAll = ref(false);
 const indeterminate = ref(false);
 
-const classValue = ref<CheckboxValueType[]>([]);
+const classValue = ref([]);
 const classList = ref([]);
 
 const value = ref();
@@ -208,19 +228,27 @@ const handleCheckAll = (val: CheckboxValueType) => {
 const addNewPaper = () => {
   dialogFormVisible.value = false;
 
-  router.push("/teacher/paper/1");
+  router.push("/teacher/paper/"+13+'/add');
 };
 
 const getAllClass = async () => {
   const res = await teacherGetAllClassAPI(userStore.getUserInfo()!.roleId);
 
   if (res.data.code === 200) {
-    classList.value = res.data.data;
+    classList.value = res.data.data.map((item) => {
+      return {
+        label: item.className,
+        value: item.id,
+      };
+    });
+    // classList.value = res.data.data;
   } else ElMessage.error(res.data.message);
 };
 
 const getAllCourse = async () => {
-  const res = await teacherViewMyTeachCourseAPI(userStore.getUserInfo()!.roleId);
+  const res = await teacherViewMyTeachCourseAPI(
+    userStore.getUserInfo()!.roleId
+  );
 
   if (res.data.code === 200) {
     options.value = res.data.data;
@@ -238,10 +266,37 @@ const getAllExam = async () => {
   );
 
   if (res.data.code === 200) {
+    console.log(res.data.data);
     tableData.value = res.data.data;
   } else {
     ElMessage.error(res.data.message);
   }
+};
+
+const toPublish = async () => {
+  const res = await teacherPublishAssignmentAPI(
+    2,
+    currentExamData.value.examId,
+    form.startTime,
+    form.endTime,
+    form.examTime,
+    classValue.value
+  );
+
+  if (res.data.code === 200) {
+    ElMessage.success("发布成功");
+
+    getAllExam();
+  } else {
+    ElMessage.error(res.data.message);
+  }
+
+  postDialog.value=false
+};
+
+const toViewExam = (item: any) => {
+  console.log(item);
+  router.push("/course/" + item.courseId + "/exam/details/" + item.examId);
 };
 
 onMounted(() => {

@@ -3,12 +3,17 @@
     <span class="markHomeworkText">批改作业</span>
     <!-- <hr> -->
     <br />
-    <el-radio-group @change="getAllData" style="margin-bottom: 20px" v-model="status" size="large">
-      <el-radio-button label="全部" :value="2" />
+    <el-radio-group
+      @change="getAllData"
+      style="margin-bottom: 20px"
+      v-model="status"
+      size="large"
+    >
+      <el-radio-button label="全部" :value="-1" />
 
-      <el-radio-button label="待批改" :value="1" />
-      <el-radio-button label="已批改" :value="0" />
-      <el-radio-button label="未交" :value="3" />
+      <el-radio-button label="待批阅" :value="1" />
+      <el-radio-button label="已完成" :value="2" />
+      <el-radio-button label="未交" :value="0" />
     </el-radio-group>
     <br />
     <el-input
@@ -17,24 +22,37 @@
       v-model="searchText"
       placeholder="请输入学号或者姓名"
     ></el-input>
-    <!-- <el-button type="primary">搜索</el-button> -->
-    <br />
-    <span class="grayText">
-      创建时间：截至时间 </span
+
+    <el-button @click="analysis" style="margin-left: 20px" type="success"
+      >学情分析</el-button
     >
+    <br />
+    <span class="grayText"> 创建时间：截至时间 </span>
     <el-table :data="filterTableData">
       <el-table-column prop="sno" label="id" />
       <el-table-column prop="name" label="姓名" />
       <el-table-column prop="status" label="状态">
         <template #default="scope">
           <el-tag v-if="scope.row.state === 0" type="danger">未交</el-tag>
-          <el-tag v-else type="success">{{scope.row.state===1?"待批阅":'已完成'}}</el-tag>
+          <el-tag v-else-if="scope.row.state === 1" type="success"
+            >待批阅</el-tag
+          >
+          <el-tag v-else type="warning">已完成</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="studentScore" label="成绩" />
-      <el-table-column label="操作">
+      <el-table-column label="操作" fixed="right" min-width="240">
         <template #default="scope">
-          <el-button type="primary" @click="markExam(scope.row)">查看</el-button>
+          <el-button type="primary" plain @click="markExam(scope.row)"
+            >查看</el-button
+          >
+          <el-button
+            type="warning"
+            plain
+            v-if="scope.row.state === 2"
+            @click="analysisStudent(scope.row.sno)"
+            >学情分析</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -42,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref,computed } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { Search } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { teacherViewAssignmentListAPI } from "@/apis/assignment";
@@ -55,39 +73,80 @@ const filterTableData = computed(() =>
   tableData.value.filter(
     (data) =>
       !searchText.value ||
-      data.name.toLowerCase().includes(searchText.value.toLowerCase())||
+      data.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
       data.sno.toLowerCase().includes(searchText.value.toLowerCase())
   )
-)
+);
 
-const tableData = ref([
-  
-]);
+const tableData = ref([]);
 
 const searchText = ref("");
-const status = ref(0);
+const status = ref(2);
 
 const markExam = (item: any) => {
+  // console.log(route.params)
   router.push(
-    "/course/" + route.params.id + "/exam/details/" + route.params.assignmentId + "/"+item.studentAssignmentId
+    "/course/" +
+      route.params.id +
+      "/exam/details/" +
+      route.params.assignmentId +
+      "/" +
+      item.studentAssignmentId
+  );
+};
+
+const analysis = () => {
+  router.push(
+    "/course/" +
+      route.params.id +
+      "/exam/" +
+      route.params.assignmentId +
+      "/analysis"
+  );
+};
+
+const analysisStudent = (id: number) => {
+  // 用的是学号
+  router.push(
+    "/course/" +
+      route.params.id +
+      "/exam/" +
+      route.params.assignmentId +
+      "/analysis/" +
+      id
   );
 };
 
 const getAllData = async () => {
-  const res = await teacherViewAssignmentListAPI(
+  if (status.value === -1) {
+    const res = await teacherViewAssignmentListAPI(
     parseInt(route.params.assignmentId as string),
-    1,
+    2
+  );
+
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+    tableData.value = res.data.data;
+  } else ElMessage.error(res.data.message);
+  }
+  else {
+    const res = await teacherViewAssignmentListAPI(
+    parseInt(route.params.assignmentId as string),
+    2,
     status.value
   );
 
   if (res.data.code === 200) {
-    console.log(res.data.data)
+    console.log(res.data.data);
     tableData.value = res.data.data;
   } else ElMessage.error(res.data.message);
+  }
+
+  
 };
 
 onMounted(() => {
-  getAllData()
+  getAllData();
 });
 </script>
 

@@ -11,7 +11,7 @@
         <span class="span2">名</span>
       </div>
       <div>
-        <el-progress width="80" type="circle" :percentage="finishTaskPointNum/allTaskPointNum*100" />
+        <el-progress width="80" type="circle" percentage="28" />
       </div>
     </div>
     <div class="bottom">
@@ -29,9 +29,9 @@
               >已完成</el-tag
             >
             <el-tag v-else-if="scope.row.status === 2" size="mid" type="danger"
-              >已完成</el-tag
+              >未完成</el-tag
             >
-            <el-tag v-else size="mid" type="primary">已完成</el-tag>
+            <el-tag v-else size="mid" type="primary">进行中</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作">
@@ -59,15 +59,15 @@ interface User {
 
 const tableData: User[] = [
   {
-    name: "web开发",
+    name: "第一章",
     status: 1,
   },
   {
-    name: "web开发",
+    name: "第二章",
     status: 2,
   },
   {
-    name: "web开发",
+    name: "第三章",
     status: 3,
   },
 ];

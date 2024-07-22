@@ -11,16 +11,17 @@
         :highlight-current="true"
         :expand-on-click-node="false"
         :indent="22"
+        @node-click="handleNodeClick"
       >
         <template #default="{ node, data }">
-          <span v-if="!node.isLeaf" style="display: flex; align-items: center">
+          <span v-if="!node.isLeaf" @click="handleNodeClick(node, data)" style="display: flex; align-items: center">
             <el-icon v-if="node.expanded" style="margin: 0 6px 0 2px" size="20"
               ><FolderOpened
             /></el-icon>
             <el-icon v-else style="margin: 0 6px 0 2px" size="20"
               ><Folder
             /></el-icon>
-            <large @click="handleNodeClick(node, data)">{{ node.label }}</large>
+            <large >{{ node.label }}</large>
             <el-icon
               v-if="node.disabled"
               style="margin: 0 6px 0 20px"
@@ -31,7 +32,7 @@
             </el-icon>
           </span>
 
-          <span v-else style="display: flex; align-items: center">
+          <span @click="handleNodeClick(node, data)" v-else style="display: flex; align-items: center">
             <el-icon style="margin: 0 6px 0 2px" size="20"
               ><Document
             /></el-icon>
@@ -93,8 +94,8 @@ const handleNodeClick = (node: any, data: any) => {
     "color: #000",
     data
   );
-
-  router.push("/course/" + route.params.id + "/task/" + data.id);
+  console.log(node.id)
+  router.push("/course/" + route.params.id + "/task/" + node.id);
 };
 
 const setTreeData = (value: any) => {

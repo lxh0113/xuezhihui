@@ -1,10 +1,16 @@
 import type { RouteRecordRaw } from "vue-router";
+import component from '../../env';
 
 const studentRouter: RouteRecordRaw = {
   path: "/",
+  name:'xuezhihui',
   //   component: () => import("@/views/home/index.vue"),
   redirect: "/student/course",
   children: [
+    {
+      path:'studentRoute',
+      component:()=>import("@/views/student/courseHome/home/components/studentRoute.vue")
+    },
     {
       path: "course/:id/dohomework/:assignmentId",
       component: () =>
@@ -59,6 +65,11 @@ const studentRouter: RouteRecordRaw = {
           path: "interaction/:activityId",
           component: () =>
             import("@/views/student/courseHome/interaction/components/do.vue"),
+        },
+        {
+          path: "interaction/choose/:activityId",
+          component: () =>
+            import("@/views/student/courseHome/interaction/components/choose.vue"),
         },
         {
           path: "interaction/gesture/:gestureId",
@@ -164,6 +175,7 @@ const studentRouter: RouteRecordRaw = {
 
 const teacherRouter: RouteRecordRaw = {
   path: "/",
+  name:'xuezhihui',
   //   component: () => import("@/views/home/index.vue"),
   redirect: "/teacher/course",
   children: [
@@ -176,6 +188,34 @@ const teacherRouter: RouteRecordRaw = {
       path: "/course/:id/exam/details/:assignmentId/:studentId",
       component: () =>
         import("@/views/teacher/courseHome/exam/components/mark.vue"),
+    },
+
+    {
+      path: "/course/:id/knowledgeChart",
+      component: () =>
+        import("@/views/teacher/courseHome/home/knowledge/index.vue"),
+    },
+    {
+      path: "/course/:id/markdown",
+      component: () =>
+        import("@/views/teacher/courseHome/home/markdown/index.vue"),
+    },
+    // 上传试卷的模块
+    {
+      path:'upload/origin/:paperId',
+      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadOriginPaper.vue")
+    },
+    {
+      path:'upload/answer/:paperId',
+      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadPaperAnswer.vue")
+    },
+    {
+      path:'upload/student/:paperId',
+      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadStudent.vue")
+    },
+    {
+      path:'upload/result/:paperId',
+      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/paperResult.vue")
     },
     {
       path: "course/:id",
@@ -299,17 +339,32 @@ const teacherRouter: RouteRecordRaw = {
             },
           ],
         },
+        
         {
           path: "exam/addExam",
           component: () =>
             import("@/views/teacher/courseHome/exam/components/add.vue"),
         },
         {
+          path: "exam/:assignmentId/analysis",
+          component: () =>
+            import("@/views/teacher/courseHome/exam/components/analysis.vue"),
+        },
+        {
+          path: "exam/:assignmentId/analysis/:studentId",
+          component: () =>
+            import("@/views/teacher/courseHome/exam/components/studentAnalysis.vue"),
+        },
+        {
           path: "exam/details/:assignmentId",
           component: () =>
             import("@/views/teacher/courseHome/exam/components/details.vue"),
         },
-
+        {
+          path: "exam/uploadExam/:paperId",
+          component: () =>
+            import("@/views/teacher/courseHome/exam/components/uploadExam.vue"),
+        },
         {
           path: "exam",
           component: () => import("@/views/teacher/courseHome/exam/index.vue"),
@@ -366,6 +421,22 @@ const teacherRouter: RouteRecordRaw = {
           path: "paper/:id",
           component: () =>
             import("@/views/teacher/paper/components/details.vue"),
+        },
+        {
+          path: "paper/:id/add",
+          component: () =>
+            import("@/views/teacher/paper/components/add.vue"),
+        },
+        {
+            path:"ai",
+            component:()=>import("@/views/teacher/ai/index.vue"),
+            redirect:'/teacher/ai/generate',
+            children:[
+              {
+                path:'generate',
+                component:()=>import("@/views/teacher/ai/components/generate.vue")
+              }
+            ]
         },
 
         {

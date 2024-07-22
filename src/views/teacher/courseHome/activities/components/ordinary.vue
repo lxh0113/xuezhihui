@@ -7,6 +7,7 @@
       <el-form-item label="结束时间">
         <el-date-picker
           v-model="ordinaryForm.endTime"
+          
           type="datetime"
           placeholder="选择"
         />
@@ -17,6 +18,7 @@
       <el-form-item label="开始时间">
         <el-date-picker
           v-model="ordinaryForm.startTime"
+          
           type="datetime"
           placeholder="选择"
         />

@@ -107,3 +107,33 @@ export const studentViewQuestionDetailsAPI = (mistakeId: number) => {
     method: "GET",
   });
 };
+
+export const teacherGenerateQuestionsByAIAPI = (
+  material: string,
+  t:number,
+  n1:number,
+  n2:number,
+  n3:number
+) => {
+  return http({
+    url: "/question/generatedQuestions",
+    method: "GET",
+    params: {
+      material,
+      t,
+      n1,
+      n2,
+      n3,
+    },
+  });
+};
+
+export const generateMistakesByInputAPI=(query:string='')=>{
+  return http({
+    url:"/question/createQuestion",
+    method:"GET",
+    params:{
+      query
+    }
+  })
+}

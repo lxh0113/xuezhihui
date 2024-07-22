@@ -19,7 +19,9 @@
           style="margin-right: 20px; font-weight: bold"
           :class="item.icon"
         ></span>
-        <template #title>{{ item.text }}</template>
+        <template #title>
+         {{ item.text }}
+        </template>
       </el-menu-item>
     </el-menu>
 
@@ -88,8 +90,11 @@ onMounted(()=>{
 
 <style lang="scss" scoped>
 .el-menu-vertical-demo {
-  background-color: $primary-background-color;
-  color: $primary-gray-text-color;
+  background-color: #eaecfd;
+
+  //background-color: $primary-background-color;
+  background-color: white;
+  //color: $primary-gray-text-color;
 }
 
 .el-menu {
@@ -104,8 +109,9 @@ onMounted(()=>{
 //设置当前被选中的一级菜单
 .el-menu-item.is-active {
   border: 0;
-  background: $primary-color;
-  color: $primary-white-color;
+  //background: $primary-color;
+  //color: $primary-white-color;
+  color:$primary-color;
   border-radius: 5px;
 }
 
@@ -115,13 +121,18 @@ onMounted(()=>{
 }
 
 .leftNav {
-  margin-left: 20px;
-  margin-top: 10px;
+  //margin-left: 20px;
+  //margin-top: 10px;
+  background-color: white;
+  margin-bottom: 20px;
 }
 
 .subActive{
-  color: white;;
+  //color: white;;
+  color:$primary-color;
   // font-weight: bold;
-  background-color: $primary-color;
+  background-color: #eaecfd;
+
+  //background-color: $primary-color;
 }
 </style>

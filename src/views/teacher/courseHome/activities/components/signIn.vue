@@ -5,7 +5,7 @@
       <router-link :to="toSign('intelligent')" active-class="active">智能考勤</router-link>
       <router-link :to="toSign('ordinary')" active-class="active">普通签到</router-link>
       <router-link :to="toSign('gesture')" active-class="active">手势签到</router-link>
-      <router-link :to="toSign('erCode')" active-class="active">二维码签到</router-link>
+      <!-- <router-link :to="toSign('erCode')" active-class="active">二维码签到</router-link> -->
       <router-link :to="toSign('number')" active-class="active">签到码签到</router-link>
     </div>
     <div class="bottom">

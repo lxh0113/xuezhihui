@@ -8,13 +8,15 @@
       <el-badge style="margin-top:10px;" is-dot class="item">
         <el-icon size="20"><Bell /></el-icon>
       </el-badge>
+      <el-icon style="margin-left:30px;" size="20"><Setting /></el-icon>
+      <el-icon style="margin-left:30px;" size="20"><Refresh /></el-icon>
       <img :src="userStore.getUserInfo().avatar" alt="" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Bell } from "@element-plus/icons-vue";
+import { Bell, FullScreen, Setting } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/userStore";
 
 const userStore=useUserStore()
@@ -24,15 +26,18 @@ console.log(userStore.getUserInfo()?.avatar)
 
 <style lang="scss" scoped>
 .bigBox {
-  height: 80px;
-//   background-color: $primary-white-color;
+  height: 70px;
+   background-color: $primary-white-color;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+  width: 100%;
+  
 
   .left {
     display: flex;
+    background-color: white;
     align-items: center;
     padding-left: 30px;
 

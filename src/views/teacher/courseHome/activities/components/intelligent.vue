@@ -32,32 +32,23 @@
       </div>
       <div class="image">
         <div>示例图片</div>
-        <img src="@/assets/image/avatar.jpeg" alt="" />
+        <img :src="secondImage" alt="" />
       </div>
     </div>
 
     <div class="result">
       <span class="resultText">识别结果</span>
-      <div class="resultContent">
-        <div class="totalNum">
-          <span>班级人数</span>
-          <span>12人</span>
-        </div>
-        <div class="hereNum">
-          <span> 实到人数 </span>
-          <span>12人</span>
-        </div>
-      </div>
+     
       <div class="noCome">
         <span>详细名单</span>
         <el-table size="large" :data="filterTableData" style="width: 100%">
           <el-table-column label="状态" prop="status" sortable>
             <template #default="scope">
-              <el-tag size="large" v-if="scope.row.status === '已签'">
-                {{ scope.row.status }}
+              <el-tag size="large" v-if="scope.row.signinStatus === '已签'">
+                {{ scope.row.signinStatus }}
               </el-tag>
-              <el-tag size="large" type="danger" v-else-if="scope.row.status === '未签'">
-                {{ scope.row.status }}
+              <el-tag v-else size="large" type="danger">
+                {{ scope.row.signinStatus }}
               </el-tag>
             </template>
           </el-table-column>
@@ -85,7 +76,6 @@
     v-model="dialogVisible"
     title="教师代签"
     width="500"
-    :before-close="handleClose"
   >
     <el-select v-model="reason" style="width: 300px">
       <el-option label="事假" value="事假"></el-option>
@@ -119,6 +109,9 @@ const classStore = useClassStore();
 const userStore = useUserStore();
 
 const imageUrl = ref("");
+
+const secondImage=ref("https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/OIP-C%20%283%29.jpg")
+
 let currentStudent = null;
 let currentIndex = 0;
 
@@ -160,7 +153,7 @@ const uploadImage = async (uploadFile) => {
 
   if (res.data.code === 200) {
     imageUrl.value = res.data.data;
-
+    
     const response = await teacherCreateSignInAPI(
       parseInt(route.params.id as string),
       classStore.getCurrentClass(),
@@ -171,13 +164,15 @@ const uploadImage = async (uploadFile) => {
       null,
       0,
       null,
-      "https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/10%3A52%3A51-e0c453d3b4c94b85a3ddef6260b0de13class.jpg"
+      imageUrl.value
     );
 
     if (response.data.code === 200) {
       console.log(response.data.data);
+      secondImage.value=response.data.data.detectionImage
 
-      tableData.value=response.data.data
+
+      tableData.value=response.data.data.studentActivities
     }
   }
 };

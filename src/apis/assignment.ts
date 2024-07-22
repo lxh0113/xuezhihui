@@ -74,7 +74,7 @@ export const teacherAddAssignmentAPI = (
     answer: string;
     answerAnalysis: string;
   }[],
-  assignmentId?: number
+  assignmentId: number
 ) => {
   return http({
     url: "/assignment/teacher",
@@ -192,7 +192,7 @@ export const teacherViewAllAssignmentAPI = (
 export const teacherViewAssignmentListAPI = (
   assignmentId: number,
   type: number,
-  studentAssignmentState: number
+  studentAssignmentState?: number
 ) => {
   return http({
     url: "/assignment/Submission_list",

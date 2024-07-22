@@ -8,9 +8,9 @@ import { useRoute,useRouter } from 'vue-router';
 
 import { showLoading, hideLoading } from '@/utils/loading.js'
 const http = axios.create({
-    // baseURL: 'http://localhost:8079',
-    baseURL:'/mock',
-    timeout: 60*1000
+    baseURL: 'http://localhost:8079',
+    // baseURL:'/mock',
+    timeout: 6000*1000
 })
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 axios.defaults.withCredentials = true;

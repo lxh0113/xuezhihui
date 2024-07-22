@@ -157,7 +157,7 @@ export const studentSignInAPI = (
 export const studentGetChooseDetailsAPI = (activityId: number) => {
   return http({
     url: "/activity/studentChooser",
-    method: "PUT",
+    method: "GET",
     params: {
       activityId,
     },
@@ -185,3 +185,10 @@ export const uploadImageAPI = (data:FormData) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const getUrlAPI=()=>{
+  return http({
+    url:"/activity/getSignature",
+    method:"GET"
+  })
+}

@@ -23,12 +23,19 @@
     <br />
   </div>
 
-  <el-dialog v-model="dialogVisible" title="Tips" width="500" :before-close="handleClose">
+  <el-dialog
+    v-model="dialogVisible"
+    title="Tips"
+    width="500"
+    :before-close="handleClose"
+  >
     <span>This is a message</span>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogVisible = false"> Confirm </el-button>
+        <el-button type="primary" @click="dialogVisible = false">
+          Confirm
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -43,7 +50,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "../../../../stores/userStore";
 
-const dialogVisible = ref(false)
+const dialogVisible = ref(false);
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
@@ -82,8 +89,9 @@ const toView = (item: any) => {
     router.push("/course/" + route.params.id + "/interaction/" + item.id);
   } else {
     // 选人
-
-    
+    router.push(
+      "/course/" + route.params.id + "/interaction/choose/" + item.id
+    );
   }
 };
 
@@ -96,7 +104,7 @@ onMounted(() => {
 .interactionBox {
   // width: 100%;
   margin-right: 20px;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
   background-color: $primary-white-color;
   box-sizing: border-box;
   padding: 30px;

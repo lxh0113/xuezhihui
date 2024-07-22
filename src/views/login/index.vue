@@ -13,25 +13,34 @@
         :model="form"
         label-position="top"
         label-width="auto"
-        style="width: 420px;margin-top:20px;"
+        style="width: 420px; margin-top: 20px"
       >
         <el-form-item label="邮箱">
           <el-input :prefix-icon="User" v-model="form.account" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input :prefix-icon="Lock" type="password" v-model="form.password" />
+          <el-input
+            :prefix-icon="Lock"
+            type="password"
+            v-model="form.password"
+          />
         </el-form-item>
         <el-form-item>
           <el-checkbox-group v-model="form.type">
-            <el-checkbox value="1" name="type">
-              记住我
-            </el-checkbox>
+            <el-checkbox value="1" name="type"> 记住我 </el-checkbox>
           </el-checkbox-group>
-          <p style="margin-left: 294px;color:gray" @click="$router.push('/forget')">忘记密码</p>
+          <p
+            style="margin-left: 294px; color: gray"
+            @click="$router.push('/forget')"
+          >
+            忘记密码
+          </p>
         </el-form-item>
 
         <el-form-item>
-          <el-button @click="login" style="width: 420px;" type="primary">登录</el-button>
+          <el-button @click="login" style="width: 420px" type="primary"
+            >登录</el-button
+          >
         </el-form-item>
       </el-form>
 
@@ -44,98 +53,92 @@
 </template>
 
 <script setup lang="ts">
-import { reactive,ref } from "vue";
-import { User, Lock } from '@element-plus/icons-vue'
+import { reactive, ref } from "vue";
+import { User, Lock } from "@element-plus/icons-vue";
 import { loginAPI } from "@/apis/user";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
+const userStore = useUserStore();
 
-const userStore=useUserStore()
-
-const router=useRouter()
+const router = useRouter();
 
 const form = ref({
-  account: "",
+  account: "65950649",
   password: "",
-  type:''
+  type: "",
 });
 
-const login=async ()=>{
-  const res=await loginAPI(form.value.account,form.value.password)
+const login = async () => {
+  userStore.setIsLogin(false);
+  const res = await loginAPI(form.value.account, form.value.password);
 
-  if(res.data.code===200)
-  {
+  if (res.data.code === 200) {
     userStore.setUserInfo(res.data.data);
-    // userStore.changeIsLogin(true);
-    // console.log(res.data)
-    console.log(res.data.data)
-    ElMessage.success('登录成功')
-    setTimeout(()=>{
-      router.push('/')
-    },2000)
-  }
-  else{
-    ElMessage.error(res.data.message)
-  }
-}
+    
+    console.log(res.data.data);
 
-
+    ElMessage.success("登录成功");
+    setTimeout(() => {
+      router.push("/");
+    }, 3000);
+    // alert(4)
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
 </script>
 
 <style lang="scss" scoped>
-
-.backBox{
+.backBox {
   background: #f5f7fd;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 
-  img{
+  img {
     width: 60px;
   }
 
-  .logo{
+  .logo {
     display: flex;
     justify-content: center;
     align-items: center;
 
-    span{
+    span {
       margin-left: 20px;
       font-weight: bold;
-      color:$primary-title-color;
+      color: $primary-title-color;
       font-size: 30px;
     }
   }
 
-  .loginText{
+  .loginText {
     font-size: 12px;
-    color:$primary-title-color;
+    color: $primary-title-color;
 
-    p{
-      color:$primary-gray-color;
+    p {
+      color: $primary-gray-color;
       margin-top: 10px;
     }
   }
 
-
-  .loginBox{
+  .loginBox {
     display: flex;
     flex-direction: column;
     background: $primary-white-color;
 
-    padding:40px;
+    padding: 40px;
   }
 
-  .bottomText{
+  .bottomText {
     display: flex;
     justify-content: center;
 
-    span:nth-child(2)
-    {
-      color:$primary-color;
+    span:nth-child(2) {
+      color: $primary-color;
       cursor: pointer;
     }
   }

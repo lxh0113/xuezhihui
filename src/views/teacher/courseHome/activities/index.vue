@@ -82,6 +82,8 @@ let activities = ref<typeList>([
 
 const setCurrentClass=()=>{
   classStore.setCurrentClass(myClass.value)
+
+  getAllActivity()
 }
 
 const activitiesList = ref([]);
@@ -152,6 +154,7 @@ onMounted(async() => {
   height: calc(100vh - 120px);
   // background: red;
   margin-right: 20px;
+  margin-bottom:20px;
 
   .head {
     display: flex;

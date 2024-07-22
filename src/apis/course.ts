@@ -1,5 +1,15 @@
 import http from "@/utils/http";
 
+export const videoAddSubtitleAPI = (video: string) => {
+  return http({
+    url: "/python/getVideo",
+    method: "POST",
+    params: {
+      video,
+    },
+  });
+};
+
 export const studentViewMyCourseAPI = (studentId: number) => {
   return http({
     url: "/course/courses/" + studentId,
@@ -99,7 +109,7 @@ export const teacherModifyChaptersAPI = (data: {
 export const teacherDeleteChapterAPI = (chapterId: number) => {
   return http({
     url: "/course/chapter/" + chapterId,
-    method: "PUT",
+    method: "DELETE",
   });
 };
 
@@ -113,3 +123,47 @@ export const studentGetRecordsAPI = (studentId: number, courseId: number) => {
     },
   });
 };
+
+export const teacherGetKnowledgeChartByCourseAPI = (courseId: number) => {
+  return http({
+    url: "/course/create-knowledge-graph",
+    method: "PUT",
+    params:{
+      courseId
+    }
+  });
+};
+
+export const getKnowledgeChartAPI = (courseId: number) => {
+  return http({
+    url: "/course/get-knowledge-graph/"+courseId,
+    method: "GET"
+  });
+};
+
+export const createMindMapByCourseIdAPI=(courseId:number)=>{
+  return http({
+    url:'/course/create-mindMap/'+courseId,
+    method:"GET"
+  })
+}
+
+export const getPPTAPI = (query: string = '') => {
+  return http({
+    url: "/course/createPPT",
+    method: "GET",
+    params: {
+      query,
+    },
+  });
+};
+
+export const recommedStudyPathAPI=(query: string = 'ff')=>{
+  return http({
+    url:"/course/createPath",
+    method:"GET",
+    params:{
+      query
+    }
+  })
+}

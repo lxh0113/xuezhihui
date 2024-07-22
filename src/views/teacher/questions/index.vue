@@ -27,7 +27,8 @@
       <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="题干">
         <template #default="scope">
-          {{ JSON.parse(scope.row.title).text }}
+          <p v-html="JSON.parse(scope.row.title).text"></p>
+          <!-- {{ JSON.parse(scope.row.title).text }} -->
         </template>
       </el-table-column>
 
@@ -106,6 +107,7 @@ const filterTableData = computed(() =>
 const getQuestions = async () => {
   const res = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
   if (res.data.code === 200) {
+    console.log(res.data.data)
     tableData.value = res.data.data;
   } else ElMessage.error(res.data.message);
 };

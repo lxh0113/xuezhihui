@@ -1,13 +1,20 @@
 <template>
   <div class="examBox">
-    <div class="head">
+    <div class="head" style="margin-bottom: 10px;">
       <el-button
         style="font-size: 18px"
         :icon="Plus"
         type="primary"
-        text="primary"
         @click="toAddExam"
         >新建考试</el-button
+      >
+
+      <el-button
+        style="font-size: 18px"
+        :icon="Upload"
+        type="primary"
+        @click="toUploadPaper"
+        >上传纸质试卷智能批阅</el-button
       >
     </div>
     <hr />
@@ -50,12 +57,20 @@
             <el-button
               v-if="scope.row.state === 0"
               type="primary"
-              text="primary"
               @click="toPublish(scope.row)"
               >发布</el-button
             >
-            <el-button v-else type="primary" text="primary" @click="toMark(scope.row)"
+            <el-button
+              v-else
+              type="primary"
+              @click="toMark(scope.row.assignmentId)"
               >批阅</el-button
+            >
+            <el-button
+              
+              type="primary"
+              @click="toMark(scope.row.assignmentId)"
+              >智能批阅</el-button
             >
           </template>
         </el-table-column>
@@ -76,31 +91,34 @@
       </el-form-item>
       <el-form-item label="有效时段">
         <el-date-picker
-          v-model="form.startTime"
+          v-model="form.beginDate"
           type="datetime"
           placeholder="开始时间"
           style="margin-right: 20px"
         />
         至
         <el-date-picker
-          v-model="form.endTime"
+          v-model="form.endDate"
           type="datetime"
           placeholder="结束时间"
           style="margin-left: 20px"
         />
       </el-form-item>
-      <el-form-item label="督促设置">
-        <el-checkbox v-model="form.supervise">
+      <el-form-item label="发放对象">
+        <el-input type="number" min="0" v-model="form.examTime"></el-input>
+      </el-form-item>
+      <!-- <el-form-item label="督促设置">
+        <el-checkbox v-model="form.smartSupervise">
           在作业截至<el-input
             size="mid"
             style="width: 50px; margin-left: 10px; margin-right: 10px"
-            v-model="form.superviseTime"
+            v-model="form.smartSupervise"
           ></el-input
           >分钟的的时候发通知提醒学生
         </el-checkbox>
 
         <el-checkbox v-model="form.smartSupervise"> 智能提醒 </el-checkbox>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -112,7 +130,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Plus, Search, User } from "@element-plus/icons-vue";
+import { Plus, Search, Upload, User } from "@element-plus/icons-vue";
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
@@ -121,7 +139,10 @@ import {
   teacherViewAllAssignmentAPI,
 } from "@/apis/assignment";
 import { teacherGetAllClassAPI } from "../../../../apis/assignment";
+import { teacherAddPaperAPI } from "@/apis/paper";
+import { useUserStore } from "@/stores/userStore";
 
+const userStore = useUserStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -131,6 +152,7 @@ const form = ref({
   classList: [],
   beginDate: "",
   endDate: "",
+  examTime: 0,
   smartSupervise: "",
 });
 
@@ -185,28 +207,45 @@ const toPublish = (row: any) => {
   dialogFormVisible.value = true;
 };
 
-const publish =async () => {
+const publish = async () => {
   const res = await teacherPublishAssignmentAPI(
+    2,
     parseInt(route.params.assignmentId as string),
     form.value.beginDate,
     form.value.endDate,
+    form.value.examTime,
     form.value.classList
   );
 
-  if(res.data.code===200)
-  {
-    ElMessage.success('发布成功')
-    getAllExam()
+  if (res.data.code === 200) {
+    ElMessage.success("发布成功");
+    getAllExam();
+  } else {
+    ElMessage.error(res.data.message);
   }
-  else {
+
+  dialogFormVisible.value = false;
+};
+
+const toUploadPaper = async () => {
+  const res = await teacherAddPaperAPI(
+    userStore.getUserInfo().roleId,
+    parseInt(route.params.id as string)
+  );
+
+  if (res.data.code === 200) {
+    router.push("/course/" + route.params.id + "/exam/uploadExam/"+res.data.data);
+
+  } else {
     ElMessage.error(res.data.message)
   }
 
-  dialogFormVisible.value=false
 };
 
 onMounted(() => {
   getAllExam();
+
+  // setClassList()
 });
 </script>
 

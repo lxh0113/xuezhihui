@@ -7,11 +7,11 @@
         </el-form-item>
 
         <el-form-item label="截止时间">
-          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择" />
+          <el-date-picker v-model="form.endTime"  type="datetime" placeholder="选择" />
         </el-form-item>
 
         <el-form-item label="开始时间">
-          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择" />
+          <el-date-picker v-model="form.startTime"  type="datetime" placeholder="选择" />
         </el-form-item>
       <el-button type="primary" @click="toSignIn">确定</el-button>
 

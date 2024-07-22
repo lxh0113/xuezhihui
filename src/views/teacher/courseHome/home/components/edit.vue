@@ -7,10 +7,18 @@
       </div>
       <div class="setting">
         <div class="contentSetting">
-          <el-button :icon="Plus" type="primary" text="primary" @click="chooseNode"
+          <el-button
+            :icon="Plus"
+            type="primary"
+            text="primary"
+            @click="chooseNode"
             >同级目录</el-button
           >
-          <el-button type="primary" text="primary" :icon="Plus" @click="chooseChildren"
+          <el-button
+            type="primary"
+            text="primary"
+            :icon="Plus"
+            @click="chooseChildren"
             >子目录</el-button
           >
         </div>
@@ -27,52 +35,104 @@
           @node-click="handleNodeClick"
         />
       </div>
-      <div class="right">
+      <div class="right" style="min-width: 400px">
         <Editor
           v-if="chapterData.type === 'text'"
           v-model="valueHtml"
           :defaultConfig="editorConfig"
-          :text="chapterData.content"
           class="editor"
-          style="height: calc(100vh - 420px); overflow-y: scroll; padding: 20px"
+          style="
+            min-width: calc(100vh - 420px);
+            overflow-y: scroll;
+            box-sizing: border-box;
+            adding: 20px;
+          "
           @onCreated="handleCreated"
         />
 
-        <myVideo v-else-if="chapterData.type === 'video'" :src="chapterData.content" />
+        <myVideo
+          :startTime="videoBeginTime"
+          v-else-if="chapterData.type === 'video'"
+          :src="currentUrl"
+          style="min-height: 400px"
+        />
 
         <iframe
           v-else
           style="min-width: 600px"
           class="ppt"
-          :src="'http://view.officeapps.live.com/op/view.aspx?src=' + chapterData.content"
+          :src="
+            'http://view.officeapps.live.com/op/view.aspx?src=' +
+            chapterData.content
+          "
           frameborder="0"
         ></iframe>
 
-        <el-upload
-          ref="upload"
-          class="upload-demo"
-          :limit="1"
-          :on-exceed="handleExceed"
-          :auto-upload="false"
-          style="margin-left: 20px"
-          :on-change="submit"
-          accept=".ppt,.pptx,.mp4,.avi,.mov,.flv,.wmv"
+        <div
+          class="buttonOptions"
+          style="display: flex; background: white; padding-top: 20px"
         >
-          <template #trigger>
-            <el-button type="primary">选择文件</el-button>
-          </template>
-          <el-button
+          <el-upload
+            ref="upload"
+            class="upload-demo"
+            :limit="1"
+            :on-exceed="handleExceed"
+            :auto-upload="false"
             style="margin-left: 20px"
-            class="ml-3"
-            type="success"
-            @click="submitUpload"
+            :on-change="submit"
+            accept=".ppt,.pptx,.mp4,.avi,.mov,.flv,.wmv"
           >
-            上传
-          </el-button>
-          <template #tip>
-            <div class="el-upload__tip text-red">只能上传一个文件</div>
-          </template>
-        </el-upload>
+            <template #trigger>
+              <el-button type="primary">选择文件</el-button>
+            </template>
+            <el-button
+              style="margin-left: 20px"
+              class="ml-3"
+              type="success"
+              @click="submitUpload"
+            >
+              上传
+            </el-button>
+
+            <template #tip>
+              <div class="el-upload__tip text-red">只能上传一个文件</div>
+            </template>
+          </el-upload>
+
+          <el-button
+            @click="deleteCurrentChapter"
+            type="danger"
+            style="margin-left: 20px"
+            >删除当前章节</el-button
+          >
+
+          <el-button
+            @click="addSubtitle"
+            type="warning"
+            style="margin-left: 20px"
+            v-if="chapterData.type === 'video'"
+            >添加字幕</el-button
+          >
+        </div>
+
+        <div class="addSubtitleBox" v-if="chapterData.type === 'video'">
+          <span class="titleText">知识切片</span>
+          <el-timeline
+            v-if="chapterData.knowledge !== null"
+            style="max-width: 600px"
+          >
+            <el-timeline-item
+              v-for="item in subTitleContent"
+              :timestamp="item.beginTime"
+              placement="top"
+            >
+              <el-card @click="changeCurrentTime(item.beginTime)">
+                <!-- <h4></h4> -->
+                <p>{{ item.knowledge }}</p>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
       </div>
     </div>
   </div>
@@ -108,7 +168,9 @@ import { Plus } from "@element-plus/icons-vue";
 import {
   getAllChaptersAPI,
   teacherAddChapterAPI,
+  teacherDeleteChapterAPI,
   teacherModifyChaptersAPI,
+  videoAddSubtitleAPI,
 } from "@/apis/course";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -117,6 +179,7 @@ import type { UploadInstance, UploadProps, UploadRawFile } from "element-plus";
 import { uploadImageAPI } from "../../../../../apis/activity";
 import myEditor from "@/views/components/editor.vue";
 
+const currentUrl=ref("https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/05:11:26-29ebcc0e90cc445d9761ff3b6c808844out_video.mp4")
 const route = useRoute();
 const router = useRouter();
 let cache = [];
@@ -135,6 +198,7 @@ const chapterData = ref({
   taskPointTitle: "",
   content: "新的内容",
   type: "text",
+  knowledge: null,
 });
 
 // 编辑器实例，必须用 shallowRef，重要！
@@ -159,6 +223,10 @@ const editorConfig = {
 };
 
 const handleCreated = (editor: any) => {
+  if (editorRef.value != null) {
+    editorRef.value.destroy();
+  }
+
   editorRef.value = editor; // 记录 editor 实例，重要！
 };
 
@@ -181,27 +249,41 @@ const handleNodeClick = (node: any, data: Tree) => {
   console.log(node);
   currentTreeData.value = node;
 
+  console.log("判断是不是空" + node.id === null);
+
   if (node.id === null) {
     console.log(node);
     chapterData.value.type = "text";
-    chapterData.value.id = null;
-    // chapterData.value.con
+    chapterData.value.content = "";
+
     return;
   } else {
     console.log(cache);
 
     chapterData.value = cache.find((item) => item.id === node.id);
 
+    if (chapterData.value.knowledge !== null) {
+      subTitleContent.value = JSON.parse(chapterData.value.knowledge);
+
+    }
+
+    if(chapterData.value.type==='video'){
+      currentUrl.value=chapterData.value.content
+    }
+
     console.log(chapterData.value);
+
+    if (chapterData.value.type === "text") {
+      valueHtml.value = chapterData.value.content;
+    }
+
   }
+
+
 
   // console.log(data)
   // 设置
 };
-
-// watch(currentTreeData.value,(newValue,oldValue)=>{
-//   // 设置里面的内容
-// })
 
 const data = ref<Tree[]>([
   {
@@ -236,6 +318,8 @@ const toDeal = () => {
   } else {
     addChildren();
   }
+
+  // toSave()
 };
 
 const addNode = async () => {
@@ -293,7 +377,10 @@ const addNode = async () => {
         }
         let k = 0;
         for (; k < data.value[i].children[j].children.length; k++) {
-          if (data.value[i].children[j].children[k].id === currentTreeData.value.id) {
+          if (
+            data.value[i].children[j].children[k].id ===
+            currentTreeData.value.id
+          ) {
             data.value[i].children[j].children.splice(k + 1, 0, {
               label: chapterData.value.chapterTitle,
               id: null,
@@ -301,8 +388,10 @@ const addNode = async () => {
             });
 
             chapterData.value.level = 3;
-            chapterData.value.chapterNumber = data.value[i].children[j].children.length;
-            chapterData.value.fatherId = data.value[i].children[j].children.length;
+            chapterData.value.chapterNumber =
+              data.value[i].children[j].children.length;
+            chapterData.value.fatherId =
+              data.value[i].children[j].children.length;
             chapterData.value.taskPointTitle = chapterData.value.chapterTitle;
 
             break;
@@ -315,6 +404,8 @@ const addNode = async () => {
       if (j < data.value[i].children.length) break;
     }
   }
+
+  chapterData.value.id = null;
 };
 
 const chooseNode = () => {
@@ -376,15 +467,20 @@ const addChildren = () => {
           });
 
           chapterData.value.level = 3;
-          chapterData.value.chapterNumber = data.value[i].children[j].children.length;
-          chapterData.value.fatherId = data.value[i].children[j].children.length;
+          chapterData.value.chapterNumber =
+            data.value[i].children[j].children.length;
+          chapterData.value.fatherId =
+            data.value[i].children[j].children.length;
           chapterData.value.taskPointTitle = chapterData.value.chapterTitle;
 
           break;
         }
         let k = 0;
         for (; k < data.value[i].children[j].children.length; k++) {
-          if (data.value[i].children[j].children[k].id === currentTreeData.value.id) {
+          if (
+            data.value[i].children[j].children[k].id ===
+            currentTreeData.value.id
+          ) {
             ElMessage.error("该节点不能创建新章节");
             break;
           }
@@ -482,8 +578,11 @@ const submit = async (rawFile: UploadRawFile) => {
   var FileExt = rawFile.name.replace(/.+\./, "");
   if (["ppt", "pptx"].indexOf(FileExt.toLowerCase()) !== -1) {
     chapterData.value.type = "ppt";
-  } else if (["mp4", "avi", "mov", "flv", "wmv"].indexOf(FileExt.toLowerCase()) !== -1) {
+  } else if (
+    ["mp4", "avi", "mov", "flv", "wmv"].indexOf(FileExt.toLowerCase()) !== -1
+  ) {
     chapterData.value.type = "video";
+    
   } else {
     ElMessage.error("您必须上传ppt或者视频");
     return;
@@ -495,7 +594,6 @@ const submit = async (rawFile: UploadRawFile) => {
 
   // const res = await uploadImageAPI()
 };
-
 const submitUpload = async () => {
   const res = await uploadImageAPI(file);
 
@@ -506,22 +604,30 @@ const submitUpload = async () => {
     console.log(res.data.data);
 
     chapterData.value.content = res.data.data;
-
-    toSave()
+    currentUrl.value=res.data.data
+    toSave();
   } else {
     ElMessage.error("上传失败");
   }
 };
 
 const toSave = async () => {
+  if (chapterData.value.chapterTitle.trim() === "") {
+    return;
+  }
+
   if (chapterData.value.type === "text") {
     chapterData.value.content = valueHtml.value;
   }
 
   console.log(chapterData.value);
 
+  chapterData.value.knowledge=JSON.stringify(chapterData.value.knowledge)
+    console.log(chapterData.value)
+
   if (chapterData.value.id === null) {
     // 新建
+    
     const res = await teacherAddChapterAPI(chapterData.value);
 
     if (res.data.code === 200) {
@@ -540,6 +646,62 @@ const toSave = async () => {
       getAllChapters();
     } else ElMessage.error("修改失败");
   }
+};
+
+const deleteCurrentChapter = async () => {
+  if (chapterData.value.id === null) {
+    ElMessage.error("您未选中任何班级");
+    return;
+  }
+
+  const res = await teacherDeleteChapterAPI(chapterData.value.id);
+
+  if (res.data.code === 200) {
+    ElMessage.success("删除成功");
+
+    getAllChapters();
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+const subTitleContent = ref([]);
+
+const addSubtitle = async () => {
+  const res = await videoAddSubtitleAPI(chapterData.value.content);
+
+  if (res.data.code === 200) {
+    chapterData.value.content = res.data.data.videoPath;
+    subTitleContent.value = res.data.data.knowledge;
+
+    chapterData.value.knowledge = res.data.data.knowledge;
+    chapterData.value.content = res.data.data.videoPath;
+    
+    currentUrl.value=res.data.data.videoPath
+    ElMessage.success("获取含字幕视频成功");
+    toSave();
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+const videoBeginTime = ref(0);
+
+const changeCurrentTime = (beginTime: string) => {
+
+  // 解析时间字符串
+  let parts = beginTime.split(":");
+  let secondsPart = parts[2].split(",")[0]; // 获取秒部分
+  let millisecondsPart = parts[2].split(",")[1]; // 获取毫秒部分
+
+  // 转换为数值
+  let seconds = parseInt(secondsPart, 10); // 秒数部分
+  let milliseconds = parseInt(millisecondsPart, 10); // 毫秒数部分
+
+  // 计算总秒数
+  let totalSeconds = seconds + milliseconds / 1000;
+  console.log(totalSeconds)
+  videoBeginTime.value=totalSeconds
 };
 
 onMounted(() => {
@@ -628,6 +790,19 @@ onMounted(() => {
     .right {
       flex: 1;
       background-color: $primary-white-color;
+      min-height: 450px;
+      background-color: white;
+    }
+  }
+
+  .addSubtitleBox {
+    box-sizing: border-box;
+    padding: 30px;
+
+    .titleText {
+      color: $primary-color;
+      line-height: 50px;
+      font-weight: bold;
     }
   }
 }

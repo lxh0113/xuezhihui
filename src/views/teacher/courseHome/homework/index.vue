@@ -35,18 +35,26 @@
           <div class="left">
             <div class="header">
               <span class="title">{{ item.title }}</span>
-              <el-tag style="margin-left: 20px" size="small" type="primary"
-                >{{item.state===1?'进行中':item.state===0?'待开始':'已结束'}}</el-tag
-              >
+              <el-tag style="margin-left: 20px" size="small" type="primary">{{
+                item.state === 1
+                  ? "进行中"
+                  : item.state === 0
+                  ? "待开始"
+                  : "已结束"
+              }}</el-tag>
             </div>
-            <p >{{item.classList?.map(myClass=>myClass.className).join("、")}}</p>
-            <p>作答时间：{{item.beginDate}} 至 {{item.endDate}}</p>
+            <p>
+              {{
+                item.classList?.map((myClass) => myClass.className).join("、")
+              }}
+            </p>
+            <p>作答时间：{{ item.beginDate }} 至 {{ item.endDate }}</p>
           </div>
 
           <div class="right">
-            <span style="font-size: 26px">{{item.waitCorrectNum}}</span>
+            <span style="font-size: 26px">{{ item.waitCorrectNum }}</span>
             <span>待批</span>
-            <span style="color: #ccc">{{item.unCommittedNum}}未交</span>
+            <span style="color: #ccc">{{ item.unCommittedNum }}未交</span>
             <el-button
               style="font-size: 16px"
               type="primary"
@@ -117,7 +125,7 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"> 确认 </el-button>
+        <el-button type="primary" @click="modify"> 确认 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -130,8 +138,9 @@ import {
 } from "@/apis/assignment";
 import { Plus, Search } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { teacherModifyAssignmentStatusAPI } from "../../../../apis/assignment";
 
 const dialogFormVisible = ref(false);
 
@@ -164,6 +173,17 @@ const modifySettings = (item) => {
   dialogFormVisible.value = true;
 };
 
+const modify = async() => {
+  const res = await teacherModifyAssignmentStatusAPI(
+    parseInt(route.params.assignmentId as string),
+    1
+  );
+
+  if (res.data.code === 200) {
+    ElMessage.success('修改成功')
+  } else ElMessage.error(res.data.message);
+};
+
 const toMark = (id: number) => {
   router.push("/course/" + route.params.id + "/homework/details/" + id);
 };
@@ -188,12 +208,10 @@ const getAllHomework = async () => {
     1
   );
 
-  if(res.data.code===200)
-  {
-    console.log(res.data.data)
-    homeworkList.value=res.data.data
-  }
-  else ElMessage.error(res.data.message)
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+    homeworkList.value = res.data.data;
+  } else ElMessage.error(res.data.message);
 };
 
 onMounted(() => {

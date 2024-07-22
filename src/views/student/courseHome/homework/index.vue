@@ -2,10 +2,10 @@
   <div class="homeworkBox">
     <div class="title">
       <span class="text">筛选</span>
-      <el-radio-group v-model="radio" class="ml-4">
-        <el-radio :value="0" size="large">全部</el-radio>
+      <el-radio-group v-model="radio" @change="getHomework" class="ml-4">
+        <el-radio :value="2" size="large">全部</el-radio>
         <el-radio :value="1" size="large">已完成</el-radio>
-        <el-radio :value="2" size="large">未完成</el-radio>
+        <el-radio :value="0" size="large">未完成</el-radio>
       </el-radio-group>
     </div>
     <hr />
@@ -104,6 +104,7 @@ const getItem = (item: any) => {
 
   // 根据截止日期是否晚于当前日期来设置 type 属性
   const type = isDeadlinePassed ? "primary" : "info";
+  // const type='primary'
 
   return {
     type,
@@ -111,14 +112,7 @@ const getItem = (item: any) => {
   };
 };
 
-const homeworkList = ref([
-  {
-    assignmentId: 1,
-    endDate: "2024-12-2",
-    title: "12",
-    state: "已完成",
-  },
-]);
+const homeworkList = ref([]);
 
 watch(radio, (newValue, oldValue) => {
   getHomework();
@@ -130,7 +124,7 @@ const getHomework = async () => {
   const res = await studentGetAssignmentAPI(
     userStore.getUserInfo().roleId,
     parseInt(courseId),
-    parseInt(radio.value),
+    radio.value,
     1
   );
 
@@ -140,14 +134,16 @@ const getHomework = async () => {
     homeworkList.value = res.data.data;
 
     // 处理一下
-    
   } else {
     ElMessage.error(res.data.message);
   }
 };
 
 const toView = (assignment) => {
-  router.push("/course/"+route.params.id+"/dohomework/" + assignment.assignmentId);
+  if (getItem(assignment).type !== "info")
+    router.push(
+      "/course/" + route.params.id + "/dohomework/" + assignment.assignmentId
+    );
 };
 
 onMounted(() => {

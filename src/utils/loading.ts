@@ -9,8 +9,8 @@ function showLoading() {
     loading = ElLoading.service({
         body: true,
         lock: true,
-        text: "",
-        spinner: "el-icon-loading",
+        text: "加载中……",
+        // spinner: "el-icon-loading",
         background: "rgba(0, 0, 0, 0.7)",
       });
   }

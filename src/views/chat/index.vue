@@ -177,7 +177,7 @@ export default {
   mounted() {
     const wsStore = useWsStore();
     console.log(112);
-    wsStore.wsInit();
+    // wsStore.wsInit();
 
     // wsStore.sendMessage('你好我想问学习js难吗')
   },
@@ -185,13 +185,18 @@ export default {
 </script>
 
 <style>
+
 .sc-chat-window {
   width: 800px !important;
+  z-index:999;
 }
 .sc-message-list {
   width: 800px !important;
 }
 .sc-message {
   width: 760px !important;
+}
+.sc-launcher{
+  z-index:999;
 }
 </style>

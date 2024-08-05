@@ -112,7 +112,17 @@ onUnmounted(() => {
 </script>
 
 <style src="@wangeditor/editor/dist/css/style.css"></style>
-<style lang="scss" scoped>
+<style lang="scss" >
+.w-e-toolbar {
+  z-index: 2!important;
+}
+.w-e-menu {
+  z-index: 2 !important;
+}
+.w-e-text-container {
+  z-index: 1 !important;
+}
+
 .text {
   border: 1px solid #ccc;
   max-height: 120px;

@@ -1,6 +1,6 @@
 <template>
   <div style="height:600px;min-height:600px">
-    <video id="my-player" ref="videoRef" class="video-js w-full h-full">
+    <video id="my-player" ref="videoRef" :src="src" class="video-js w-full h-full">
       <source :src="src" />
     </video>
   </div>

@@ -10,7 +10,15 @@
       </el-badge>
       <el-icon style="margin-left:30px;" size="20"><Setting /></el-icon>
       <el-icon style="margin-left:30px;" size="20"><Refresh /></el-icon>
-      <img :src="userStore.getUserInfo().avatar" alt="" />
+      <!-- <img :src="userStore.getUserInfo().avatar" alt="" /> -->
+      <el-dropdown>
+        <img :src="userStore.getUserInfo().avatar" alt="" />
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="$router.push('/login')">退出登录</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </div>
 </template>

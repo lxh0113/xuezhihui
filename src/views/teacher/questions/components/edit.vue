@@ -9,18 +9,9 @@
           <el-radio-button label="简答题" value="简答题" />
           <el-radio-button label="判断题" value="判断题" />
         </el-radio-group>
-        <el-select
-          v-model="courseIdData"
-          style="margin-left: 30px; width: 200px"
-          placeholder="选择课程"
-          @change="changeCurrentCourse"
-        >
-          <el-option
-            v-for="item in optionsList"
-            :key="item.id"
-            :label="item.courseName"
-            :value="item.id"
-          ></el-option>
+        <el-select v-model="courseIdData" style="margin-left: 30px; width: 200px" placeholder="选择课程"
+          @change="changeCurrentCourse">
+          <el-option v-for="item in optionsList" :key="item.id" :label="item.courseName" :value="item.id"></el-option>
         </el-select>
       </div>
 
@@ -28,148 +19,78 @@
     </div>
 
     <div class="questionContent">
-      <Toolbar
-        :editor="editorRef"
-        style="border: 1px solid #ccc; margin-top: 20px"
-      />
-      <Editor
-        v-model="valueHtml"
-        class="editor"
-        style="border: 1px solid #ccc; height: 200px; margin-bottom: 20px"
-        @onCreated="handleCreated"
-      />
+      <Toolbar :editor="editorRef" style="border: 1px solid #ccc; margin-top: 20px" />
+      <Editor v-model="valueHtml" class="editor" style="border: 1px solid #ccc; height: 200px; margin-bottom: 20px"
+        @onCreated="handleCreated" />
 
       <!--        这个是单选题 -->
       <div v-if="choose === '单选题'" class="radio">
         <el-radio-group v-model="radio" size="large">
-          <div
-            class="radioOptions"
-            v-for="(item, index) in radioAnswer"
-            :key="index"
-          >
-            <el-radio-button
-              style="border-radius: 20px"
-              :label="String.fromCharCode(65 + index)"
-              :value="String.fromCharCode(65 + index)"
-            />
+          <div class="radioOptions" v-for="(item, index) in radioAnswer" :key="index">
+            <el-radio-button style="border-radius: 20px" :label="String.fromCharCode(65 + index)"
+              :value="String.fromCharCode(65 + index)" />
 
             <div style="margin-left: 20px" class="editor">
               <myEditor :text="item" :ref="setRadioRef"></myEditor>
             </div>
-            <el-button
-              :icon="Delete"
-              @click="deleteRadioOption(index)"
-              style="margin-left: 20px"
-              type="primary"
-              text="primary"
-            ></el-button>
+            <el-button :icon="Delete" @click="deleteRadioOption(index)" style="margin-left: 20px" type="primary"
+              text="primary"></el-button>
           </div>
         </el-radio-group>
-        <el-button
-          type="primary"
-          text="primary"
-          :icon="Plus"
-          style="margin-bottom: 20px"
-          @click="addRadioOption"
-          >添加选项</el-button
-        >
+        <el-button type="primary" text="primary" :icon="Plus" style="margin-bottom: 20px"
+          @click="addRadioOption">添加选项</el-button>
       </div>
 
       <!--        这个是多选题 -->
       <div v-else-if="choose === '多选题'" class="checkBox">
         <el-checkbox-group v-model="checkboxGroup" size="large">
-          <div
-            class="checkBoxOptions"
-            v-for="(item, index) in checkBoxAnswer"
-            :key="index"
-          >
-            <el-checkbox-button
-              :key="String.fromCharCode(65 + index)"
-              :value="String.fromCharCode(65 + index)"
-            >
+          <div class="checkBoxOptions" v-for="(item, index) in checkBoxAnswer" :key="index">
+            <el-checkbox-button :key="String.fromCharCode(65 + index)" :value="String.fromCharCode(65 + index)">
               {{ String.fromCharCode(65 + index) }}
             </el-checkbox-button>
 
             <div style="margin-left: 20px" class="editor">
               <myEditor :ref="setCheckBoxRef"></myEditor>
             </div>
-            <el-button
-              :icon="Delete"
-              @click="deleteCheckBoxOption(index)"
-              style="margin-left: 20px"
-              type="primary"
-              text="primary"
-            ></el-button>
+            <el-button :icon="Delete" @click="deleteCheckBoxOption(index)" style="margin-left: 20px" type="primary"
+              text="primary"></el-button>
           </div>
         </el-checkbox-group>
-        <el-button
-          type="primary"
-          text="primary"
-          :icon="Plus"
-          style="margin-bottom: 20px"
-          @click="addCheckBoxOption"
-          >添加选项</el-button
-        >
+        <el-button type="primary" text="primary" :icon="Plus" style="margin-bottom: 20px"
+          @click="addCheckBoxOption">添加选项</el-button>
       </div>
 
       <!-- 填空题 -->
       <div v-else-if="choose === '填空题'" class="fill">
-        <div
-          class="fillOptions"
-          v-for="(item, index) in fillAnswer"
-          :key="index"
-        >
+        <div class="fillOptions" v-for="(item, index) in fillAnswer" :key="index">
           <span>第&nbsp;{{ index + 1 }}&nbsp;空</span>
 
           <div style="margin-left: 20px" class="editor">
             <myEditor :text="item" :ref="setFillRef"></myEditor>
           </div>
-          <el-button
-            :icon="Delete"
-            @click="deleteFillOption(index)"
-            style="margin-left: 20px"
-            type="primary"
-            text="primary"
-          ></el-button>
+          <el-button :icon="Delete" @click="deleteFillOption(index)" style="margin-left: 20px" type="primary"
+            text="primary"></el-button>
         </div>
-        <el-button
-          type="primary"
-          text="primary"
-          :icon="Plus"
-          style="margin-bottom: 20px"
-          @click="addFillOption"
-          >添加选项</el-button
-        >
+        <el-button type="primary" text="primary" :icon="Plus" style="margin-bottom: 20px"
+          @click="addFillOption">添加选项</el-button>
       </div>
 
       <!-- 这是判断题 -->
       <div v-else-if="choose === '判断题'" class="judge">
         <el-radio-group v-model="judge" size="large">
           <div class="judgeOptions">
-            <el-radio-button
-              style="border-radius: 20px"
-              label="A"
-              value="true"
-            />
+            <el-radio-button style="border-radius: 20px" label="A" value="true" />
             <span style="line-height: 40px; margin-left: 20px">对</span>
           </div>
           <div class="judgeOptions">
-            <el-radio-button
-              style="border-radius: 20px"
-              label="B"
-              value="false"
-            />
+            <el-radio-button style="border-radius: 20px" label="B" value="false" />
             <span style="line-height: 40px; margin-left: 20px">错</span>
           </div>
         </el-radio-group>
       </div>
 
       <!-- 这是简答题 -->
-      <div
-        v-else-if="choose === '简答题'"
-        class="reply"
-        style="margin-bottom: 20px"
-      >
+      <div v-else-if="choose === '简答题'" class="reply" style="margin-bottom: 20px">
         <span>请输入答案</span>
         <div class="replyOptions" style="margin-top: 20px">
           <div style="" class="editor">
@@ -184,10 +105,7 @@
         <span>请输入解析</span>
         <!-- <br> -->
         <div style="margin-top: 20px" class="editor">
-          <myEditor
-            :text="questionData.answerAnalysis"
-            ref="analysisRef"
-          ></myEditor>
+          <myEditor :text="questionData.answerAnalysis" ref="analysisRef"></myEditor>
         </div>
       </div>
     </div>
@@ -312,6 +230,11 @@ let questionData = {
 
 const addNewQuestion = async () => {
   // if(choose.value==="") return
+
+  if (currentCourseName.value === '' || currentCourseName.value === null) {
+    ElMessage.error('课程不能为空')
+  }
+
   questionData.courseId = parseInt(route.params.id as string);
   questionData.type = choose.value;
   questionData.answerAnalysis = analysisRef.value.add();
@@ -412,7 +335,7 @@ const editorRef = shallowRef();
 const valueHtml = ref("<p>hello</p>");
 
 // 模拟 ajax 异步获取内容
-onMounted(() => {});
+onMounted(() => { });
 
 const handleCreated = (editor: any) => {
   editorRef.value = editor; // 记录 editor 实例，重要！
@@ -490,6 +413,7 @@ onMounted(() => {
 .el-checkbox-group {
   font-size: 16px !important;
 }
+
 .addBox {
   background-color: $primary-white-color;
   min-height: calc(100vh - 120px);

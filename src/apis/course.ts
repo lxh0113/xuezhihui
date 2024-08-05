@@ -4,7 +4,7 @@ export const videoAddSubtitleAPI = (video: string) => {
   return http({
     url: "/python/getVideo",
     method: "POST",
-    params: {
+    data: {
       video,
     },
   });

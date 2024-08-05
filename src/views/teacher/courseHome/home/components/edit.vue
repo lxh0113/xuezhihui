@@ -572,21 +572,25 @@ const handleExceed: UploadProps["onExceed"] = (files) => {
 
 let file = new FormData();
 
+let cacheType:string='text'
+
 const submit = async (rawFile: UploadRawFile) => {
   console.log(rawFile);
 
   var FileExt = rawFile.name.replace(/.+\./, "");
   if (["ppt", "pptx"].indexOf(FileExt.toLowerCase()) !== -1) {
-    chapterData.value.type = "ppt";
+    cacheType = "ppt";
   } else if (
     ["mp4", "avi", "mov", "flv", "wmv"].indexOf(FileExt.toLowerCase()) !== -1
   ) {
-    chapterData.value.type = "video";
+    cacheType = "video";
     
   } else {
     ElMessage.error("您必须上传ppt或者视频");
     return;
   }
+
+  file.delete('image')
 
   file.append("image", rawFile.raw);
 
@@ -600,11 +604,12 @@ const submitUpload = async () => {
   if (res.data.code === 200) {
     ElMessage.success("上传成功");
 
-    cache = res.data.data;
     console.log(res.data.data);
 
     chapterData.value.content = res.data.data;
     currentUrl.value=res.data.data
+
+    chapterData.value.type=cacheType;
     toSave();
   } else {
     ElMessage.error("上传失败");
@@ -612,7 +617,7 @@ const submitUpload = async () => {
 };
 
 const toSave = async () => {
-  if (chapterData.value.chapterTitle.trim() === "") {
+  if (chapterData.value.chapterTitle?.trim() === "") {
     return;
   }
 
@@ -627,6 +632,8 @@ const toSave = async () => {
 
   if (chapterData.value.id === null) {
     // 新建
+
+    chapterData.value.knowledge=null
     
     const res = await teacherAddChapterAPI(chapterData.value);
 

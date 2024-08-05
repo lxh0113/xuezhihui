@@ -8,7 +8,7 @@ import { useRoute,useRouter } from 'vue-router';
 
 import { showLoading, hideLoading } from '@/utils/loading.js'
 const http = axios.create({
-    baseURL: 'http://localhost:8079',
+    baseURL: 'http://192.168.50.199:8079',
     // baseURL:'/mock',
     timeout: 6000*1000
 })
@@ -21,15 +21,17 @@ axios.defaults.withCredentials = true;
 
 
 http.interceptors.request.use(config => {
-
-    showLoading()
-
-    // const userStore=useUserStore()
-    // const user=userStore.getUserInfo()
-    // if(user!==null){
-    //     // console.log(user.shortToken)
-    //     config.headers.set("Authorization",user.shortToken)
-    // }
+    console.log(config.url)
+    let WhiteList = ['/python/getContent']
+    let reqUrl=config.url //可以直接获取到当前请求的url地址
+   // WhiteList.includes(reqUrl)
+    
+    if(WhiteList.includes(reqUrl)){
+      
+    }else {
+        showLoading()
+    }
+    
     return config
 }, e => Promise.reject(e))
 

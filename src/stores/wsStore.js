@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { h, ref } from 'vue'
 import { ElMessage, ElNotification } from "element-plus";
 import { getUrlAPI } from '../apis/activity.ts'
-import axios from 'axios'
+import { getContentAPI } from '../apis/ai.ts'
+import { init } from "echarts";
 
 export const useWsStore = defineStore("ws", () => {
 
@@ -49,7 +50,7 @@ export const useWsStore = defineStore("ws", () => {
             url = res.data.data
             console.log(res.data.data)
         }
-        else return
+        else return false
 
 
         ws = new WebSocket(url)
@@ -75,11 +76,13 @@ export const useWsStore = defineStore("ws", () => {
 
         ws.onclose = () => {
             // ElMessage.error("连接已经关闭")
-            reload()
+            // reload()
         }
+
+        return true
     }
 
-    const reload=()=>{
+    const reload = () => {
         wsInit()
     }
 
@@ -94,28 +97,50 @@ export const useWsStore = defineStore("ws", () => {
         console.log(myMessage.value)
     }
 
+    const getContent = async (question) => {
+        const res = await getContentAPI(question);
+
+        if (res.data.code === 200) {
+            return res.data.data.content
+        }
+        else {
+            return 'false'
+        }
+    }
+
     const sendMessage = async (question) => {
 
-        // if (ws.readyState === WebSocket.CLOSED) {
-        //     await wsInit()
-        // }
+        let flag = await wsInit()
+        // data.value.messages.push({
+        //     "role": "user",
+        //     "content": question
+        // })
 
-        // if (ws && ws.readyState === WebSocket.OPEN) {
+        if (flag) {
+            putMyContent(question)
 
-        data.value.messages.push({
-            "role": "user",
-            "content": question
-        })
+            myMessage.value.push({
+                type: 'text', author: `ai`, data: { text: '' }
+            })
 
-        putMyContent(question)
+            // console.log(JSON.stringify(data.value))
 
-        myMessage.value.push({
-            type: 'text', author: `ai`, data: { text: '' }
-        })
+            const content = await getContent(question);
 
-        console.log(JSON.stringify(data.value))
+            if (content === 'false') {
+                ElMessage.error('网络出错了，请重新连接')
+            }
+            else {
+                data.value.messages.push({
+                    "role": "user",
+                    "content": content
+                })
+                ws.send(JSON.stringify(data.value))
+            }
 
-        ws.send(JSON.stringify(data.value))
+        }
+
+
 
 
     }

@@ -51,8 +51,6 @@ const getCurrentPath = () => {
   for (let i = 0; i < navList.length; i++) {
     let path = navList[i].path.split("/");
 
-    // console.log("path",path)
-    
     if (flag === 0) {
       if (path[2] == currentPath[2]) {
         return navList[i].path;
@@ -84,7 +82,7 @@ const { navList, flag } = withDefaults(
 );
 
 onMounted(()=>{
-  // getCurrentPath()
+
 })
 </script>
 

@@ -64,7 +64,7 @@ export const teacherGetAnswerByDocAPI = (file: string) => {
   return http({
     url: "/python/getAnswerInfo",
     method: "POST",
-    params: {
+    data: {
       file,
     },
   });

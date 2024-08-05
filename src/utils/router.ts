@@ -1,5 +1,4 @@
 import type { RouteRecordRaw } from "vue-router";
-import component from '../../env';
 
 const studentRouter: RouteRecordRaw = {
   path: "/",
@@ -168,6 +167,10 @@ const studentRouter: RouteRecordRaw = {
             },
           ],
         },
+        {
+          path:'logout',
+          redirect:'/login'
+        }
       ],
     },
   ],
@@ -487,6 +490,10 @@ const teacherRouter: RouteRecordRaw = {
             },
           ],
         },
+        {
+          path:'logout',
+          redirect:'/login'
+        }
       ],
     },
   ],

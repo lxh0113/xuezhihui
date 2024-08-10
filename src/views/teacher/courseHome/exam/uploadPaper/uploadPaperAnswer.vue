@@ -187,6 +187,10 @@ onMounted(() => {
   getDetails();
 
   getAnswerDetails()
+
+  nextTick(()=>{
+    save()
+  })
 });
 </script>
 

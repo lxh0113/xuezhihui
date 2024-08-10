@@ -289,7 +289,10 @@ onMounted(async () => {
 
   await getStudentDetails();
   
-  getStudentPaper();
+  await getStudentPaper();
+  
+  save()
+  
 });
 </script>
 

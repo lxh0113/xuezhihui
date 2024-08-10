@@ -164,16 +164,15 @@ import { useUserStore } from "@/stores/userStore";
 import { teacherViewMyTeachCourseAPI } from "@/apis/course";
 import { teacherGetAllClassAPI } from "@/apis/class";
 
+import { usePaperStore } from "@/stores/paperStore";
+
+const paperStore=usePaperStore()
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
-const input = ref("");
 const state = ref(1);
 
-const start = ref("");
-const end = ref("");
-const defaultTime = new Date(2000, 1, 1, 12, 0, 0);
 const dialogFormVisible = ref(false);
 
 const postDialog = ref(false);
@@ -226,9 +225,12 @@ const handleCheckAll = (val: CheckboxValueType) => {
 };
 
 const addNewPaper = () => {
+
+  paperStore.setPaperTitle(form.name)
+
   dialogFormVisible.value = false;
 
-  router.push("/teacher/paper/"+13+'/add');
+  router.push("/teacher/paper/"+value.value+'/add');
 };
 
 const getAllClass = async () => {
@@ -241,7 +243,6 @@ const getAllClass = async () => {
         value: item.id,
       };
     });
-    // classList.value = res.data.data;
   } else ElMessage.error(res.data.message);
 };
 

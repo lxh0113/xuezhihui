@@ -3,7 +3,7 @@
     <div class="head">
       <div class="leftSetting">
         <el-form :model="form" label-width="auto" style="max-width: 300px">
-          <el-form-item label="试卷名称">
+          <el-form-item label="考试名称">
             <el-input v-model="publishSetting.name" />
           </el-form-item>
           <el-form-item label="题目编号">
@@ -23,19 +23,16 @@
     </div>
     <div class="bottom">
       <div class="left">
-        <div class="saying">题量1，总分5.0分</div>
+        <div class="saying">题量{{ questionsContentList.length }}，总分{{ totalScore }}分</div>
         <div class="bigKind">
           <div class="title">一、单选题</div>
           <div class="saying">题型说明</div>
-          <div
-            class="questionsDesc"
-            v-for="(item, index) in questionsContentList"
-            :class="{ active: activeListIndex === index }"
-            @click="setCurrent(index)"
-            :key="item"
-          >
+          <div class="questionsDesc" v-for="(item, index) in questionsContentList"
+            :class="{ active: activeListIndex === index }" @click="setCurrent(index)" :key="item"
+            :title="JSON.parse(item.title).text">
             {{ index + 1 }}.({{ item.questionScore }}分)
-            {{ JSON.parse(item.title).text }}
+            <!-- {{ JSON.parse(item.title).text }} -->
+            <p v-html="JSON.parse(item.title).text"></p>
           </div>
         </div>
       </div>
@@ -43,194 +40,124 @@
         <div class="choose">
           <div class="leftButton">
             <span style="margin-right: 20px">添加题目</span>
-            <el-radio-group
-              v-model="questionsContentList[activeListIndex].type"
-              size="large"
-            >
+            <el-radio-group v-model="questionsContentList[activeListIndex].type" size="large">
               <el-radio-button label="单选题" value="单选题" />
               <el-radio-button label="多选题" value="多选题" />
               <el-radio-button label="简答题" value="简答题" />
               <el-radio-button label="判断题" value="判断题" />
               <el-radio-button label="填空题" value="填空题" />
             </el-radio-group>
-            <el-button style="margin-left: 30px" type="success" @click="addNewOneQuestion"
-              >添加</el-button
-            >
+            <el-button style="margin-left: 30px" type="success" @click="addNewOneQuestion">添加</el-button>
           </div>
           <div class="rightButton">
             <el-button size="mid" style="font-size: 15px" type="primary" text="primary"
+              @click="chooseInQuestionsBank">题库选题</el-button>
+            <!-- <el-button
+              size="mid"
+              style="font-size: 15px"
+              type="primary"
+              text="primary"
               >智能导入</el-button
             >
-            <el-button size="mid" style="font-size: 15px" type="primary" text="primary"
+            <el-button
+              size="mid"
+              style="font-size: 15px"
+              type="primary"
+              text="primary"
               >选题</el-button
-            >
+            > -->
           </div>
         </div>
         <div class="questionsDetails" v-if="questionsContentList.length > 0">
           <div class="deleteButton">
-            <el-button
-              style="font-size: 20px; border-radius: 0 5px 0 10px; width: 50px"
-              type="primary"
-              plain
-              :icon="Delete"
-            ></el-button>
+            <el-button style="font-size: 20px; border-radius: 0 5px 0 10px; width: 50px" type="primary" plain
+              :icon="Delete"></el-button>
           </div>
           <div class="questionsKind">
-            <el-button type="primary" @click="saveCurrentQuestion">确认</el-button>
-            <span
-              >{{ activeListIndex + 1 }}.{{
-                questionsContentList[activeListIndex].type
-              }}</span
-            >
-            <el-input
-              style="width: 80px"
-              v-model="questionsContentList[activeListIndex].questionScore"
-              type="number"
-            ></el-input>
+            <el-button type="primary" @click="saveQuestions">确认</el-button>
+            <span>{{ activeListIndex + 1 }}.{{
+              questionsContentList[activeListIndex].type
+            }}</span>
+            <el-input style="width: 80px" v-model="questionsContentList[activeListIndex].questionScore"
+              type="number"></el-input>
             <span style="margin-left: 20px">分</span>
           </div>
           <div class="questionContent">
-            <Toolbar
-              :editor="editorRef"
-              style="border: 1px solid #ccc; margin-top: 20px"
-            />
-            <Editor
-              v-model="valueHtml"
-              class="editor"
-              style="border: 1px solid #ccc; height: 200px; margin-bottom: 20px"
-              @onCreated="handleCreated"
-            />
+            <Toolbar :editor="editorRef" style="border: 1px solid #ccc; margin-top: 20px" />
+            <Editor v-model="valueHtml" class="editor"
+              style="border: 1px solid #ccc; height: 200px; margin-bottom: 20px" @onCreated="handleCreated" />
 
             <!--        这个是单选题 -->
-            <div
-              v-if="questionsContentList[activeListIndex].type === '单选题'"
-              class="radio"
-            >
-              <el-radio-group
-                v-model="questionsContentList[activeListIndex].answer"
-                size="large"
-              >
-                <div
-                  class="radioOptions"
-                  v-for="(option, optionIndex) in JSON.parse(
-                    JSON.parse(questionsContentList[activeListIndex].title).options
-                  )"
-                  :key="optionIndex"
-                >
-                  <el-radio-button
-                    style="border-radius: 20px"
-                    :label="String.fromCharCode(65 + optionIndex)"
-                    :value="String.fromCharCode(65 + optionIndex)"
-                  />
+            <div v-if="questionsContentList[activeListIndex].type === '单选题'" class="radio">
+              <el-radio-group v-model="questionsContentList[activeListIndex].answer" size="large">
+                <div class="radioOptions" v-for="(option, optionIndex) in JSON.parse(
+                  JSON.parse(questionsContentList[activeListIndex].title)
+                    .options
+                )" :key="optionIndex">
+                  <el-radio-button style="border-radius: 20px" :label="String.fromCharCode(65 + optionIndex)"
+                    :value="String.fromCharCode(65 + optionIndex)" />
 
                   <div style="margin-left: 20px" class="editor">
                     <myEditor :text="option" :ref="setRadioRef"></myEditor>
                   </div>
-                  <el-button
-                    :icon="Delete"
-                    @click="deleteRadioOption(optionIndex)"
-                    style="margin-left: 20px"
-                    type="primary"
-                    text="primary"
-                  ></el-button>
+                  <el-button :icon="Delete" @click="deleteRadioOption(optionIndex)" style="margin-left: 20px"
+                    type="primary" text="primary"></el-button>
                 </div>
               </el-radio-group>
-              <el-button
-                type="primary"
-                text="primary"
-                :icon="Plus"
-                style="margin-bottom: 20px"
-                @click="addRadioOption"
-                >添加选项</el-button
-              >
+              <el-button type="primary" text="primary" :icon="Plus" style="margin-bottom: 20px"
+                @click="addRadioOption">添加选项</el-button>
             </div>
 
             <!--        这个是多选题 -->
-            <div
-              v-else-if="questionsContentList[activeListIndex].type === '多选题'"
-              class="checkBox"
-            >
+            <div v-else-if="
+              questionsContentList[activeListIndex].type === '多选题'
+            " class="checkBox">
               <el-checkbox-group v-model="checkBoxAnswer" size="large">
-                <div
-                  class="checkBoxOptions"
-                  v-for="(option, optionIndex) in JSON.parse(
-                    JSON.parse(questionsContentList[activeListIndex].title).options
-                  )"
-                  :key="optionIndex"
-                >
-                  <el-checkbox-button
-                    :key="String.fromCharCode(65 + optionIndex)"
-                    :value="String.fromCharCode(65 + optionIndex)"
-                  >
+                <div class="checkBoxOptions" v-for="(option, optionIndex) in JSON.parse(
+                  JSON.parse(questionsContentList[activeListIndex].title)
+                    .options
+                )" :key="optionIndex">
+                  <el-checkbox-button :key="String.fromCharCode(65 + optionIndex)"
+                    :value="String.fromCharCode(65 + optionIndex)">
                     {{ String.fromCharCode(65 + optionIndex) }}
                   </el-checkbox-button>
 
                   <div style="margin-left: 20px" class="editor">
                     <myEditor :text="option" :ref="setCheckBoxRef"></myEditor>
                   </div>
-                  <el-button
-                    :icon="Delete"
-                    @click="deleteCheckBoxOption(optionIndex)"
-                    style="margin-left: 20px"
-                    type="primary"
-                    text="primary"
-                  ></el-button>
+                  <el-button :icon="Delete" @click="deleteCheckBoxOption(optionIndex)" style="margin-left: 20px"
+                    type="primary" text="primary"></el-button>
                 </div>
               </el-checkbox-group>
-              <el-button
-                type="primary"
-                text="primary"
-                :icon="Plus"
-                style="margin-bottom: 20px"
-                @click="addCheckBoxOption"
-                >添加选项</el-button
-              >
+              <el-button type="primary" text="primary" :icon="Plus" style="margin-bottom: 20px"
+                @click="addCheckBoxOption">添加选项</el-button>
             </div>
 
             <!-- 填空题 -->
-            <div
-              v-else-if="questionsContentList[activeListIndex].type === '填空题'"
-              class="fill"
-            >
-              <div
-                class="fillOptions"
-                v-for="(option, optionIndex) in JSON.parse(
-                  JSON.parse(questionsContentList[activeListIndex].title).options
-                )"
-                :key="optionIndex"
-              >
+            <div v-else-if="
+              questionsContentList[activeListIndex].type === '填空题'
+            " class="fill">
+              <div class="fillOptions" v-for="(option, optionIndex) in JSON.parse(
+                JSON.parse(questionsContentList[activeListIndex].title)
+                  .options
+              )" :key="optionIndex">
                 <span>第&nbsp;{{ optionIndex + 1 }}&nbsp;空</span>
 
                 <div style="margin-left: 20px" class="editor">
                   <myEditor :text="option" :ref="setFillRef"></myEditor>
                 </div>
-                <el-button
-                  :icon="Delete"
-                  @click="deleteFillOption(optionIndex)"
-                  style="margin-left: 20px"
-                  type="primary"
-                  text="primary"
-                ></el-button>
+                <el-button :icon="Delete" @click="deleteFillOption(optionIndex)" style="margin-left: 20px"
+                  type="primary" text="primary"></el-button>
               </div>
-              <el-button
-                type="primary"
-                text="primary"
-                :icon="Plus"
-                @click="addFillOption"
-                style="margin-bottom: 20px"
-                >添加选项</el-button
-              >
+              <el-button type="primary" text="primary" :icon="Plus" @click="addFillOption"
+                style="margin-bottom: 20px">添加选项</el-button>
             </div>
 
             <!-- 这是判断题 -->
-            <div
-              v-else-if="questionsContentList[activeListIndex].type === '判断题'"
-              class="judge"
-            >
-              <el-radio-group
-                v-model="questionsContentList[activeListIndex].answer"
-                size="large"
-              >
+            <div v-else-if="
+              questionsContentList[activeListIndex].type === '判断题'
+            " class="judge">
+              <el-radio-group v-model="questionsContentList[activeListIndex].answer" size="large">
                 <div class="judgeOptions">
                   <el-radio-button style="border-radius: 20px" label="A" value="true" />
                   <span style="line-height: 40px; margin-left: 20px">对</span>
@@ -243,18 +170,14 @@
             </div>
 
             <!-- 这是简答题 -->
-            <div
-              v-else-if="questionsContentList[activeListIndex].type === '简答题'"
-              class="reply"
-            >
+            <div v-else-if="
+              questionsContentList[activeListIndex].type === '简答题'
+            " class="reply">
               <span>请输入答案</span>
 
               <div class="replyOptions" style="margin-bottom: 20px; margin-top: 20px">
                 <div style="" class="editor">
-                  <myEditor
-                    :text="questionsContentList[activeListIndex].answer"
-                    ref="replyAnswer"
-                  ></myEditor>
+                  <myEditor :text="questionsContentList[activeListIndex].answer" ref="replyAnswer"></myEditor>
                 </div>
               </div>
             </div>
@@ -276,38 +199,18 @@
   <el-dialog v-model="dialogFormVisible" title="发布考试" width="640">
     <el-form :model="publishSetting">
       <el-form-item label="发放对象">
-        <el-select
-          v-model="publishSetting.classIdList"
-          multiple
-          filterable
-          allow-create
-          default-first-option
-          :reserve-keyword="false"
-          placeholder="选择班级"
-          style="width: 240px"
-        >
-          <el-option v-for="item in classList" :key="item.id" :label="item.className" :value="item.id" />
-        </el-select>
+        <el-select-v2 v-model="publishSetting.classIdList" :options="classListOptions" placeholder="选中班级"
+          style="width: 240px" multiple />
       </el-form-item>
       <el-form-item label="有效时段">
-        <el-date-picker
-          v-model="publishSetting.beginDate"
-           value-format="YYYY-MM-DD HH:mm:ss"
-          type="datetime"
-          placeholder="开始时间"
-          style="margin-right: 20px"
-        />
+        <el-date-picker v-model="publishSetting.beginDate" type="datetime" placeholder="开始时间" style="margin-right: 20px"
+          value-format="YYYY-MM-DD HH:mm:ss" />
         至
-        <el-date-picker
-          v-model="publishSetting.endDate"
-          type="datetime"
-          placeholder="结束时间"
-          style="margin-left: 20px"
-           value-format="YYYY-MM-DD HH:mm:ss"
-        />
+        <el-date-picker v-model="publishSetting.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px"
+          value-format="YYYY-MM-DD HH:mm:ss" />
       </el-form-item>
       <el-form-item label="考试时长">
-        <el-input style="width:300px" type="number" v-model="publishSetting.examTime"></el-input>
+        <el-input style="width: 300px" type="number" v-model="publishSetting.examTime"></el-input>
       </el-form-item>
       <!-- <el-form-item label="督促设置">
         <el-checkbox v-model="form.supervise">
@@ -329,6 +232,47 @@
       </div>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="importQuestionDialog" title="从题库中选题" width="90%">
+    <el-input v-model="search" style="width: 200px" placeholder="请输入关键词" :prefix-icon="Search" />
+
+    <el-table :data="filterTableData" :default-sort="{ prop: 'date', order: 'descending' }"
+      style="width: 100%; margin-top: 20px">
+      <!-- <el-table-column type="selection" width="55" /> -->
+      <el-table-column width="55" align="left">
+        <!-- <template #header>
+        </template> -->
+        <template #default="scope">
+          <el-checkbox v-model="checkList[scope.$index]">
+          </el-checkbox>
+        </template>
+      </el-table-column>
+      <el-table-column label="题干">
+        <template #default="scope">
+          <p v-html="JSON.parse(scope.row.title).text"></p>
+          <!-- {{ JSON.parse(scope.row.title).text }} -->
+        </template>
+      </el-table-column>
+
+      <el-table-column label="题目类型" width="160px" prop="type" sortable />
+      <el-table-column label="课程" width="200px" prop="courseName" sortable />
+
+      <el-table-column prop="creatorName" width="160px" label="创建人" />
+    </el-table>
+
+    <div style="margin-top:20px;">
+      <el-pagination layout="prev, pager, next" :total="pageData.total" v-model:current-page="pageData.current"
+        @change="getQuestions" />
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="importQuestionDialog = false">取消</el-button>
+        <el-button type="primary" @click="importQuestion">
+          确认
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -338,13 +282,27 @@ import { onBeforeUnmount, ref, shallowRef, onMounted } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import myEditor from "@/views/components/editor.vue";
 import { watch } from "vue";
-import { teacherAddAssignmentAPI, teacherGetAllClassAPI, teacherPublishAssignmentAPI } from "@/apis/assignment";
+import {
+  teacherAddAssignmentAPI,
+  teacherGetAllClassAPI,
+  teacherPublishAssignmentAPI,
+} from "@/apis/assignment";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import E from "wangeditor";
+import { useUserStore } from "@/stores/userStore";
+import {
+  teacherPageSearchQuestionsAPI
+} from "../../../../apis/question";
 
-let assignmentId = 0;
+import { usePaperStore } from "@/stores/paperStore";
+
+const paperStore = usePaperStore()
+const userStore = useUserStore()
+let assignmentId = null;
 const dialogFormVisible = ref(false);
+
+const classListOptions = ref([])
 
 const route = useRoute();
 const router = useRouter();
@@ -358,11 +316,11 @@ const judge = ref("true");
 
 const publishSetting = ref({
   type: 1,
-  name:'test',
+  name: paperStore.getPaperTitle(),
   assignmentId: 1,
   beginDate: "",
   endDate: "",
-  examTime:0,
+  examTime: 0,
   classIdList: [],
 });
 
@@ -379,13 +337,16 @@ const setRadioRef = (el: any) => {
 const addRadioOption = () => {
   // radioAnswer.value.push("");
   clear();
-  let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+  let data = JSON.parse(
+    questionsContentList.value[activeListIndex.value].title
+  );
   data.options = JSON.parse(data.options);
 
   data.options.push("");
 
   data.options = JSON.stringify(data.options);
-  questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
+  questionsContentList.value[activeListIndex.value].title =
+    JSON.stringify(data);
 
   console.log(questionsContentList.value[activeListIndex.value].title);
 };
@@ -393,7 +354,9 @@ const addRadioOption = () => {
 const deleteRadioOption = (index: number) => {
   clear();
 
-  let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+  let data = JSON.parse(
+    questionsContentList.value[activeListIndex.value].title
+  );
   data.options = JSON.parse(data.options);
 
   data.options = data.options.filter((item: any, i: number) => {
@@ -401,7 +364,8 @@ const deleteRadioOption = (index: number) => {
   });
 
   data.options = JSON.stringify(data.options);
-  questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
+  questionsContentList.value[activeListIndex.value].title =
+    JSON.stringify(data);
 };
 
 // 多选题
@@ -417,19 +381,24 @@ const setCheckBoxRef = (el: any) => {
 
 const addCheckBoxOption = () => {
   clear();
-  let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+  let data = JSON.parse(
+    questionsContentList.value[activeListIndex.value].title
+  );
   data.options = JSON.parse(data.options);
 
   data.options.push("");
 
   data.options = JSON.stringify(data.options);
-  questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
+  questionsContentList.value[activeListIndex.value].title =
+    JSON.stringify(data);
 
   console.log(questionsContentList.value[activeListIndex.value].title);
 };
 
 const deleteCheckBoxOption = (index: number) => {
-  let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+  let data = JSON.parse(
+    questionsContentList.value[activeListIndex.value].title
+  );
   data.options = JSON.parse(data.options);
 
   data.options = data.options.filter((item: any, i: number) => {
@@ -437,7 +406,8 @@ const deleteCheckBoxOption = (index: number) => {
   });
 
   data.options = JSON.stringify(data.options);
-  questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
+  questionsContentList.value[activeListIndex.value].title =
+    JSON.stringify(data);
 };
 
 // 填空题
@@ -485,7 +455,7 @@ interface question {
   answerAnalysis: string;
 }
 
-interface questionsList extends Array<question> {}
+interface questionsList extends Array<question> { }
 
 const activeListIndex = ref(0);
 const questionsContentList = ref<questionsList>([
@@ -504,22 +474,38 @@ const questionsContentList = ref<questionsList>([
   },
 ]);
 
+const saveQuestions = async () => {
+  saveCurrentQuestion()
+
+  const res = await teacherAddAssignmentAPI(
+    2,
+    parseInt(route.params.id as string),
+    publishSetting.value.name,
+    userStore.getUserInfo().roleId,
+    questionsContentList.value,
+    assignmentId === 0 ? null : assignmentId
+  );
+
+  if (res.data.code === 200) {
+    console.log(res.data.data)
+    ElMessage.success("保存成功");
+    assignmentId = res.data.data;
+  }
+}
+
 const saveCurrentQuestion = async () => {
   // 保存当前这道题
-
-  console.log(eleRadioRef.value.length);
 
   let flag = judgeQuestions();
   if (flag === false) return;
 
-  console.log(editorRef.value.getText());
-
-  questionsContentList.value[
-    activeListIndex.value
-  ].answerAnalysis = analysisRef.value.add();
+  questionsContentList.value[activeListIndex.value].answerAnalysis =
+    analysisRef.value.add();
 
   if (questionsContentList.value[activeListIndex.value].type === "单选题") {
-    let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+    let data = JSON.parse(
+      questionsContentList.value[activeListIndex.value].title
+    );
     data.options = JSON.parse(data.options);
 
     let num = eleRadioRef.value.length - data.options.length;
@@ -529,11 +515,17 @@ const saveCurrentQuestion = async () => {
       return eleRadioRef.value[num++].add();
     });
 
+    data.text = valueHtml.value
     data.options = JSON.stringify(data.options);
 
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
-  } else if (questionsContentList.value[activeListIndex.value].type === "多选题") {
-    let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+    questionsContentList.value[activeListIndex.value].title =
+      JSON.stringify(data);
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "多选题"
+  ) {
+    let data = JSON.parse(
+      questionsContentList.value[activeListIndex.value].title
+    );
     data.options = JSON.parse(data.options);
 
     let num = eleCheckBoxRef.value.length - data.options.length;
@@ -543,26 +535,40 @@ const saveCurrentQuestion = async () => {
       return eleCheckBoxRef.value[num++].add();
     });
 
+    data.text = valueHtml.value
     data.options = JSON.stringify(data.options);
 
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
+    questionsContentList.value[activeListIndex.value].title =
+      JSON.stringify(data);
 
     questionsContentList.value[activeListIndex.value].answer = JSON.stringify(
       checkboxGroup.value
     );
-  } else if (questionsContentList.value[activeListIndex.value].type === "判断题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "判断题"
+  ) {
     questionsContentList.value[activeListIndex.value].title = JSON.stringify({
-      text: editorRef.value.getText(),
+      text: valueHtml.value,
       options: JSON.stringify([]),
     });
-  } else if (questionsContentList.value[activeListIndex.value].type === "简答题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "简答题"
+  ) {
+
+    questionsContentList.value[activeListIndex.value].title = JSON.stringify({
+      text: valueHtml.value,
+      options: JSON.stringify([])
+    })
+
     questionsContentList.value[activeListIndex.value].answer = JSON.stringify(
       replyAnswer.value.add()
     );
   } else {
     // 填空题
 
-    let data = JSON.parse(questionsContentList.value[activeListIndex.value].title);
+    let data = JSON.parse(
+      questionsContentList.value[activeListIndex.value].title
+    );
     data.options = JSON.parse(data.options);
 
     let num = eleFillRef.value.length - data.options.length;
@@ -574,26 +580,14 @@ const saveCurrentQuestion = async () => {
       return "";
     });
 
+    data.text = valueHtml.value
     data.options = JSON.stringify(data.options);
 
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify(data);
-
-   
+    questionsContentList.value[activeListIndex.value].title =
+      JSON.stringify(data);
   }
 
 
-  const res = await teacherAddAssignmentAPI(
-    2,
-    parseInt(route.params.id as string),
-    publishSetting.value.name,
-    questionsContentList.value,
-    assignmentId === 0 ? null : assignmentId
-  );
-
-  if (res.data.code === 200) {
-    ElMessage.success("保存成功");
-    assignmentId=res.data.data
-  }
 };
 
 const judgeQuestions = () => {
@@ -607,7 +601,9 @@ const judgeQuestions = () => {
     );
 
     if (replyAnswer.value.getText() === "") flag = false;
-  } else if (questionsContentList.value[activeListIndex.value].type === "填空题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "填空题"
+  ) {
     // 填空题
 
     // 设置答案
@@ -623,7 +619,9 @@ const judgeQuestions = () => {
 
   // clear()
 
-  if (questionsContentList.value[activeListIndex.value].answer === "") {
+  // if(questionsContentList.value[activeListIndex.value].answer)
+
+  if (JSON.stringify(questionsContentList.value[activeListIndex.value].answer).trim() === "") {
     ElMessage.error("您还没有设置答案");
     return false;
   }
@@ -676,26 +674,35 @@ const addNewOneQuestion = () => {
       text: "这是一个题目示例",
       options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
     });
-  } else if (questionsContentList.value[activeListIndex.value].type === "多选题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "多选题"
+  ) {
     questionsContentList.value[activeListIndex.value].title = JSON.stringify({
       text: "这是一个题目示例",
       options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
     });
-  } else if (questionsContentList.value[activeListIndex.value].type === "填空题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "填空题"
+  ) {
     questionsContentList.value[activeListIndex.value].title = JSON.stringify({
       text: "这是一个题目示例",
       options: JSON.stringify(["第一空"]),
     });
-  } else if (questionsContentList.value[activeListIndex.value].type === "简答题") {
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "简答题"
+  ) {
     questionsContentList.value[activeListIndex.value].title = JSON.stringify({
       text: "这是一个题目示例",
       options: JSON.stringify([]),
     });
-  } else if (questionsContentList.value[activeListIndex.value].type === "判断题") {
-    questionsContentList.value[activeListIndex.value - 1].title = JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify([]),
-    });
+  } else if (
+    questionsContentList.value[activeListIndex.value].type === "判断题"
+  ) {
+    questionsContentList.value[activeListIndex.value - 1].title =
+      JSON.stringify({
+        text: "这是一个题目示例",
+        options: JSON.stringify([]),
+      });
   }
 
   //
@@ -714,33 +721,39 @@ const addHomeWork = async () => {
 
   if (publishSetting.value.name.trim() === "") {
     ElMessage.error("您还没设置作业名称");
-    return
+    return;
   }
 
-  dialogFormVisible.value=true
+  dialogFormVisible.value = true;
 };
 
-const toPublishHomework = async() => {
+const toPublishHomework = async () => {
 
-  const res = await teacherPublishAssignmentAPI(
-    2,
-    assignmentId,
-    publishSetting.value.beginDate,
-    publishSetting.value.endDate,
-    publishSetting.value.examTime,
-    publishSetting.value.classIdList
-  );
-
-  if (res.data.code === 200) {
-    ElMessage.success("添加成功");
-    setTimeout(() => {
-      router.push("/course/" + route.params.id);
-    }, 2000);
-  } else {
-    ElMessage.error(res.data.message);
+  if (assignmentId === 0) {
+    await saveQuestions()
   }
 
-  dialogFormVisible.value=false
+  nextTick(async() => {
+    const res = await teacherPublishAssignmentAPI(
+      2,
+      assignmentId,
+      publishSetting.value.beginDate,
+      publishSetting.value.endDate,
+      publishSetting.value.examTime,
+      publishSetting.value.classIdList
+    );
+
+    if (res.data.code === 200) {
+      ElMessage.success("添加成功");
+      setTimeout(() => {
+        router.push("/teacher/paper");
+      }, 2000);
+    } else {
+      ElMessage.error(res.data.message);
+    }
+
+    dialogFormVisible.value = false;
+  })
 };
 
 const setCurrent = (index: number) => {
@@ -757,7 +770,7 @@ const valueHtml = ref("<p>这是一个题目示例</p>");
 const answerValue = ref("<p></p>");
 
 // 模拟 ajax 异步获取内容
-onMounted(() => {});
+onMounted(() => { });
 
 const handleCreated = (editor: any) => {
   editorRef.value = editor; // 记录 editor 实例，重要！
@@ -783,15 +796,101 @@ const setClassList = async () => {
 
   if (res.data.code === 200) {
     classList.value = res.data.data;
-   
+
+    classListOptions.value = classList.value.map(item => {
+      return {
+        label: item.className,
+        value: item.id
+      }
+    })
   } else {
     ElMessage.error(res.data.message);
   }
 };
 
-onMounted(()=>{
-  setClassList()
+onMounted(() => {
+  setClassList();
+});
+
+// 导入题库模块
+
+const importQuestionDialog = ref(false)
+
+interface Paper {
+  id: number;
+  type: string;
+  title: string;
+  answer: string;
+  answerAnalysis: string;
+  courseId: number;
+  courseName: string;
+  creatorId: number;
+  creatorName: string;
+}
+
+const search = ref("");
+
+const pageData = ref({
+  total: 0,
+  current: 1,
 })
+
+const checkList = ref([])
+
+const tableData = ref<Array<Paper>>();
+
+const filterTableData = computed(() =>
+  tableData.value?.filter(
+    (data) =>
+      !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
+  )
+);
+
+const getQuestions = async () => {
+  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
+
+  if (res.data.code === 200) {
+    tableData.value = res.data.data.records
+    pageData.value.total = res.data.data.total
+  }
+  else {
+    ElMessage.error('获取出错');
+
+  }
+};
+
+const chooseInQuestionsBank = async () => {
+
+  await getQuestions()
+
+  importQuestionDialog.value = true
+}
+
+const importQuestion = () => {
+
+  // 导入题目
+
+  for (let i = 0; i < checkList.value.length; i++) {
+    if (checkList.value[i]) {
+      questionsContentList.value.push({
+        questionScore: 3,
+        studentScore: 0,
+        type: tableData.value[i].type,
+        title: tableData.value[i].title,
+        studentAnswer: '',
+        questionComment: '',
+        answer: tableData.value[i].answer,
+        answerAnalysis: tableData.value[i].answerAnalysis
+      })
+    }
+  }
+
+  // activeListIndex.value=questionsContentList.value.length-1;
+
+  saveQuestions()
+
+  importQuestionDialog.value = false
+}
 
 </script>
 
@@ -827,6 +926,7 @@ onMounted(()=>{
 
     .png {
       padding-right: 20px;
+
       img {
         width: 160px;
       }
@@ -884,6 +984,7 @@ onMounted(()=>{
         margin-bottom: 20px;
 
         align-items: center;
+
         .leftButton {
           span {
             color: $primary-gray-text-color;

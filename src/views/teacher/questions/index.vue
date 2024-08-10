@@ -11,19 +11,11 @@
     <hr />
     <div class="choose">
       <!-- <el-button style="font-size:16px;margin-right:20px;" type="primary" :icon="Upload" text="primary">上传</el-button> -->
-      <el-input
-        v-model="search"
-        style="width: 200px"
-        placeholder="请输入关键词"
-        :prefix-icon="Search"
-      />
+      <el-input v-model="search" style="width: 200px" placeholder="请输入关键词" :prefix-icon="Search" />
     </div>
     <!-- <hr /> -->
-    <el-table
-      :data="filterTableData"
-      :default-sort="{ prop: 'date', order: 'descending' }"
-      style="width: 100%; margin-top: 20px"
-    >
+    <el-table :data="filterTableData" :default-sort="{ prop: 'date', order: 'descending' }"
+      style="width: 100%; margin-top: 20px">
       <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="题干">
         <template #default="scope">
@@ -38,34 +30,18 @@
       <el-table-column prop="creatorName" width="160px" label="创建人" />
       <el-table-column label="操作">
         <template #default="scope">
-          <!-- <el-button
-            type="primary"
-            text="primary"
-            @click="$router.push('/teacher/questions/1')"
-            >查看</el-button
-          > -->
-          <el-button
-            size="large"
-            :icon="Edit"
-            type="primary"
-            text="primary"
-            @click="toEdit(scope.row)"
-            >编辑</el-button
-          >
-          <el-button
-            size="large"
-            :icon="Delete"
-            type="primary"
-            text="primary"
-            @click="toDelete(scope.row)"
-            >删除</el-button
-          >
+          <el-button size="large" :icon="Edit" type="primary" text="primary" @click="toEdit(scope.row)">编辑</el-button>
+          <el-button size="large" :icon="Delete" type="primary" text="primary"
+            @click="toDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <div style="margin-top:20px;">
+      <el-pagination layout="prev, pager, next" :total="pageData.total"  v-model:current-page="pageData.current" @change="getQuestions" />
+    </div>
   </div>
 
-  
 </template>
 
 <script lang="ts" setup>
@@ -75,6 +51,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import {
   teacherDeleteQuestionAPI,
+  teacherPageSearchQuestionsAPI,
   teacherViewCourseQuestionAPI,
 } from "../../../apis/question";
 
@@ -93,6 +70,11 @@ interface Paper {
   creatorName: string;
 }
 
+const pageData = ref({
+  total: 0,
+  current: 1,
+})
+
 const search = ref("");
 
 const tableData = ref<Array<Paper>>();
@@ -105,11 +87,24 @@ const filterTableData = computed(() =>
 );
 
 const getQuestions = async () => {
-  const res = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
+
+  // 老的
+  // const res = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
+  // if (res.data.code === 200) {
+  //   console.log(res.data.data)
+  //   tableData.value = res.data.data;
+  // } else ElMessage.error(res.data.message);
+
+  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
+
   if (res.data.code === 200) {
-    console.log(res.data.data)
-    tableData.value = res.data.data;
-  } else ElMessage.error(res.data.message);
+    tableData.value=res.data.data.records
+    pageData.value.total=res.data.data.total
+  }
+  else {
+      ElMessage.error('获取出错');
+      
+  }
 };
 
 const toAdd = () => {

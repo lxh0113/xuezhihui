@@ -41,15 +41,6 @@
         />
       </div>
 
-      <!-- <iframe
-        style="min-width: 400px; height: 700px"
-        class="ppt"
-        :src="
-          'https://view.officeapps.live.com/op/view.aspx?src=' +
-          'http://blog.java1234.com/cizhi20211008.docx'
-        "
-        frameborder="0"
-      ></iframe> -->
     </div>
 
     <div class="right">
@@ -116,7 +107,7 @@ const setRef = (el: any) => {
 
 const paperData = ref({
   id: parseInt(route.params.paperId as string),
-  title: "",
+  title: "测试",
   questionsImage: srcList.value,
   questions: originStore.getOriginPaperData().questions,
   score: 0,
@@ -185,6 +176,11 @@ const totalScore = computed(() => {
 
 onMounted(() => {
   getDetails();
+
+  nextTick(()=>{
+    save()
+  })
+
 });
 </script>
 

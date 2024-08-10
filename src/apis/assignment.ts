@@ -74,7 +74,7 @@ export const teacherAddAssignmentAPI = (
     answer: string;
     answerAnalysis: string;
   }[],
-  assignmentId: number
+  assignmentId: number|null
 ) => {
   return http({
     url: "/assignment/teacher",
@@ -135,8 +135,7 @@ export const teacherModifyAssignmentStatusAPI = (
 };
 
 export const teacherMarkAssignmentAPI = (
-  studentId: number,
-  assignmentId: number,
+  studentAssignmentId: number,
   teacherId: number,
   comment: string,
   content: {
@@ -154,8 +153,7 @@ export const teacherMarkAssignmentAPI = (
     url: "/assignment/correct",
     method: "PUT",
     data: {
-      studentId,
-      assignmentId,
+      studentAssignmentId,
       teacherId,
       comment,
       content,

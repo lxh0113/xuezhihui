@@ -4,11 +4,10 @@
     <!-- <hr> -->
     <br />
     <el-radio-group style="margin-bottom: 20px" @change="getAllData" v-model="status" size="large">
-      <el-radio-button label="全部" :value="2" />
-
+      <el-radio-button label="全部" :value="-1" />
       <el-radio-button label="待批改" :value="1" />
-      <el-radio-button label="已批改" :value="0" />
-      <el-radio-button label="未交" :value="3" />
+      <el-radio-button label="已批改" :value="2" />
+      <el-radio-button label="未交" :value="0" />
     </el-radio-group>
     <br />
     <el-input
@@ -34,7 +33,7 @@
       <el-table-column prop="studentScore" label="成绩" />
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" @click="markHomework(scope.row)">查看</el-button>
+          <el-button type="primary" v-if="scope.row.state !== 0" @click="markHomework(scope.row,scope.$index)">查看</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -47,9 +46,12 @@ import { Search } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { teacherViewAssignmentListAPI } from "@/apis/assignment";
 import { ElMessage } from "element-plus";
+import { useMarkStore } from "@/stores/markStore";
 
 const route = useRoute();
 const router = useRouter();
+
+const markStore=useMarkStore()
 
 const filterTableData = computed(() =>
   tableData.value.filter(
@@ -60,16 +62,21 @@ const filterTableData = computed(() =>
   )
 )
 
-const tableData = ref([
-  
-]);
+const tableData = ref([]);
 
 const searchText = ref("");
 const status = ref(0);
 
-const markHomework = (item: any) => {
+const markHomework = (item: any,index:number) => {
+  
+  // 先存储下来批阅列表
+  markStore.setActiveIndex(index)
+  markStore.setMarkList(filterTableData.value)
+
+  console.log(filterTableData.value)
+
   router.push(
-    "/course/" + route.params.id + "/homework/details/" + route.params.assignmentId + "/1"
+    "/course/" + route.params.id + "/homework/details/" + route.params.assignmentId +"/"+item.studentAssignmentId
   );
 };
 
@@ -77,7 +84,7 @@ const getAllData = async () => {
   const res = await teacherViewAssignmentListAPI(
     parseInt(route.params.assignmentId as string),
     1,
-    status.value
+    status.value===-1?null:status.value
   );
 
   if (res.data.code === 200) {

@@ -111,7 +111,7 @@
             type="warning"
             style="margin-left: 20px"
             v-if="chapterData.type === 'video'"
-            >添加字幕</el-button
+            >AI视频总结</el-button
           >
         </div>
 

@@ -45,10 +45,12 @@ const props=defineProps<{
   text?:string;
 }>()
 
-// watch(props,(newValue)=>{
-//   console.log(newValue)
-//   editor.txt.html(newValue.text)
-// })
+watch(props,(newValue)=>{
+  if(props.text!==undefined)
+  {
+    editor.txt.html(newValue.text)
+  }
+})
 
 onMounted(() => {
   editor = new E(`#${myClass.value}`);
@@ -81,10 +83,6 @@ onMounted(() => {
   editor.config.menus = menus;
 
   editor.config.uploadImgServer = "/iPDMessage/saveImg";
-
-  // editor.config.uploadFileName = 'FileName'
-  // editor.config.uploadImgMaxSize = 20 * 1024 * 1024;//设置图片大小为20M
-  // editor.config.uploadImgTimeout = 1000000; //图片上传超时限制10s
 
   editor.create();
 

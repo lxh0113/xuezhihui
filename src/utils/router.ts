@@ -183,12 +183,12 @@ const teacherRouter: RouteRecordRaw = {
   redirect: "/teacher/course",
   children: [
     {
-      path: "/course/:id/homework/details/:assignmentId/:studentId",
+      path: "/course/:id/homework/details/:assignmentId/:studentAssignmentId",
       component: () =>
         import("@/views/teacher/courseHome/homework/components/mark.vue"),
     },
     {
-      path: "/course/:id/exam/details/:assignmentId/:studentId",
+      path: "/course/:id/exam/details/:assignmentId/:studentAssignmentId",
       component: () =>
         import("@/views/teacher/courseHome/exam/components/mark.vue"),
     },

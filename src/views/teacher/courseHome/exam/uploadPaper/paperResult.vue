@@ -2,44 +2,19 @@
   <div class="markBox">
     <div class="outerBox">
       <div class="left">
-        <el-button style="margin-bottom: 20px" @click="save" type="primary"
-          >批阅</el-button
-        >
+        <el-button style="margin-bottom: 20px" @click="save" type="primary">批阅</el-button>
         <div class="demo-image__preview">
-          <el-image
-            style="width: 400px; height: 700px"
-            :src="url"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="srcList"
-            :initial-index="4"
-            fit="fill"
-          />
+          <el-image style="width: 400px; height: 700px" :src="url" :zoom-rate="1.2" :max-scale="7" :min-scale="0.2"
+            :preview-src-list="srcList" :initial-index="4" fit="fill" />
         </div>
         <div style="height: 10px"></div>
-        <el-button :disabled="currentStudentIndex === 0" @click="lastPapers"
-          >上一套学生试卷</el-button
-        >
-        <el-button
-          :disabled="paperIndex === 0"
-          @click="minusPapers"
-          circle
-          :icon="ArrowLeft"
-          type="primary"
-        ></el-button>
-        <el-button
-          :disabled="paperIndex === srcList.length - 1"
-          @click="addPapers"
-          circle
-          :icon="ArrowRight"
-          type="primary"
-        ></el-button>
-        <el-button
-          :disabled="currentStudentIndex == studentImageList.length - 1"
-          @click="nextPapers"
-          >下一套学生试卷</el-button
-        >
+        <el-button :disabled="currentStudentIndex === 0" @click="lastPapers">上一套学生试卷</el-button>
+        <el-button :disabled="paperIndex === 0" @click="minusPapers" circle :icon="ArrowLeft"
+          type="primary"></el-button>
+        <el-button :disabled="paperIndex === srcList.length - 1" @click="addPapers" circle :icon="ArrowRight"
+          type="primary"></el-button>
+        <el-button :disabled="currentStudentIndex == studentImageList.length - 1"
+          @click="nextPapers">下一套学生试卷</el-button>
       </div>
     </div>
 
@@ -49,12 +24,13 @@
         <p style="margin-left: 20px" class="scoreText">
           总分：{{ totalScore }}
         </p>
+
+        <p style="margin-left: 20px" class="scoreText">
+          学生得分：{{ studentScore }}
+        </p>
       </div>
 
-      <div
-        class="infoBox"
-        style="display: flex; justify-content: space-between"
-      >
+      <div class="infoBox" style="display: flex; justify-content: space-between">
         <span>班级:&nbsp; {{ studentInfo.className }}</span>
         <span> 学号:&nbsp;{{ studentInfo.sno }}</span>
         <span> 姓名:&nbsp;{{ studentInfo.name }}</span>
@@ -66,10 +42,7 @@
           {{ item.title.text }}
         </p>
 
-        <p
-          v-if="item.type === '单选题' || item.type === '多选题'"
-          v-for="(option, optionIndex) in item.title.options"
-        >
+        <p v-if="item.type === '单选题' || item.type === '多选题'" v-for="(option, optionIndex) in item.title.options">
           {{ String.fromCharCode("A".charCodeAt(0) + optionIndex) }}
           {{ item.title.options[optionIndex] }}
         </p>
@@ -87,24 +60,17 @@
           <span> 学生答案： </span>
           {{ studentAnswer[index].studentAnswer }}
         </p>
-        <div style="display:flex;aligns-item:center;margin-bottom:20px;" >
+        <div style="display:flex;aligns-item:center;margin-bottom:20px;">
           <span style="font-weight:bold;width:70px">得分</span>
-          <el-input
-            v-model="markList[index].studentScore"
-            style="margin-left:20px;"
-            min="0"
-            :max="questionList[index].questionScore"
-          ></el-input>
+          <el-input v-model="markList[index].studentScore" style="margin-left:20px;" min="0"
+            :max="questionList[index].questionScore"></el-input>
         </div>
         <div style="display:flex;aligns-item:center;">
           <span style="font-weight:bold;width:70px">评语</span>
-          <el-input
-            style="margin-left:28px;"
-            type="textarea"
-            cols="5"
-            v-model="markList[index].questionComment"
-          ></el-input>
-          <el-button style="margin-left:20px;height:52px;font-weight:bold;font-size:16px;" type="primary">智能评阅</el-button>
+          <el-input style="margin-left:28px;" type="textarea" cols="5"
+            v-model="markList[index].questionComment"></el-input>
+          <el-button style="margin-left:20px;height:52px;font-weight:bold;font-size:16px;" type="primary"
+            @click="smartMarkQuestion(index)">智能评阅</el-button>
         </div>
 
         <hr style="margin-top:30px;margin-bottom: 30px" />
@@ -128,7 +94,7 @@ import {
 } from "@/apis/paper";
 import { useAnswerStore } from "@/stores/answerStore";
 import { useStudentStore } from "@/stores/studentStore";
-import { teacherSaveMarkingAPI, teacherGetAllStudentPaperAPI } from '../../../../../apis/paper';
+import { teacherSaveMarkingAPI, teacherGetAllStudentPaperAPI, teacherMarkSingleQuestionAPI } from '../../../../../apis/paper';
 import {
   teacherSaveStudentAnswerAPI,
   markAllQuestionAPI,
@@ -192,7 +158,7 @@ const getDetails = async () => {
 
     answerList.value = questionList.value.map((item) => {
       return {
-        answer:''
+        answer: ''
       }
     });
 
@@ -200,8 +166,8 @@ const getDetails = async () => {
 
     markList.value = questionList.value.map((item) => {
       return {
-        questionComment:'',
-        studentScore:''
+        questionComment: '',
+        studentScore: ''
       }
     });
 
@@ -212,27 +178,24 @@ const getDetails = async () => {
 
 const save = async () => {
 
-  let sumScore=markList.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-
+  let sumScore = markList.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
   const res = await teacherSaveStudentAnswerAPI(
-
-      parseInt(route.params.paperId as string),
+    parseInt(route.params.paperId as string),
     studentInfo.value.name,
     studentInfo.value.sno,
     studentInfo.value.className,
     JSON.stringify(
       {
-        studentAnswer:studentAnswer.value,
-      mark:markList.value
+        studentAnswer: studentAnswer.value,
+        mark: markList.value
       }
     ),
     srcList.value,
     sumScore
   )
 
-  if(res.data.code===200)
-  {
+  if (res.data.code === 200) {
     ElMessage.success('批阅成功')
   }
   else {
@@ -244,6 +207,14 @@ const totalScore = computed(() => {
   return questionList.value.reduce((accumulator, question) => {
     // 这里假设每个问题对象有一个 score 属性来表示分数
     return accumulator + question.questionScore;
+  }, 0); // 初始值设为 0
+});
+
+const studentScore=computed(() => {
+  return questionList.value.reduce((accumulator, question) => {
+    // 这里假设每个问题对象有一个 score 属性来表示分数
+    if(question.studentScore)  return accumulator + question.studentScore;
+    else return accumulator
   }, 0); // 初始值设为 0
 });
 
@@ -288,7 +259,7 @@ const lastPapers = () => {
 
   getStudentPaper();
   getAllQuestion()
-  
+
 };
 
 const nextPapers = () => {
@@ -301,7 +272,7 @@ const nextPapers = () => {
   getAllQuestion()
 };
 
-const getStudentDetails = async() => {
+const getStudentDetails = async () => {
   // console.log(studentStore.getStudentList());
 
   const res = await teacherGetAllStudentPaperAPI(parseInt(route.params.paperId as string))
@@ -332,18 +303,18 @@ const getStudentPaper = async () => {
   }
 };
 
-const markList=ref([])
+const markList = ref([])
 
 const getAllQuestion = async () => {
-  let data=[]
+  let data = []
   console.log(answerList.value)
   for (let i = 0; i < questionList.value.length; i++) {
     data.push({
-      title:JSON.stringify(questionList.value[i].title),
-      type:questionList.value[i].type,
-      studentAnswer:studentAnswer.value[i].studentAnswer,
-      questionScore:questionList.value[i].questionScore,
-      correctAnswer:answerList.value[i].answer
+      title: JSON.stringify(questionList.value[i].title),
+      type: questionList.value[i].type,
+      studentAnswer: studentAnswer.value[i].studentAnswer,
+      questionScore: questionList.value[i].questionScore,
+      correctAnswer: answerList.value[i].answer
     })
   }
 
@@ -353,15 +324,44 @@ const getAllQuestion = async () => {
     data
   )
 
-  if(res.data.code===200)
-  {
+  if (res.data.code === 200) {
     // 获取成功
-    markList.value=res.data.data
+    1
   }
-  else{
+  else {
     ElMessage.error(res.data.message)
   }
 };
+
+const smartMarkQuestion = async (i: number) => {
+
+  // let data= {
+  //   title: JSON.stringify(questionList.value[i].title),
+  //   type: questionList.value[i].type,
+  //   studentAnswer: studentAnswer.value[i].studentAnswer,
+  //   questionScore: questionList.value[i].questionScore,
+  //   correctAnswer: answerList.value[i].answer
+  // }
+
+  const res = await teacherMarkSingleQuestionAPI(JSON.stringify(questionList.value[i].title),
+    questionList.value[i].type,
+    studentAnswer.value[i].studentAnswer,
+    questionList.value[i].questionScore,
+    answerList.value[i].answer)
+
+  if (res.data.code === 200) {
+    // markList.value[i].
+
+    markList.value[i] = res.data.data
+
+    questionList.value[i].studentScore=res.data.data.studentScore;
+    questionList.value[i].questionComment=res.data.data.questionComment
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
+
+}
 
 onMounted(async () => {
   await getDetails();
@@ -381,9 +381,10 @@ onMounted(async () => {
   cursor: pointer !important;
 }
 
-label{
-color:black;
+label {
+  color: black;
 }
+
 .markBox {
   display: flex;
   background: #f5f7fd;
@@ -482,7 +483,7 @@ color:black;
   //border: 1px dotted #2f3ced;
   box-sizing: border-box;
   //padding: 20px;
-  
+
   margin-top: 20px;
   margin-bottom: 20px;
   border-radius: 5px;
@@ -520,7 +521,7 @@ color:black;
     line-height: 40px;
     //color:#3B90FF;
     //color: red;
-    color:#a6a5ab;
+    color: #a6a5ab;
     font-weight: bold;
   }
 }
@@ -549,9 +550,11 @@ color:black;
 .demo-image__error .image-slot {
   font-size: 30px;
 }
+
 .demo-image__error .image-slot .el-icon {
   font-size: 30px;
 }
+
 .demo-image__error .el-image {
   width: 100%;
   height: 200px;

@@ -2,10 +2,9 @@
   <routerView></routerView>
 </template>
 
-<script setup>
+<script lang='ts' setup>
+
 
 </script>
 
-<style>
-
-</style>
+<style></style>

@@ -169,7 +169,7 @@ const btnClick = (index: number) => {
 
 const getDetails = async () => {
   const res = await teacherViewStudentAssignmentAPI(
-    parseInt(route.params.studentId as string)
+    parseInt(route.params.studentAssignmentId as string)
   );
 
   if (res.data.code === 200) {

@@ -7,6 +7,17 @@ export const teacherViewCourseQuestionAPI = (courseId: number) => {
   });
 };
 
+export const teacherPageSearchQuestionsAPI = (
+  courseId: number,
+  currentPage: number,
+  pageSize: number
+) => {
+  return http({
+    url: "/question/page/" + courseId + "/" + currentPage + "/" + pageSize,
+    method: "GET",
+  });
+};
+
 export const teacherAddSingleQuestionAPI = (data: {
   id: number;
   type: string;
@@ -110,10 +121,10 @@ export const studentViewQuestionDetailsAPI = (mistakeId: number) => {
 
 export const teacherGenerateQuestionsByAIAPI = (
   material: string,
-  t:number,
-  n1:number,
-  n2:number,
-  n3:number
+  t: number,
+  n1: number,
+  n2: number,
+  n3: number
 ) => {
   return http({
     url: "/question/generatedQuestions",
@@ -128,12 +139,12 @@ export const teacherGenerateQuestionsByAIAPI = (
   });
 };
 
-export const generateMistakesByInputAPI=(query:string='')=>{
+export const generateMistakesByInputAPI = (query: string = "") => {
   return http({
-    url:"/question/createQuestion",
-    method:"GET",
-    params:{
-      query
-    }
-  })
-}
+    url: "/question/createQuestion",
+    method: "GET",
+    params: {
+      query,
+    },
+  });
+};

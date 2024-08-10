@@ -36,10 +36,10 @@
             <div class="header">
               <span class="title">{{ item.title }}</span>
               <el-tag style="margin-left: 20px" size="small" type="primary">{{
-                item.state === 1
+                item.state === 0
+                  ? "未开始"
+                  : item.state === 1
                   ? "进行中"
-                  : item.state === 0
-                  ? "待开始"
                   : "已结束"
               }}</el-tag>
             </div>
@@ -59,7 +59,7 @@
               style="font-size: 16px"
               type="primary"
               text="primary"
-              @click="toMark(1)"
+              @click="toMark(item.assignmentId)"
               >批阅</el-button
             >
             <el-button
@@ -181,6 +181,8 @@ const modify = async() => {
 
   if (res.data.code === 200) {
     ElMessage.success('修改成功')
+
+    getAllHomework()
   } else ElMessage.error(res.data.message);
 };
 
@@ -211,6 +213,7 @@ const getAllHomework = async () => {
   if (res.data.code === 200) {
     console.log(res.data.data);
     homeworkList.value = res.data.data;
+    console.log(homeworkList.value)
   } else ElMessage.error(res.data.message);
 };
 

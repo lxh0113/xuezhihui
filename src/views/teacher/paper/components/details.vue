@@ -1,6 +1,6 @@
 <template>
   <div class="homeworkDetailsBox">
-    <span class="markHomeworkText">批改作业</span>
+    <span class="markHomeworkText">考试批阅</span>
     <!-- <hr> -->
     <br />
     <el-radio-group @change="getAllData" style="margin-bottom: 20px" v-model="status" size="large">
@@ -102,6 +102,7 @@ onMounted(() => {
   // margin-bottom: 20px;
   margin-right: 20px;
   border-radius: 5px;
+  margin-bottom: 20px;
 
   .markHomeworkText {
     color: $primary-color;

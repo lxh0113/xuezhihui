@@ -1,37 +1,31 @@
 <template>
   <div class="viewSignInBox">
     <div class="detailsBox">
-      <span class="titleText">活动详情</span>
-      <span class="titleText" v-if="activityData.activityType===1">智能选人</span>
+      <div>
+        <span class="titleText">活动详情</span>
+        <el-button :icon="Delete" type="danger" plain style="width:140px;margin-left:20px;"
+          @click="deleteActivity">删除此次活动</el-button>
+      </div>
+      <span class="titleText" v-if="activityData.activityType === 1">智能选人</span>
       <span v-else class="titleText">{{ statusList[activityData.type] }}</span>
-      <img
-        v-if="activityData.answerImage != null"
-        :src="activityData.answerImage"
-        alt=""
-      />
-      <img
-        style="margin-top: 20px"
-        v-if="activityData.detectionImage != null"
-        :src="activityData.detectionImage"
-        alt=""
-      />
+      <img v-if="activityData.answerImage != null" :src="activityData.answerImage" alt="" />
+      <img style="margin-top: 20px" v-if="activityData.detectionImage != null" :src="activityData.detectionImage"
+        alt="" />
     </div>
     <div class="listBox">
       <div class="noCome">
         <span>详细名单</span>
-        <el-table
-          height="500"
-          v-if="activityData.studentSigninList !== null"
-          size="large"
-          :data="filterFirstTableData"
-          style="width: 100%"
-        >
+        <el-table height="500" v-if="activityData.studentSigninList !== null" size="large" :data="filterFirstTableData"
+          style="width: 100%">
           <el-table-column label="状态" prop="signinStatus" sortable>
             <template #default="scope">
               <el-tag size="large" v-if="scope.row.signinStatus === '已签'">
                 {{ scope.row.signinStatus }}
               </el-tag>
-              <el-tag v-else size="large" type="danger" >
+              <el-tag v-else-if="scope.row.signinStatus===''" size="large" type="danger">
+                未签
+              </el-tag>
+              <el-tag v-else size="large" type="danger">
                 {{ scope.row.signinStatus }}
               </el-tag>
             </template>
@@ -42,35 +36,15 @@
               <el-input v-model="searchFirst" size="large" placeholder="搜索" />
             </template>
             <template #default="scope">
-              <el-button
-                size="large"
-                @click="handleEdit(scope.$index, scope.row)"
-                type="primary"
-              >
+              <el-button size="large" @click="handleEdit(scope.$index, scope.row)" type="primary">
                 修改
               </el-button>
             </template>
           </el-table-column>
         </el-table>
 
-        <!-- <el-pagination
-          v-if="
-            activityData.studentSigninList != null &&
-            activityData.studentSigninList.length !== 0
-          "
-          @current-change="changeFirstPage"
-          style="margin-top: 20px"
-          layout="prev, pager, next"
-          :total="pageFirstData.total"
-        /> -->
-
-        <el-table
-          height="500"
-          v-if="activityData.students !== null"
-          size="large"
-          :data="filterSecondTableData"
-          style="width: 100%"
-        >
+        <el-table height="500" v-if="activityData.students !== null" size="large" :data="filterSecondTableData"
+          style="width: 100%">
           <el-table-column label="学号" prop="sno" sortable> </el-table-column>
           <el-table-column label="姓名" prop="name" />
           <el-table-column align="right">
@@ -82,24 +56,11 @@
             </template>
           </el-table-column>
         </el-table>
-
-        <!-- <el-pagination
-          v-if="activityData.students != null && activityData.students.length !== 0"
-          @current-change="changeSecondPage"
-          style="margin-top: 20px"
-          layout="prev, pager, next"
-          :total="pageSecondData.total"
-        /> -->
       </div>
     </div>
   </div>
 
-  <el-dialog
-    v-model="dialogVisible"
-    title="教师代签"
-    width="500"
-    :before-close="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" title="教师代签" width="500">
     <el-select v-model="reason" style="width: 300px">
       <el-option label="事假" value="事假"></el-option>
       <el-option label="病假" value="病假"></el-option>
@@ -119,11 +80,12 @@
 
 <script lang="ts" setup>
 import { teacherModifyAssignmentStatusAPI } from "@/apis/assignment";
-import { UploadFilled } from "@element-plus/icons-vue";
+import { Delete, UploadFilled } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { computed, onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
+  teacherDeleteActivityAPI,
   teacherModifySignInStatusAPI,
   teacherViewActivityAPI,
 } from "../../../../../apis/activity";
@@ -216,6 +178,21 @@ const modifyStatus = async (studentId: number, siginId: number, signinStatus: st
   } else ElMessage.error(res.data.message);
 };
 
+const deleteActivity =async () => {
+  const res =await teacherDeleteActivityAPI(
+    parseInt(route.params.activityId as string)
+  )
+
+  if (res.data.code === 200) {
+    ElMessage.success('删除成功')
+    router.push('/course/'+route.params.id+'/activities')
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
+
+}
+
 onMounted(() => {
   getActivityDetails();
 });
@@ -229,6 +206,7 @@ onMounted(() => {
   padding: 20px;
   margin-right: 20px;
   min-height: calc(100vh - 100px);
+  margin-bottom: 20px;
 
   .detailsBox {
     width: 500px;

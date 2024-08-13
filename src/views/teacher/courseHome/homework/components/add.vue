@@ -196,9 +196,9 @@
         <el-date-picker v-model="publishSetting.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px"
           value-format="YYYY-MM-DD HH:mm:ss" />
       </el-form-item>
-      <el-form-item label="考试时长">
+      <!-- <el-form-item label="考试时长">
         <el-input style="width: 300px" v-model="publishSetting.examTime" type="number"></el-input>
-      </el-form-item>
+      </el-form-item> -->
       <!-- <el-form-item label="督促设置">
         <el-checkbox v-model="form.supervise">
           在作业截至<el-input
@@ -450,7 +450,7 @@ const questionsContentList = ref<questionsList>([
     type: "单选题",
     title: JSON.stringify({
       text: "这是一个题目示例",
-      options: JSON.stringify([""]),
+      options: JSON.stringify(["", ""]),
     }),
     studentAnswer: "",
     questionComment: "",
@@ -555,7 +555,6 @@ const saveCurrentQuestion = () => {
       JSON.stringify(data);
   }
 
-  console.log(questionsContentList.value[activeListIndex.value])
 };
 
 const saveQuestions = async () => {
@@ -623,20 +622,33 @@ const judgeQuestions = () => {
 
 const deleteCurrentQuestion = () => {
 
+  if (questionsContentList.value.length === 1) {
+    ElMessage.error('当前只有一道题，您不能删除它')
+    return
+  }
+
   let flag = confirm('您确认要删除当前这道题吗')
 
   if (flag === false) return;
 
-  questionsContentList.value.filter((item, index) => {
-    return index !== activeListIndex.value
+  console.log(activeListIndex.value)
+  console.log(questionsContentList.value)
+
+  questionsContentList.value = questionsContentList.value.filter((item, i) => {
+    console.log(item, i)
+    return activeListIndex.value !== i
   })
+
+  activeListIndex.value = 0
 
   // 重新保存
 
-  saveQuestions()
+  nextTick(() => {
+    saveQuestions()
+  })
 }
 
-// 清楚所有实例
+// 清除所有实例
 const clear = () => {
   eleRadioRef.value = [];
   eleCheckBoxRef.value = [];
@@ -749,7 +761,7 @@ const toPublishHomework = async () => {
     await saveQuestions()
   }
 
-  nextTick(async() => {
+  nextTick(async () => {
     const res = await teacherPublishAssignmentAPI(
       1,
       assignmentId,
@@ -762,7 +774,7 @@ const toPublishHomework = async () => {
     if (res.data.code === 200) {
       ElMessage.success("添加成功");
       setTimeout(() => {
-        router.push("/course/" + route.params.id+'/homework/index');
+        router.push("/course/" + route.params.id + '/homework/index');
       }, 2000);
     } else {
       ElMessage.error(res.data.message);
@@ -878,6 +890,11 @@ const filterTableData = computed(() =>
 );
 
 const getQuestions = async () => {
+
+  for (let i = 0; i < checkList.value.length; i++) {
+    checkList.value[i] = false
+  }
+
   const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
 
   if (res.data.code === 200) {

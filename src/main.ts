@@ -27,8 +27,6 @@ import router from "./router";
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import 'dayjs/locale/zh-cn'
 
-
-//
 import { useRouterStore } from "./stores/routerStore";
 
 const app = createApp(App);

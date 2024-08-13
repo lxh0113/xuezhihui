@@ -16,7 +16,6 @@
       v-model="searchText"
       placeholder="请输入学号或者姓名"
     ></el-input>
-    <!-- <el-button type="primary">搜索</el-button> -->
     <br />
     <span class="grayText">
       创建时间：截至时间 </span

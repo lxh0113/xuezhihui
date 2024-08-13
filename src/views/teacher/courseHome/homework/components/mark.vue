@@ -2,7 +2,7 @@
   <div class="markBox">
     <div class="outerBox">
       <div class="left">
-        <h3 class="title" style="margin-bottom: 20px">一、简答题</h3>
+        <h3 class="title" style="margin-bottom: 20px">题目列表</h3>
 
         <el-checkbox-group v-model="checkboxGroup1" size="large">
           <el-checkbox-button style="
@@ -71,19 +71,18 @@
         </div>
         总分：&nbsp;
         <span style="color:red;font-weight:bold;">{{ totalScore }}</span>
-        <!-- <el-input type="number" placeholder="0-100分" style="width: 100px" min="0" max="100"
-          :value="total"></el-input> -->
+        
         <el-button type="primary" style="margin-left: 20px" @click="mark">提交</el-button>
         <el-button type="success" style="margin-left: 20px"
           :disabled="markStore.getActiveIndex() === markStore.getMarkList().length - 1"
           @click="markAndViewNext">提交并且查看下一个</el-button>
 
-        <el-button style="margin-left: 20px" type="primary" plain><svg t="1723207082050" class="icon"
+        <!-- <el-button style="margin-left: 20px" type="primary" plain><svg t="1723207082050" class="icon"
             viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1913" width="24" height="24">
             <path
               d="M374.75 179.1L0 844.9h157.58l84-151.74h264.7l29.5 151.74h157.59L557.56 179.1zM290.3 597.16l151.43-281.8 47.13 281.8zM875.87 179.1L756.4 844.9h148.13L1024 179.1z"
               p-id="1914" fill="#51e2a4"></path>
-          </svg>&nbsp;&nbsp;&nbsp;智能批阅</el-button>
+          </svg>&nbsp;&nbsp;&nbsp;智能批阅</el-button> -->
       </div>
     </div>
   </div>
@@ -129,6 +128,7 @@ const getDetails = async () => {
   if (res.data.code === 200) {
     console.log(res.data.data);
     myData.value = res.data.data;
+    comment.value=res.data.data.comment||''
     questionList.value = res.data.data.questionList;
   } else ElMessage.error(res.data.message);
 };
@@ -165,6 +165,10 @@ const markAndViewNext = () => {
     "/course/" + route.params.id + "/homework/details/" + route.params.assignmentId + "/" + markStore.getMarkList()[markStore.getActiveIndex()].studentAssignmentId
   );
 }
+
+watch(()=>route.params.studentAssignmentId,(newValue)=>{
+  getDetails()
+})
 
 onMounted(() => {
   getDetails();

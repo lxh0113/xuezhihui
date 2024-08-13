@@ -71,7 +71,7 @@
         <div class="questionsDetails" v-if="questionsContentList.length > 0">
           <div class="deleteButton">
             <el-button style="font-size: 20px; border-radius: 0 5px 0 10px; width: 50px" type="primary" plain
-              :icon="Delete"></el-button>
+              :icon="Delete" @click="deleteCurrentQuestion"></el-button>
           </div>
           <div class="questionsKind">
             <el-button type="primary" @click="saveQuestions">确认</el-button>
@@ -196,7 +196,7 @@
     </div>
   </div>
 
-  <el-dialog v-model="dialogFormVisible" title="发布考试" width="640">
+  <el-dialog v-model="dialogFormVisible" title="发布作业" width="640">
     <el-form :model="publishSetting">
       <el-form-item label="发放对象">
         <el-select-v2 v-model="publishSetting.classIdList" :options="classListOptions" placeholder="选中班级"
@@ -296,7 +296,7 @@ import {
 } from "../../../../../apis/question";
 
 const userStore = useUserStore()
-let assignmentId = null;
+let assignmentId = 0;
 const dialogFormVisible = ref(false);
 
 const classListOptions = ref([])
@@ -333,7 +333,7 @@ const setRadioRef = (el: any) => {
 
 const addRadioOption = () => {
   // radioAnswer.value.push("");
-  clear();
+  // clear();
   let data = JSON.parse(
     questionsContentList.value[activeListIndex.value].title
   );
@@ -462,7 +462,7 @@ const questionsContentList = ref<questionsList>([
     type: "单选题",
     title: JSON.stringify({
       text: "这是一个题目示例",
-      options: JSON.stringify([""]),
+      options: JSON.stringify(["", ""]),
     }),
     studentAnswer: "",
     questionComment: "",
@@ -583,8 +583,6 @@ const saveCurrentQuestion = async () => {
     questionsContentList.value[activeListIndex.value].title =
       JSON.stringify(data);
   }
-
-
 };
 
 const judgeQuestions = () => {
@@ -619,17 +617,45 @@ const judgeQuestions = () => {
   // if(questionsContentList.value[activeListIndex.value].answer)
 
   if (JSON.stringify(questionsContentList.value[activeListIndex.value].answer).trim() === "") {
-    ElMessage.error("您还没有设置答案");
+    ElMessage.error("您还没有设置当前题目的答案");
     return false;
   }
 
   if (flag === false) {
-    ElMessage.error("您还没有设置答案");
+    ElMessage.error("您还没有设置当前题目的答案");
     return false;
   }
 };
 
-// 清楚所以实例
+const deleteCurrentQuestion = () => {
+
+  if (questionsContentList.value.length === 1) {
+    ElMessage.error('当前只有一道题，您不能删除它')
+    return
+  }
+
+  let flag = confirm('您确认要删除当前这道题吗')
+
+  if (flag === false) return;
+
+  console.log(activeListIndex.value)
+  console.log(questionsContentList.value)
+
+  questionsContentList.value = questionsContentList.value.filter((item, i) => {
+    console.log(item, i)
+    return activeListIndex.value !== i
+  })
+
+  activeListIndex.value = 0
+
+  // 重新保存
+
+  nextTick(() => {
+    saveQuestions()
+  })
+}
+
+// 清除所有实例
 const clear = () => {
   eleRadioRef.value = [];
   eleCheckBoxRef.value = [];
@@ -645,64 +671,69 @@ watch(
 
 // 添加一道题
 const addNewOneQuestion = () => {
-  clear();
 
-  let flag = judgeQuestions();
-  if (flag === false) return false;
+  saveCurrentQuestion()
 
-  questionsContentList.value.push({
-    questionScore: 5,
-    studentScore: 0,
-    type: questionsRadio.value,
-    title: JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify(""),
-    }),
-    studentAnswer: "",
-    questionComment: "",
-    answer: "",
-    answerAnalysis: "",
-  });
+  nextTick(() => {
+    let flag = judgeQuestions();
+    if (flag === false) return false;
 
-  activeListIndex.value = questionsContentList.value.length - 1;
+    questionsContentList.value.push({
+      questionScore: 5,
+      studentScore: 0,
+      type: questionsRadio.value,
+      title: JSON.stringify({
+        text: "这是一个题目示例",
+        options: JSON.stringify(""),
+      }),
+      studentAnswer: "",
+      questionComment: "",
+      answer: "",
+      answerAnalysis: "",
+    });
 
-  if (questionsContentList.value[activeListIndex.value].type === "单选题") {
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
-    });
-  } else if (
-    questionsContentList.value[activeListIndex.value].type === "多选题"
-  ) {
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
-    });
-  } else if (
-    questionsContentList.value[activeListIndex.value].type === "填空题"
-  ) {
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify(["第一空"]),
-    });
-  } else if (
-    questionsContentList.value[activeListIndex.value].type === "简答题"
-  ) {
-    questionsContentList.value[activeListIndex.value].title = JSON.stringify({
-      text: "这是一个题目示例",
-      options: JSON.stringify([]),
-    });
-  } else if (
-    questionsContentList.value[activeListIndex.value].type === "判断题"
-  ) {
-    questionsContentList.value[activeListIndex.value - 1].title =
-      JSON.stringify({
+    activeListIndex.value = questionsContentList.value.length - 1;
+
+    valueHtml.value = '这是一个题目示例'
+
+    if (questionsContentList.value[activeListIndex.value].type === "单选题") {
+      questionsContentList.value[activeListIndex.value].title = JSON.stringify({
+        text: "这是一个题目示例",
+        options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
+      });
+    } else if (
+      questionsContentList.value[activeListIndex.value].type === "多选题"
+    ) {
+      questionsContentList.value[activeListIndex.value].title = JSON.stringify({
+        text: "这是一个题目示例",
+        options: JSON.stringify(["A选项", "B选项", "C选项", "D选项"]),
+      });
+    } else if (
+      questionsContentList.value[activeListIndex.value].type === "填空题"
+    ) {
+      questionsContentList.value[activeListIndex.value].title = JSON.stringify({
+        text: "这是一个题目示例",
+        options: JSON.stringify(["第一空"]),
+      });
+    } else if (
+      questionsContentList.value[activeListIndex.value].type === "简答题"
+    ) {
+      questionsContentList.value[activeListIndex.value].title = JSON.stringify({
         text: "这是一个题目示例",
         options: JSON.stringify([]),
       });
-  }
+    } else if (
+      questionsContentList.value[activeListIndex.value].type === "判断题"
+    ) {
+      questionsContentList.value[activeListIndex.value - 1].title =
+        JSON.stringify({
+          text: "这是一个题目示例",
+          options: JSON.stringify([]),
+        });
+    }
+  })
 
-  //
+
 };
 
 // 作业模块
@@ -710,14 +741,14 @@ const addNewOneQuestion = () => {
 const addHomeWork = async () => {
   //添加作业
 
-  let flag = confirm("您确定要添加此次作业吗");
+  let flag = confirm("您确定要添加此次考试吗");
 
   if (flag === false) return;
 
   console.log(questionsContentList.value);
 
   if (publishSetting.value.name.trim() === "") {
-    ElMessage.error("您还没设置作业名称");
+    ElMessage.error("您还没设置考试名称");
     return;
   }
 
@@ -732,7 +763,7 @@ const toPublishHomework = async () => {
     await saveQuestions()
   }
 
-  nextTick(async() => {
+  nextTick(async () => {
     const res = await teacherPublishAssignmentAPI(
       2,
       assignmentId,
@@ -745,7 +776,7 @@ const toPublishHomework = async () => {
     if (res.data.code === 200) {
       ElMessage.success("添加成功");
       setTimeout(() => {
-        router.push("/course/" + route.params.id);
+        router.push("/course/" + route.params.id + '/exam');
       }, 2000);
     } else {
       ElMessage.error(res.data.message);
@@ -757,9 +788,15 @@ const toPublishHomework = async () => {
 };
 
 const setCurrent = (index: number) => {
+  let flag = judgeQuestions()
+
+  if (flag === false) return;
+
   activeListIndex.value = index;
 
   questionsRadio.value = questionsContentList.value[activeListIndex.value].type;
+
+  valueHtml.value = JSON.parse(questionsContentList.value[activeListIndex.value].title).text
 };
 
 // 编辑器实例，必须用 shallowRef，重要！
@@ -808,6 +845,12 @@ const setClassList = async () => {
   }
 };
 
+const totalScore = computed(() => {
+  return questionsContentList.value.reduce((s, a) => {
+    return s + a.questionScore
+  }, 0)
+})
+
 onMounted(() => {
   setClassList();
 });
@@ -847,6 +890,13 @@ const filterTableData = computed(() =>
 );
 
 const getQuestions = async () => {
+
+  for (let i = 0; i < checkList.value.length; i++) {
+    checkList.value[i] = false
+  }
+
+  // console.log(checkList.value)
+
   const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
 
   if (res.data.code === 200) {

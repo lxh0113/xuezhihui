@@ -10,37 +10,16 @@
     </div>
     <hr />
     <div class="interactions">
-      <interaction
-        v-for="item in homeworkList"
-        @click="toView(item)"
-        :key="item"
-        :item="getItem(item)"
-      >
+      <interaction v-for="item in homeworkList" @click="toView(item)" :key="item" :item="getItem(item)">
         <template #mid>
           <div>
             <p style="margin-bottom: 5px">{{ item.title }}</p>
-            <el-tag
-              v-if="item.state === '已完成'"
-              type="primary"
-              size="small"
-              >{{ item.state }}</el-tag
-            >
-            <el-tag
-              v-else-if="item.state === '未完成'"
-              type="danger"
-              size="small"
-              >{{ item.state }}</el-tag
-            >
-            <el-tag
-              v-if="item.state === '待批阅'"
-              type="success"
-              size="small"
-              >{{ item.state }}</el-tag
-            >
+            <el-tag v-if="item.state === '2'" type="primary" size="small">已完成</el-tag>
+            <el-tag v-else-if="item.state === '0'" type="danger" size="small">未完成</el-tag>
           </div>
         </template>
-        <template v-if="getTime(item)" #right>
-          <p style="color: #ffc082">还剩下{{ getDeathTime(item) }}小时</p>
+        <template #right>
+          <p style="color: #ffc082">截至时间&nbsp;&nbsp;:&nbsp;&nbsp;{{ item.endDate }}</p>
         </template>
       </interaction>
     </div>
@@ -55,6 +34,7 @@ import { useUserStore } from "@/stores/userStore";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { studentGetAssignmentAPI } from "@/apis/assignment";
+import { useExamStore } from "@/stores/examStore";
 
 const radio = ref(2);
 const userStore = useUserStore();
@@ -95,7 +75,7 @@ const getDeathTime = (item: any) => {
 
 const getItem = (item: any) => {
   console.log(item.endTime);
-  const endTime = new Date(item.endTime); // 将截止日期转换为日期对象
+  const endTime = new Date(item.endDate); // 将截止日期转换为日期对象
 
   const currentDate = new Date(); // 获取当前日期
 
@@ -103,12 +83,12 @@ const getItem = (item: any) => {
   const isDeadlinePassed = endTime > currentDate;
 
   // 根据截止日期是否晚于当前日期来设置 type 属性
-  // const type = isDeadlinePassed ? "primary" : "info";
-  const type='success'
+  const type = isDeadlinePassed ? "primary" : "info";
+  // const type='success'
 
   return {
     type,
-    name: "作业",
+    name: "考试",
   };
 };
 
@@ -118,6 +98,7 @@ const homeworkList = ref([
     endDate: "2024-12-2",
     title: "12",
     state: "已完成",
+    examTime: 120
   },
 ]);
 
@@ -137,7 +118,7 @@ const getHomework = async () => {
 
   if (res.data.code === 200) {
     console.log(res.data.data);
-    // if(radio.value==)
+
     homeworkList.value = res.data.data;
 
     // 处理一下
@@ -146,11 +127,18 @@ const getHomework = async () => {
   }
 };
 
+const examStore=useExamStore()
+
 const toView = (assignment) => {
-  // if (getItem(assignment).type !== "info")
+  if (getItem(assignment).type !== "info" && assignment.type !== '2') {
+
+    console.log(assignment.examTime)
+    examStore.setExamTime(assignment.examTime)
+
     router.push(
       "/course/" + route.params.id + "/exam/" + assignment.assignmentId
     );
+  }
 };
 
 onMounted(() => {

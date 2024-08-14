@@ -39,7 +39,7 @@ export const studentDoAssignmentAPI = (
   studentId: number,
   assignmentId: number,
   operation: number,
-  content: string,
+  content: any[],
   type: number, //0 代表保存 1 代表提交
   examBeginTime?: string,
   examEndTime?: string
@@ -74,7 +74,7 @@ export const teacherAddAssignmentAPI = (
     answer: string;
     answerAnalysis: string;
   }[],
-  assignmentId: number|null
+  assignmentId: number | null
 ) => {
   return http({
     url: "/assignment/teacher",
@@ -166,8 +166,8 @@ export const teacherViewAllCourseAssignmentAPI = (
   state: number
 ) => {
   return http({
-    url:"/assignment/exam/"+teacherId+'/'+state,
-    method:"GET"
+    url: "/assignment/exam/" + teacherId + "/" + state,
+    method: "GET",
   });
 };
 
@@ -209,5 +209,20 @@ export const teacherViewStudentAssignmentAPI = (
   return http({
     url: "/assignment/student/" + studentAssignmentId,
     method: "GET",
+  });
+};
+
+export const correctAllAPI = (assignmentId: number, teacherId: number) => {
+  return http({
+    url: "/assignment/ai-correct-all/" + assignmentId + "/" + teacherId,
+    method: "PUT",
+  });
+};
+
+export const examAnalysisAPI = (courseId: number) => {
+  return http({
+    url: "/assignment/study_analysis",
+    method: "GET",
+    params: courseId,
   });
 };

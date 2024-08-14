@@ -1,27 +1,12 @@
 <template>
   <div class="homeworkBox">
     <div class="head">
-      <el-button
-        style="font-size: 18px"
-        :icon="Plus"
-        type="primary"
-        text="primary"
-        @click="toAddHomework"
-        >作业</el-button
-      >
+      <el-button style="font-size: 18px" :icon="Plus" type="primary" text="primary"
+        @click="toAddHomework">作业</el-button>
     </div>
     <hr />
     <div class="bottom">
       <div class="choose">
-        <!-- <el-input
-          style="width: 200px; height: 40px; margin-right: 20px"
-          :prefix-icon="Search"
-          placeholder="搜索"
-        ></el-input>
-        <el-select
-          style="width: 200px; margin-right: 20px"
-          placeholder="请输入"
-        ></el-select> -->
         <el-radio-group v-model="radio" @change="getAllHomework" class="ml-4">
           <!-- <el-radio value="1" size="large">全部</el-radio> -->
           <el-radio :value="0" size="large">未开始</el-radio>
@@ -39,8 +24,8 @@
                 item.state === 0
                   ? "未开始"
                   : item.state === 1
-                  ? "进行中"
-                  : "已结束"
+                    ? "进行中"
+                    : "已结束"
               }}</el-tag>
             </div>
             <p>
@@ -52,30 +37,23 @@
           </div>
 
           <div class="right">
-            <span style="font-size: 26px">{{ item.waitCorrectNum }}</span>
-            <span>待批</span>
-            <span style="color: #ccc">{{ item.unCommittedNum }}未交</span>
-            <el-button
-              style="font-size: 16px"
-              type="primary"
-              text="primary"
-              @click="toMark(item.assignmentId)"
-              >批阅</el-button
-            >
-            <el-button
-              style="font-size: 16px"
-              type="primary"
-              text="primary"
-              @click="deleteHomework(item, index)"
-              >删除</el-button
-            >
-            <el-button
-              style="font-size: 16px"
-              type="primary"
-              text="primary"
-              @click="modifySettings(item)"
-              >修改设置</el-button
-            >
+            <span style="font-size: 26px" v-if="item.state !== 0">{{ item.waitCorrectNum }}</span>
+            <span v-if="item.state !== 0">待批</span>
+            <span style="color: #ccc" v-if="item.state !== 0">{{ item.unCommittedNum }}未交</span>
+            <el-button style="font-size: 16px" type="primary" text="primary" v-if="item.state === 0"
+            @click="toDealPublish(item)">
+              发布
+            </el-button>
+            <el-button style="font-size: 16px" type="primary" text="primary" v-if="item.state !== 0"
+              @click="toMark(item.assignmentId)">批阅</el-button>
+            <el-button style="font-size: 16px" type="primary" text="primary" v-if="item.state === 0"
+              @click="editItem(item)">编辑</el-button>
+            <el-button style="font-size: 16px" type="primary" text="primary"
+              @click="deleteHomework(item, index)">删除</el-button>
+
+            <el-button style="font-size: 16px" type="primary" text="primary" v-if="item.state === 1"
+              @click="modifySettings(item)">修改设置</el-button>
+
           </div>
         </div>
       </div>
@@ -85,38 +63,18 @@
   <el-dialog v-model="dialogFormVisible" title="修改设置" width="640">
     <el-form :model="form">
       <el-form-item label="发放对象">
-        <el-tag
-          size="mid"
-          style="margin-right: 10px"
-          type="info"
-          v-for="(item, index) in 4"
-          :key="index"
-          >软件{{ index + 1 }}班</el-tag
-        >
+        <el-tag size="mid" style="margin-right: 10px" type="info" v-for="(item, index) in 4" :key="index">软件{{ index + 1
+          }}班</el-tag>
       </el-form-item>
       <el-form-item label="有效时段">
-        <el-date-picker
-          v-model="form.startTime"
-          type="datetime"
-          placeholder="开始时间"
-          style="margin-right: 20px"
-        />
+        <el-date-picker v-model="form.startTime" type="datetime" placeholder="开始时间" style="margin-right: 20px" />
         至
-        <el-date-picker
-          v-model="form.endTime"
-          type="datetime"
-          placeholder="结束时间"
-          style="margin-left: 20px"
-        />
+        <el-date-picker v-model="form.endTime" type="datetime" placeholder="结束时间" style="margin-left: 20px" />
       </el-form-item>
       <el-form-item label="督促设置">
         <el-checkbox v-model="form.supervise">
-          在作业截至<el-input
-            size="mid"
-            style="width: 50px; margin-left: 10px; margin-right: 10px"
-            v-model="form.superviseTime"
-          ></el-input
-          >分钟的的时候发通知提醒学生
+          在作业截至<el-input size="mid" style="width: 50px; margin-left: 10px; margin-right: 10px"
+            v-model="form.superviseTime"></el-input>分钟的的时候发通知提醒学生
         </el-checkbox>
 
         <el-checkbox v-model="form.smartSupervise"> 智能提醒 </el-checkbox>
@@ -126,6 +84,28 @@
       <div class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button type="primary" @click="modify"> 确认 </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="publishDialogVisiable" title="发布作业" width="640">
+    <el-form :model="publishSetting">
+      <el-form-item label="发放对象">
+        <el-select-v2 v-model="publishSetting.classIdList" :options="classListOptions" placeholder="选中班级"
+          style="width: 240px" multiple />
+      </el-form-item>
+      <el-form-item label="有效时段">
+        <el-date-picker v-model="publishSetting.beginDate" type="datetime" placeholder="开始时间" style="margin-right: 20px"
+          value-format="YYYY-MM-DD HH:mm:ss" />
+        至
+        <el-date-picker v-model="publishSetting.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px"
+          value-format="YYYY-MM-DD HH:mm:ss" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="toPublishHomework"> 确认 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -141,6 +121,10 @@ import { ElMessage } from "element-plus";
 import { ref, reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { teacherModifyAssignmentStatusAPI } from "../../../../apis/assignment";
+import {
+  teacherPublishAssignmentAPI,
+  teacherGetAllClassAPI
+} from "@/apis/assignment";
 
 const dialogFormVisible = ref(false);
 
@@ -173,7 +157,7 @@ const modifySettings = (item) => {
   dialogFormVisible.value = true;
 };
 
-const modify = async() => {
+const modify = async () => {
   const res = await teacherModifyAssignmentStatusAPI(
     parseInt(route.params.assignmentId as string),
     1
@@ -217,9 +201,88 @@ const getAllHomework = async () => {
   } else ElMessage.error(res.data.message);
 };
 
+
+
 onMounted(() => {
   getAllHomework();
+
+  setClassList();
 });
+
+// 编辑作业模块
+
+const editItem = (item: any) => {
+  router.push('/course/'+route.params.id+'/homework/editHomework/'+item.assignmentId)
+}
+
+// 发布作业模块
+
+const classList = ref([]);
+
+const setClassList = async () => {
+  const res = await teacherGetAllClassAPI();
+
+  if (res.data.code === 200) {
+    classList.value = res.data.data;
+
+    classListOptions.value = classList.value.map(item => {
+      return {
+        label: item.className,
+        value: item.id
+      }
+    })
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+const publishSetting = ref({
+  type: 1,
+  name: "",
+  assignmentId: 1,
+  beginDate: "",
+  endDate: "",
+  examTime: 120,
+  classIdList: [],
+});
+
+const classListOptions = ref([])
+const publishDialogVisiable = ref(false)
+let assignmentId=null
+
+const toDealPublish=(item:any)=>{
+  assignmentId=item.assignmentId
+
+  publishDialogVisiable.value=true
+}
+
+const toPublishHomework = async () => {
+
+  nextTick(async () => {
+    const res = await teacherPublishAssignmentAPI(
+      1,
+      assignmentId,
+      publishSetting.value.beginDate,
+      publishSetting.value.endDate,
+      publishSetting.value.examTime,
+      publishSetting.value.classIdList
+    );
+
+    if (res.data.code === 200) {
+      ElMessage.success("发布成功");
+      setTimeout(() => {
+        router.push("/course/" + route.params.id + '/homework/index');
+      }, 2000);
+    } else {
+      ElMessage.error(res.data.message);
+    }
+
+    publishDialogVisiable.value = false;
+  })
+
+
+};
+
 </script>
 
 <style lang="scss" scoped>
@@ -250,6 +313,7 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       height: 100px;
+      margin-bottom: 10px;
       // background: red;
 
       .left {

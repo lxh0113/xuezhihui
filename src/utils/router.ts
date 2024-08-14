@@ -2,13 +2,14 @@ import type { RouteRecordRaw } from "vue-router";
 
 const studentRouter: RouteRecordRaw = {
   path: "/",
-  name:'xuezhihui',
+  name: "xuezhihui",
   //   component: () => import("@/views/home/index.vue"),
   redirect: "/student/course",
   children: [
     {
-      path:'studentRoute',
-      component:()=>import("@/views/student/courseHome/home/components/studentRoute.vue")
+      path: "studentRoute",
+      component: () =>
+        import("@/views/student/courseHome/home/components/studentRoute.vue"),
     },
     {
       path: "course/:id/dohomework/:assignmentId",
@@ -19,6 +20,16 @@ const studentRouter: RouteRecordRaw = {
       path: "course/:id/exam/:assignmentId",
       component: () =>
         import("@/views/student/courseHome/exam/components/doExam.vue"),
+    },
+    {
+      path: "course/:id/knowledge",
+      component: () =>
+        import("@/views/student/courseHome/task/knowledge/index.vue"),
+    },
+    {
+      path: "course/:id/braveChart",
+      component: () =>
+        import("@/views/student/courseHome/task/markdown/index.vue"),
     },
     {
       path: "course/:id",
@@ -68,7 +79,9 @@ const studentRouter: RouteRecordRaw = {
         {
           path: "interaction/choose/:activityId",
           component: () =>
-            import("@/views/student/courseHome/interaction/components/choose.vue"),
+            import(
+              "@/views/student/courseHome/interaction/components/choose.vue"
+            ),
         },
         {
           path: "interaction/gesture/:gestureId",
@@ -99,7 +112,7 @@ const studentRouter: RouteRecordRaw = {
           path: "records",
           component: () =>
             import("@/views/student/courseHome/records/index.vue"),
-        },
+        }
       ],
     },
     {
@@ -168,9 +181,9 @@ const studentRouter: RouteRecordRaw = {
           ],
         },
         {
-          path:'logout',
-          redirect:'/login'
-        }
+          path: "logout",
+          redirect: "/login",
+        },
       ],
     },
   ],
@@ -178,7 +191,7 @@ const studentRouter: RouteRecordRaw = {
 
 const teacherRouter: RouteRecordRaw = {
   path: "/",
-  name:'xuezhihui',
+  name: "xuezhihui",
   //   component: () => import("@/views/home/index.vue"),
   redirect: "/teacher/course",
   children: [
@@ -205,20 +218,28 @@ const teacherRouter: RouteRecordRaw = {
     },
     // 上传试卷的模块
     {
-      path:'upload/origin/:paperId',
-      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadOriginPaper.vue")
+      path: "upload/origin/:paperId",
+      component: () =>
+        import(
+          "@/views/teacher/courseHome/exam/uploadPaper/uploadOriginPaper.vue"
+        ),
     },
     {
-      path:'upload/answer/:paperId',
-      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadPaperAnswer.vue")
+      path: "upload/answer/:paperId",
+      component: () =>
+        import(
+          "@/views/teacher/courseHome/exam/uploadPaper/uploadPaperAnswer.vue"
+        ),
     },
     {
-      path:'upload/student/:paperId',
-      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/uploadStudent.vue")
+      path: "upload/student/:paperId",
+      component: () =>
+        import("@/views/teacher/courseHome/exam/uploadPaper/uploadStudent.vue"),
     },
     {
-      path:'upload/result/:paperId',
-      component:()=>import("@/views/teacher/courseHome/exam/uploadPaper/paperResult.vue")
+      path: "upload/result/:paperId",
+      component: () =>
+        import("@/views/teacher/courseHome/exam/uploadPaper/paperResult.vue"),
     },
     {
       path: "course/:id",
@@ -340,9 +361,13 @@ const teacherRouter: RouteRecordRaw = {
                   "@/views/teacher/courseHome/homework/components/add.vue"
                 ),
             },
+            {
+              path:'editHomework/:assignmentId',
+              component:()=>import("@/views/teacher/courseHome/homework/components/edit.vue")
+            }
           ],
         },
-        
+
         {
           path: "exam/addExam",
           component: () =>
@@ -356,7 +381,9 @@ const teacherRouter: RouteRecordRaw = {
         {
           path: "exam/:assignmentId/analysis/:studentId",
           component: () =>
-            import("@/views/teacher/courseHome/exam/components/studentAnalysis.vue"),
+            import(
+              "@/views/teacher/courseHome/exam/components/studentAnalysis.vue"
+            ),
         },
         {
           path: "exam/details/:assignmentId",
@@ -427,19 +454,19 @@ const teacherRouter: RouteRecordRaw = {
         },
         {
           path: "paper/:id/add",
-          component: () =>
-            import("@/views/teacher/paper/components/add.vue"),
+          component: () => import("@/views/teacher/paper/components/add.vue"),
         },
         {
-            path:"ai",
-            component:()=>import("@/views/teacher/ai/index.vue"),
-            redirect:'/teacher/ai/generate',
-            children:[
-              {
-                path:'generate',
-                component:()=>import("@/views/teacher/ai/components/generate.vue")
-              }
-            ]
+          path: "ai",
+          component: () => import("@/views/teacher/ai/index.vue"),
+          redirect: "/teacher/ai/generate",
+          children: [
+            {
+              path: "generate",
+              component: () =>
+                import("@/views/teacher/ai/components/generate.vue"),
+            },
+          ],
         },
 
         {
@@ -491,9 +518,9 @@ const teacherRouter: RouteRecordRaw = {
           ],
         },
         {
-          path:'logout',
-          redirect:'/login'
-        }
+          path: "logout",
+          redirect: "/login",
+        },
       ],
     },
   ],

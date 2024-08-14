@@ -1,18 +1,15 @@
 <template>
   <div class="bigBox">
-    <div class="title">
-      <el-progress
-        width="50"
-        color="#2f3ced"
-        stroke-width="3"
-        type="circle"
-        :percentage="25"
-      />
-      <span>任务点完成情况</span>
+    <div class="left">
+      <div class="title">
+        <el-progress width="50" color="#2f3ced" stroke-width="3" type="circle" :percentage="25" />
+        <span>任务点完成情况</span>
+      </div>
+      <div id="leftTimeChart"></div>
     </div>
 
-    <div class="bottom">
-      <div id="leftTimeChart"></div>
+    <div class="right">
+
       <div class="rightContent">
         <div class="title">课程学习</div>
 
@@ -31,12 +28,29 @@
           </div>
         </div>
       </div>
+
+      <div class="knowledge">
+        <div class="knowledgeChart" @click="toKnowledgeChart">
+          <img src="../../../../../assets/image/knowledgeChart.png" alt=""  />
+          <h3>课程知识图谱</h3>
+        </div>
+
+        <div class="braveChart" @click="toBraveChart">
+          <img src="../../../../../assets/image/braveChart.png" alt=""  />
+          <h3>课程思维导图</h3>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted,onUnmounted } from "vue";
+import { getCurrentInstance, onMounted, onUnmounted } from "vue";
+import { useRoute,useRouter } from 'vue-router'
+
+const route=useRoute()
+const router=useRouter()
+
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance!.appContext.config.globalProperties.$echarts;
 
@@ -77,7 +91,7 @@ onMounted(() => {
     ],
   });
 
-  window.addEventListener('resize',()=>{
+  window.addEventListener('resize', () => {
     // alert(1)
     myChart.resize()
 
@@ -87,6 +101,16 @@ onMounted(() => {
     myChart.dispose();
   });
 });
+
+const toKnowledgeChart=()=>{
+  router.push('/course/'+route.params.id+'/knowledge')
+}
+
+const toBraveChart=()=>{
+  router.push('/course/'+route.params.id+'/braveChart')
+
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -99,19 +123,41 @@ onMounted(() => {
   // margin-top:20px;
   // width: 700px;
   min-height: calc(100vh - 500px);
-  background-color: $primary-white-color;
   margin-right: 20px;
   border-radius: 5px;
   box-sizing: border-box;
-  padding: 20px;
+  // padding: 20px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  // flex-direction: column;
+
+  #leftTimeChart {
+    width: 100%;
+    height: 100%;
+  }
+
+  .left {
+    background-color: $primary-white-color;
+    flex: 1;
+    margin-right: 20px;
+    // margin:20px;
+    padding: 20px;
+    ;
+  }
+
+  .right {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 500px);
+  }
 
   .title {
     display: flex;
     // justify-content: center;
     align-items: center;
     height: 50px;
+
 
     span {
       margin-left: 20px;
@@ -121,50 +167,81 @@ onMounted(() => {
     }
   }
 
-  .bottom {
+  .rightContent {
+    // margin-left: 20px;
+    background-color: $primary-white-color;
+    padding: 20px;
     flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    margin-top: 10px;
-    // background: red;
 
-    #leftTimeChart {
-      // background: pink;
-      // min-width: 300px;
-      // min-height: 300px;
-      // background: red;
+    .title {
+      color: $primary-color;
+      font-weight: bold;
+      font-size: 18px;
     }
 
-    .rightContent {
-      margin-left: 20px;
-      // background: red;
+    .data {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
 
-      .title {
-        color: $primary-color;
-        font-weight: bold;
-        font-size: 18px;
-      }
+      .analysis {
+        width: 200px;
+        margin-bottom: 20px;
 
-      .data {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        .bigNumber {
+          font-size: 30px;
+        }
 
-        .analysis {
-          width: 200px;
-          margin-bottom: 20px;
-
-          .bigNumber {
-            font-size: 30px;
-          }
-
-          .smallText {
-            color: $primary-gray-text-color;
-            font-size: 14px;
-          }
+        .smallText {
+          color: $primary-gray-text-color;
+          font-size: 14px;
         }
       }
     }
   }
+
+  .knowledge {
+    flex: 1;
+    // background-color: red;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+
+
+    .knowledgeChart,
+    .braveChart {
+      flex: 1;
+      background-color: $primary-white-color;
+      padding: 20px;
+      display: flex;
+      margin-top: 20px;
+      flex-direction: column;
+      align-items: center;
+
+      h3 {
+        color: $primary-color;
+      }
+
+      img {
+        height: 120px;
+        width: 120px;
+      }
+    }
+
+    .knowledgeChart {
+      margin-right: 20px;
+    }
+
+    .knowledgeChart:hover {
+      background-color: #efebf5;
+    }
+
+    .braveChart:hover {
+      background-color: #e4f9fe;
+    }
+
+
+  }
+
 }
 </style>

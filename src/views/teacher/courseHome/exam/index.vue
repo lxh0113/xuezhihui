@@ -1,21 +1,9 @@
 <template>
   <div class="examBox">
     <div class="head" style="margin-bottom: 10px;">
-      <el-button
-        style="font-size: 18px"
-        :icon="Plus"
-        type="primary"
-        @click="toAddExam"
-        >新建考试</el-button
-      >
+      <el-button style="font-size: 18px" :icon="Plus" type="primary" @click="toAddExam">新建考试</el-button>
 
-      <el-button
-        style="font-size: 18px"
-        :icon="Upload"
-        type="primary"
-        @click="toUploadPaper"
-        >上传纸质试卷智能批阅</el-button
-      >
+      <el-button style="font-size: 18px" :icon="Upload" type="primary" @click="toUploadPaper">上传纸质试卷智能批阅</el-button>
     </div>
     <hr />
     <div class="bottom">
@@ -25,23 +13,15 @@
           :prefix-icon="Search"
           placeholder="搜索"
         ></el-input> -->
-        <el-select
-          v-model="state"
-          style="width: 200px; margin-right: 20px"
-          placeholder="请输入"
-          @change="getAllExam"
-        >
+        <el-select v-model="state" style="width: 200px; margin-right: 20px" placeholder="请输入" @change="getAllExam">
           <el-option label="未开始" :value="0"></el-option>
           <el-option label="进行中" :value="1"></el-option>
           <el-option label="已结束" :value="2"></el-option>
         </el-select>
       </div>
 
-      <el-table
-        :data="tableData"
-        :default-sort="{ prop: 'date', order: 'descending' }"
-        style="width: 100%; margin-top: 20px"
-      >
+      <el-table :data="tableData" :default-sort="{ prop: 'date', order: 'descending' }"
+        style="width: 100%; margin-top: 20px">
         <!-- <el-table-column type="selection" /> -->
         <el-table-column label="试卷名称" prop="title" />
         <el-table-column label="发放对象">
@@ -54,24 +34,9 @@
         <el-table-column prop="beginDate" label="创建日期" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button
-              v-if="scope.row.state === 0"
-              type="primary"
-              @click="toPublish(scope.row)"
-              >发布</el-button
-            >
-            <el-button
-              v-else
-              type="primary"
-              @click="toMark(scope.row.assignmentId)"
-              >批阅</el-button
-            >
-            <el-button
-              
-              type="primary"
-              @click="toMark(scope.row.assignmentId)"
-              >智能批阅</el-button
-            >
+            <el-button v-if="scope.row.state === 0" type="primary" @click="toPublish(scope.row)">发布</el-button>
+            <el-button v-else type="primary" @click="toMark(scope.row.assignmentId)">批阅</el-button>
+            <el-button type="primary" @click="toAIMark(scope.row.assignmentId)">智能批阅</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -81,28 +46,12 @@
   <el-dialog v-model="dialogFormVisible" title="发放设置" width="640">
     <el-form :model="form">
       <el-form-item label="发放对象">
-        <el-select-v2
-          v-model="form.classList"
-          :options="options"
-          placeholder="选择班级"
-          style="width: 240px"
-          multiple
-        />
+        <el-select-v2 v-model="form.classList" :options="options" placeholder="选择班级" style="width: 240px" multiple />
       </el-form-item>
       <el-form-item label="有效时段">
-        <el-date-picker
-          v-model="form.beginDate"
-          type="datetime"
-          placeholder="开始时间"
-          style="margin-right: 20px"
-        />
+        <el-date-picker v-model="form.beginDate" type="datetime" placeholder="开始时间" style="margin-right: 20px" />
         至
-        <el-date-picker
-          v-model="form.endDate"
-          type="datetime"
-          placeholder="结束时间"
-          style="margin-left: 20px"
-        />
+        <el-date-picker v-model="form.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px" />
       </el-form-item>
       <el-form-item label="发放对象">
         <el-input type="number" min="0" v-model="form.examTime"></el-input>
@@ -135,6 +84,7 @@ import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
 import {
+  correctAllAPI,
   teacherPublishAssignmentAPI,
   teacherViewAllAssignmentAPI,
 } from "@/apis/assignment";
@@ -191,6 +141,19 @@ const getAllExam = async () => {
   }
 };
 
+const toAIMark = async (id: number) => {
+  const res = await correctAllAPI(id, userStore.getUserInfo().roleId)
+
+  if (res.data.code === 200) {
+    ElMessage.success('批阅完成')
+
+    getAllExam()
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
+}
+
 const setClassList = async () => {
   const res = await teacherGetAllClassAPI();
 
@@ -234,7 +197,7 @@ const toUploadPaper = async () => {
   );
 
   if (res.data.code === 200) {
-    router.push("/course/" + route.params.id + "/exam/uploadExam/"+res.data.data);
+    router.push("/course/" + route.params.id + "/exam/uploadExam/" + res.data.data);
 
   } else {
     ElMessage.error(res.data.message)

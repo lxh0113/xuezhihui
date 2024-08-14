@@ -128,27 +128,34 @@ export const teacherGetKnowledgeChartByCourseAPI = (courseId: number) => {
   return http({
     url: "/course/create-knowledge-graph",
     method: "PUT",
-    params:{
-      courseId
-    }
+    params: {
+      courseId,
+    },
   });
 };
 
 export const getKnowledgeChartAPI = (courseId: number) => {
   return http({
-    url: "/course/get-knowledge-graph/"+courseId,
-    method: "GET"
+    url: "/course/get-knowledge-graph/" + courseId,
+    method: "GET",
   });
 };
 
-export const createMindMapByCourseIdAPI=(courseId:number)=>{
+export const createMindMapByCourseIdAPI = (courseId: number) => {
   return http({
-    url:'/course/create-mindMap/'+courseId,
-    method:"GET"
-  })
-}
+    url: "/course/create-mindMap/" + courseId,
+    method: "GET",
+  });
+};
 
-export const getPPTAPI = (query: string = '') => {
+export const getMindMapByCourseIdAPI = (courseId: number) => {
+  return http({
+    url: "/course/get-mindMap/" + courseId,
+    method: "GET",
+  });
+};
+
+export const getPPTAPI = (query: string = "") => {
   return http({
     url: "/course/createPPT",
     method: "GET",
@@ -158,12 +165,12 @@ export const getPPTAPI = (query: string = '') => {
   });
 };
 
-export const recommedStudyPathAPI=(query: string = 'ff')=>{
+export const recommedStudyPathAPI = (query: string = "ff") => {
   return http({
-    url:"/course/createPath",
-    method:"GET",
-    params:{
-      query
-    }
-  })
-}
+    url: "/course/createPath",
+    method: "GET",
+    params: {
+      query,
+    },
+  });
+};

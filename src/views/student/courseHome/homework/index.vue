@@ -140,7 +140,7 @@ const getHomework = async () => {
 };
 
 const toView = (assignment) => {
-  if (getItem(assignment).type !== "info")
+  // if (getItem(assignment).type !== "info")
     router.push(
       "/course/" + route.params.id + "/dohomework/" + assignment.assignmentId
     );

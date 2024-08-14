@@ -261,8 +261,7 @@
     </el-table>
 
     <div style="margin-top:20px;">
-      <el-pagination layout="prev, pager, next" :total="pageData.total" v-model:current-page="pageData.current"
-        @change="getQuestions" />
+      <el-pagination layout="prev, pager, next" :total="pageData.total" v-model:current-page="pageData.current" />
     </div>
     <template #footer>
       <div class="dialog-footer">
@@ -634,25 +633,21 @@ const deleteCurrentQuestion = () => {
     return
   }
 
-  let flag = confirm('您确认要删除当前这道题吗')
+  if (confirm('您确认要删除当前这道题吗')) {
+    activeListIndex.value = 0;
+    const currentIndex = activeListIndex.value; // 保存当前索引值
+    const newQuestionsContentList = questionsContentList.value.filter((item, i) => {
+      console.error(activeListIndex.value)
+      console.log(i, currentIndex)
+      return i !== currentIndex;
+    });
 
-  if (flag === false) return;
 
-  console.log(activeListIndex.value)
-  console.log(questionsContentList.value)
-
-  questionsContentList.value = questionsContentList.value.filter((item, i) => {
-    console.log(item, i)
-    return activeListIndex.value !== i
-  })
-
-  activeListIndex.value = 0
-
-  // 重新保存
-
-  nextTick(() => {
-    saveQuestions()
-  })
+    questionsContentList.value = newQuestionsContentList;
+    nextTick(() => {
+      saveQuestions();
+    });
+  }
 }
 
 // 清除所有实例
@@ -878,29 +873,47 @@ const pageData = ref({
   current: 1,
 })
 
+const pageSize = 5; // 每页显示的数据数量
+
 const checkList = ref([])
 
 const tableData = ref<Array<Paper>>();
 
-const filterTableData = computed(() =>
-  tableData.value?.filter(
-    (data) =>
-      !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
-  )
+const filterTableData = computed(() => {
+  const filteredData = tableData.value.filter((data) =>
+    !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
+  );
+
+  // 计算当前页的开始和结束索引
+  const startIndex = (pageData.value.current - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // 返回当前页的数据
+  return filteredData.slice(startIndex, endIndex);
+}
 );
 
 const getQuestions = async () => {
 
+  // 清楚所有选择
   for (let i = 0; i < checkList.value.length; i++) {
     checkList.value[i] = false
   }
 
-  // console.log(checkList.value)
+  const reponse = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
 
-  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
+  if (reponse.data.code == 200) {
+    tableData.value = reponse.data.data
+
+    for (let i = 0; i < tableData.value.length; i++) {
+      checkList.value[i] = false
+    }
+  }
+
+  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, pageSize)
 
   if (res.data.code === 200) {
-    tableData.value = res.data.data.records
+    // tableData.value = res.data.data.records
     pageData.value.total = res.data.data.total
   }
   else {
@@ -934,8 +947,6 @@ const importQuestion = () => {
       })
     }
   }
-
-  // activeListIndex.value=questionsContentList.value.length-1;
 
   saveQuestions()
 

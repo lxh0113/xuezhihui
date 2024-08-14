@@ -9,18 +9,13 @@
         <h3 class="title" style="margin-bottom: 20px">一、简答题</h3>
 
         <el-checkbox-group size="large">
-          <el-checkbox-button
-            style="
+          <el-checkbox-button style="
               margin-right: 20px;
               margin-bottom: 20px;
               border: 1px solid #2f3ced;
               cursor: pointer !important;
-            "
-            v-for="(item, index) in questionsList"
-            @click="btnClick(index)"
-            :key="item"
-            :value="JSON.stringify(item.studentAnswer).trim() !== ''"
-          >
+            " v-for="(item, index) in questionsList" @click="btnClick(index)" :key="item"
+            :value="JSON.stringify(item.studentAnswer).trim() !== ''">
             {{ index + 1 }}
           </el-checkbox-button>
         </el-checkbox-group>
@@ -28,42 +23,29 @@
     </div>
 
     <div class="right">
-      <h2>{{homeworkData.title}}</h2>
+      <h2>{{ homeworkData.title }}</h2>
       <div class="setting">
-        <span>题量:{{questionsList.length}}&nbsp;&nbsp;</span>
+        <span>题量:{{ questionsList.length }}&nbsp;&nbsp;</span>
         <span>满分:100&nbsp;&nbsp;</span>
-        <span
-          >作答时间：{{ homeworkData.examBeginTime }} 至
-          {{ homeworkData.examEndTime }}&nbsp;&nbsp;</span
-        >
+        <span>作答时间：{{ homeworkData.examBeginTime }} 至
+          {{ homeworkData.examEndTime }}&nbsp;&nbsp;</span>
       </div>
       <div class="questions">
         <!-- <h3>选择题</h3> -->
 
-        <div
-          class="radioQuestions"
-          v-for="(item, index) in questionsList"
-          :id="'part' + index"
-          :key="index"
-          :ref="setToQuestionsRefs"
-        >
+        <div class="radioQuestions" v-for="(item, index) in questionsList" :id="'part' + index" :key="index"
+          :ref="setToQuestionsRefs">
           <div class="question">
             {{ index + 1 }}.&nbsp;&nbsp;&nbsp;({{
               item.type
-            }})&nbsp;&nbsp;&nbsp;{{ item.title.text }}
+            }})&nbsp;&nbsp;&nbsp;
+            <p style="margin-top: 10px" v-html="item.title.text"></p>
           </div>
           <div v-if="item.type === '单选题'" class="radio">
             <el-radio-group v-model="item.studentAnswer" size="large">
-              <div
-                class="radioOptions"
-                v-for="(option, optionIndex) in item.title.options"
-                :key="option"
-              >
-                <el-radio-button
-                  style="border-radius: 20px"
-                  :label="String.fromCharCode(65 + optionIndex)"
-                  :value="String.fromCharCode(65 + optionIndex)"
-                />
+              <div class="radioOptions" v-for="(option, optionIndex) in item.title.options" :key="option">
+                <el-radio-button style="border-radius: 20px" :label="String.fromCharCode(65 + optionIndex)"
+                  :value="String.fromCharCode(65 + optionIndex)" />
                 <span style="font-size: 18px; margin-left: 20px">
                   <p v-html="option"></p>
                 </span>
@@ -73,15 +55,9 @@
 
           <div v-if="item.type === '多选题'" class="checkBox">
             <el-checkbox-group v-model="item.studentAnswer" size="large">
-              <div
-                class="checkBoxOptions"
-                v-for="(option, optionIndex) in item.title.options"
-                :key="optionIndex"
-              >
-                <el-checkbox-button
-                  :key="String.fromCharCode(65 + optionIndex)"
-                  :value="String.fromCharCode(65 + optionIndex)"
-                >
+              <div class="checkBoxOptions" v-for="(option, optionIndex) in item.title.options" :key="optionIndex">
+                <el-checkbox-button :key="String.fromCharCode(65 + optionIndex)"
+                  :value="String.fromCharCode(65 + optionIndex)">
                   {{ String.fromCharCode(65 + optionIndex) }}
                 </el-checkbox-button>
                 <span style="font-size: 18px; margin-left: 20px">{{
@@ -92,11 +68,7 @@
           </div>
 
           <div v-else-if="item.type === '填空题'" class="radio">
-            <div
-              class="fillOptions"
-              v-for="(option, optionIndex) in item.title.options"
-              :key="optionIndex"
-            >
+            <div class="fillOptions" v-for="(option, optionIndex) in item.title.options" :key="optionIndex">
               <span>第&nbsp;{{ optionIndex + 1 }}&nbsp;空</span>
 
               <div style="margin-left: 20px" class="editor">
@@ -108,10 +80,7 @@
           <div v-if="item.type === '简答题'" class="radio">
             <span>请输入答案</span>
 
-            <div
-              class="replyOptions"
-              style="margin-bottom: 20px; margin-top: 20px"
-            >
+            <div class="replyOptions" style="margin-bottom: 20px; margin-top: 20px">
               <div style="" class="editor">
                 <myEditor :text="item.studentAnswer" :ref="setRef"></myEditor>
               </div>
@@ -121,19 +90,11 @@
           <div v-if="item.type === '判断题'" class="radio">
             <el-radio-group v-model="item.studentAnswer" size="large">
               <div class="judgeOptions">
-                <el-radio-button
-                  style="border-radius: 20px"
-                  label="对"
-                  value="true"
-                />
+                <el-radio-button style="border-radius: 20px" label="对" value="true" />
                 <span style="line-height: 40px; margin-left: 20px">对</span>
               </div>
               <div class="judgeOptions">
-                <el-radio-button
-                  style="border-radius: 20px"
-                  label="错"
-                  value="false"
-                />
+                <el-radio-button style="border-radius: 20px" label="错" value="false" />
                 <span style="line-height: 40px; margin-left: 20px">错</span>
               </div>
             </el-radio-group>
@@ -240,6 +201,14 @@ const getHomework = () => {
       resCount++;
     } else {
     }
+
+    item.title = JSON.stringify(
+      {
+        text: item.title.text,
+        options: JSON.stringify(item.title.options)
+      }
+    )
+
   });
 };
 
@@ -252,13 +221,13 @@ const saveHomework = async () => {
     userStore.getUserInfo()!.roleId,
     homeworkData.value.assignmentId,
     0,
-    JSON.stringify(questionsList.value),
+    questionsList.value,
     1
   );
 
   if (res.data.code === 200) {
     ElMessage.success("保存成功");
-    
+
   } else ElMessage.error("保存失败");
 };
 
@@ -283,7 +252,7 @@ const handInHomework = async () => {
     userStore.getUserInfo().roleId,
     homeworkData.value.assignmentId,
     1,
-    JSON.stringify(questionsList.value),
+    questionsList.value,
     1
   );
 
@@ -307,6 +276,7 @@ onMounted(() => {
 .el-checkbox-button.is-disabled.el-checkbox-button__inner {
   cursor: pointer !important;
 }
+
 .doHomeworkBox {
   display: flex;
   background: #f5f7fd;

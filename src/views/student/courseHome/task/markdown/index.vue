@@ -10,7 +10,6 @@
         <el-button type="primary" @click="zoomOut">缩小</el-button>
         <el-button type="primary" @click="fitToScreen">适应屏幕</el-button>
         <el-button type="primary" @click="onSave">下载</el-button>
-        <el-button type="success" @click="init">生成思维导图</el-button>
       </div>
     </div>
   </div>
@@ -100,7 +99,7 @@ const update = () => {
 };
 
 const init = async () => {
-  const res = await createMindMapByCourseIdAPI(parseInt(route.params.id as string));
+  const res = await getMindMapByCourseIdAPI(parseInt(route.params.id as string));
 
   if (res.data.code === 200) {
     initValue = res.data.data;
@@ -110,38 +109,13 @@ const init = async () => {
   }
 };
 
-const getMindMap = async () => {
-  const res = await getMindMapByCourseIdAPI(parseInt(route.params.id as string))
-
-  if (res.data.code === 200) {
-    if (res.data.data === null) {
-      return false
-    }
-    else {
-      initValue = res.data.data;
-      update()
-      return true
-    }
-  }
-  else {
-    ElMessage.error(res.data.message)
-    return false
-  }
-}
-
-onMounted(async () => {
+onMounted(() => {
 
   // 初始化markmap思维导图
   mm.value = Markmap.create(svgRef.value);
   // 更新思维导图渲染
   update();
-
-  let flag = await getMindMap()
-  if (flag === false) {
-    ElMessage.error('还没有思维导图，可以点击生成按钮生成')
-  }
-  
-  // init()
+  init()
 });
 
 onUpdated(update);

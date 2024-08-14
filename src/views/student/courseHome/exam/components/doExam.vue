@@ -209,6 +209,13 @@ const getHomework = () => {
       resCount++;
     } else {
     }
+
+    item.title = JSON.stringify(
+      {
+        text: item.title.text,
+        options: JSON.stringify(item.title.options)
+      }
+    )
   });
 };
 
@@ -244,6 +251,30 @@ function formatDateTime(date) {
   return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
 }
 
+const dealHomework = async () => {
+  getHomework();
+
+  const res = await studentDoAssignmentAPI(
+    userStore.getUserInfo().roleId,
+    homeworkData.value.assignmentId,
+    1,
+    questionsList.value,
+    2,
+    formatDateTime(new Date()),
+    formatDateTime(new Date()),
+  );
+
+  console.log(JSON.stringify(questionsList.value));
+
+  if (res.data.code === 200) {
+    ElMessage.success("提交成功");
+
+    setTimeout(() => {
+      router.push("/course/" + route.params.id + "/exam");
+    }, 2000);
+  } else ElMessage.error("保存失败");
+}
+
 const handInHomework = async () => {
   let flag = confirm("您确定要提交吗？");
   if (flag === false) return;
@@ -254,7 +285,7 @@ const handInHomework = async () => {
     userStore.getUserInfo().roleId,
     homeworkData.value.assignmentId,
     1,
-    JSON.stringify(questionsList.value),
+    questionsList.value,
     2,
     formatDateTime(new Date()),
     formatDateTime(new Date()),
@@ -273,14 +304,21 @@ const handInHomework = async () => {
 
 onMounted(async () => {
   await getAssignmentDetails();
-  rawRestTime.value=examStore.getExamTime()*60
+  rawRestTime.value = examStore.getExamTime() * 60
   startCountdown();
 
+  window.addEventListener('beforeunload', (event) => {
+    // 在这里触发 handInHomework 函数
+    alert(1)
+    handInHomework();
+    // 可以返回一个字符串来提示用户确认离开
+    event.returnValue = ''; // 返回一个空字符串，不会显示确认对话框
+  });
 });
 
 // restTime部分
 
-const rawRestTime = ref(120*60); // 例如：732 分钟
+const rawRestTime = ref(120 * 60); // 例如：732 分钟
 let countdownInterval = null;
 
 function formatTime(seconds) {
@@ -306,6 +344,12 @@ function startCountdown() {
 
 onBeforeUnmount(() => {
   clearInterval(countdownInterval);
+
+  // 提交当前作业
+
+  dealHomework()
+
+  window.removeEventListener('beforeunload', handInHomework);
 });
 
 const restTime = computed(() => {

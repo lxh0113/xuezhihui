@@ -58,7 +58,7 @@
         <div class="questionsDetails" v-if="questionsContentList.length > 0">
           <div class="deleteButton">
             <el-button style="font-size: 20px; border-radius: 0 5px 0 10px; width: 50px" type="primary" plain
-              :icon="Delete" @click="deleteCurrentQuestion"></el-button>
+              :icon="Delete" @click="deleteCurrentQuestion()"></el-button>
           </div>
           <div class="questionsKind">
             <el-button type="primary" @click="saveQuestions">确认</el-button>
@@ -196,21 +196,6 @@
         <el-date-picker v-model="publishSetting.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px"
           value-format="YYYY-MM-DD HH:mm:ss" />
       </el-form-item>
-      <!-- <el-form-item label="考试时长">
-        <el-input style="width: 300px" v-model="publishSetting.examTime" type="number"></el-input>
-      </el-form-item> -->
-      <!-- <el-form-item label="督促设置">
-        <el-checkbox v-model="form.supervise">
-          在作业截至<el-input
-            size="mid"
-            style="width: 50px; margin-left: 10px; margin-right: 10px"
-            v-model="form.superviseTime"
-          ></el-input
-          >分钟的的时候发通知提醒学生
-        </el-checkbox>
-
-        <el-checkbox v-model="form.smartSupervise"> 智能提醒 </el-checkbox>
-      </el-form-item> -->
     </el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -231,7 +216,7 @@
         <!-- <template #header>
         </template> -->
         <template #default="scope">
-          <el-checkbox v-model="checkList[scope.$index]">
+          <el-checkbox v-model="checkList[scope.$index+(pageData.current - 1) * pageSize]">
           </el-checkbox>
         </template>
       </el-table-column>
@@ -249,8 +234,7 @@
     </el-table>
 
     <div style="margin-top:20px;">
-      <el-pagination layout="prev, pager, next" :total="pageData.total" v-model:current-page="pageData.current"
-        @change="getQuestions" />
+      <el-pagination layout="prev, pager, next" :total="pageData.total" v-model:current-page="pageData.current" />
     </div>
     <template #footer>
       <div class="dialog-footer">
@@ -269,7 +253,6 @@ import { reactive } from "vue";
 import { onBeforeUnmount, ref, shallowRef, onMounted } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import myEditor from "@/views/components/editor.vue";
-import { watch } from "vue";
 import {
   teacherAddAssignmentAPI,
   teacherGetAllClassAPI,
@@ -281,6 +264,7 @@ import E from "wangeditor";
 import { useUserStore } from '../../../../../stores/userStore';
 
 import {
+  teacherViewCourseQuestionAPI,
   teacherPageSearchQuestionsAPI
 } from "../../../../../apis/question";
 
@@ -627,25 +611,21 @@ const deleteCurrentQuestion = () => {
     return
   }
 
-  let flag = confirm('您确认要删除当前这道题吗')
+  if (confirm('您确认要删除当前这道题吗')) {
+    activeListIndex.value = 0;
+    const currentIndex = activeListIndex.value; // 保存当前索引值
+    const newQuestionsContentList = questionsContentList.value.filter((item, i) => {
+      console.error(activeListIndex.value)
+      console.log(i, currentIndex)
+      return i !== currentIndex;
+    });
 
-  if (flag === false) return;
 
-  console.log(activeListIndex.value)
-  console.log(questionsContentList.value)
-
-  questionsContentList.value = questionsContentList.value.filter((item, i) => {
-    console.log(item, i)
-    return activeListIndex.value !== i
-  })
-
-  activeListIndex.value = 0
-
-  // 重新保存
-
-  nextTick(() => {
-    saveQuestions()
-  })
+    questionsContentList.value = newQuestionsContentList;
+    nextTick(() => {
+      saveQuestions();
+    });
+  }
 }
 
 // 清除所有实例
@@ -654,13 +634,6 @@ const clear = () => {
   eleCheckBoxRef.value = [];
   eleFillRef.value = [];
 };
-
-watch(
-  () => questionsContentList.value[activeListIndex.value].type,
-  (newValue) => {
-    // questionsContentList.value[activeListIndex.value].answer=[]
-  }
-);
 
 // 添加一道题
 const addNewOneQuestion = () => {
@@ -878,27 +851,47 @@ const pageData = ref({
   current: 1,
 })
 
+const pageSize = 5; // 每页显示的数据数量
+
 const checkList = ref([])
 
 const tableData = ref<Array<Paper>>();
 
-const filterTableData = computed(() =>
-  tableData.value?.filter(
-    (data) =>
-      !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
-  )
+const filterTableData = computed(() => {
+  const filteredData = tableData.value.filter((data) =>
+    !search.value || data.title.toLowerCase().includes(search.value.toLowerCase())
+  );
+
+  // 计算当前页的开始和结束索引
+  const startIndex = (pageData.value.current - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // 返回当前页的数据
+  return filteredData.slice(startIndex, endIndex);
+}
 );
 
 const getQuestions = async () => {
 
+  // 清楚所有选择
   for (let i = 0; i < checkList.value.length; i++) {
     checkList.value[i] = false
   }
 
-  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, 5)
+  const reponse = await teacherViewCourseQuestionAPI(parseInt(route.params.id as string));
+
+  if (reponse.data.code == 200) {
+    tableData.value = reponse.data.data
+
+    for (let i = 0; i < tableData.value.length; i++) {
+    checkList.value[i] = false
+  }
+  }
+
+  const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, pageSize)
 
   if (res.data.code === 200) {
-    tableData.value = res.data.data.records
+    // tableData.value = res.data.data.records
     pageData.value.total = res.data.data.total
   }
   else {
@@ -932,8 +925,6 @@ const importQuestion = () => {
       })
     }
   }
-
-  // activeListIndex.value=questionsContentList.value.length-1;
 
   saveQuestions()
 

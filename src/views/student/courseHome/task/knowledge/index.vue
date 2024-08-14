@@ -1,20 +1,23 @@
 <template>
   <div class="bigBox">
     <span class="textTitle">知识图谱</span>
-    <el-button @click="deleteCurrentNode" type="primary" style="margin-left: 20px">删除当前节点</el-button>
-    <el-button @click="dealEdit" type="primary" style="margin-left: 20px">编辑当前节点</el-button>
-    <el-button @click="addDialog = true" type="primary" style="margin-left: 20px">新建</el-button>
-    <el-button type="primary" style="margin-left: 20px" @click="getKnowledge">生成知识图谱</el-button>
 
     <div>
-      <div style="
+      <div
+        style="
           border: #efefef solid 1px;
           height: calc(100vh - 200px);
           width: 100%;
           max-width: 1000px;
           margin: 0 auto;
-        ">
-        <relation-graph :on-node-click="onNodeClick" ref="graphRef$" :options="options" :on-line-click="onLineClick">
+        "
+      >
+        <relation-graph
+          :on-node-click="onNodeClick"
+          ref="graphRef$"
+          :options="options"
+          :on-line-click="onLineClick"
+        >
         </relation-graph>
       </div>
     </div>
@@ -40,13 +43,23 @@
         <el-input v-model="addForm.text" style="width: 240px"></el-input>
       </el-form-item>
       <el-form-item label="父级节点">
-        <el-select-v2 v-model="addForm.parentNodes" placeholder="选中父级节点" :options="nodesList" style="width: 240px"
-          multiple>
+        <el-select-v2
+          v-model="addForm.parentNodes"
+          placeholder="选中父级节点"
+          :options="nodesList"
+          style="width: 240px"
+          multiple
+        >
         </el-select-v2>
       </el-form-item>
       <el-form-item label="子节点">
-        <el-select-v2 v-model="addForm.childrenNodes" placeholder="选中子节点" style="width: 240px" :options="nodesList"
-          multiple>
+        <el-select-v2
+          v-model="addForm.childrenNodes"
+          placeholder="选中子节点"
+          style="width: 240px"
+          :options="nodesList"
+          multiple
+        >
         </el-select-v2>
       </el-form-item>
     </el-form>
@@ -162,52 +175,6 @@ function generateUniqueId() {
   return Math.random().toString(36).substr(2, 9); // 生成随机字符串作为ID
 }
 
-const deleteCurrentNode = () => {
-  // 删除当前节点
-  let flag = confirm("您确定要删除当前节点吗，这将删除当前节点以及子节点");
-
-  if (currentNode.value.id === jsonData.rootId) {
-    ElMessage.error("根节点不能删除");
-    return;
-  }
-  if (flag) {
-    const currentNodeId = currentNode.value.id; // 获取当前节点的ID，假设节点信息存储在currentNode中
-
-    // 在jsonData中找到并移除当前节点以及其子节点
-    const removeNodeAndChildren = (nodeId) => {
-      const nodeIndex = jsonData.nodes.findIndex((node) => node.id === nodeId);
-      if (nodeIndex !== -1) {
-        jsonData.nodes.splice(nodeIndex, 1); // 删除节点
-      }
-      // 递归删除子节点
-      const children = jsonData.lines
-        .filter((line) => line.from === nodeId)
-        .map((line) => line.to);
-      children.forEach((childId) => removeNodeAndChildren(childId));
-      // 删除与当前节点相关的线条
-      jsonData.lines = jsonData.lines.filter(
-        (line) => line.from !== nodeId && line.to !== nodeId
-      );
-    };
-
-    removeNodeAndChildren(currentNodeId);
-
-    // 更新图形数据
-    graphRef$.value.setJsonData(jsonData);
-  }
-};
-
-const dealEdit = () => {
-  if (currentNode.value === null) {
-    ElMessage.error("您还未选中任何节点");
-    return;
-  }
-  editForm.value.id = currentNode.value.id;
-  editForm.value.text = currentNode.value.text;
-
-  editDialog.value = true;
-};
-
 const editCurrentNode = () => {
   if (currentNode.value === null) {
     ElMessage.error("您还未选中任何节点");
@@ -233,10 +200,6 @@ const editCurrentNode = () => {
   }
 
   editDialog.value = false;
-};
-
-const onNodeTextChange = (node: RGNode, newNodeText: string) => {
-  node.text = newNodeText;
 };
 
 const onLineClick = (linkObject, $event) => {
@@ -276,8 +239,18 @@ onMounted(() => {
   jsonData = {
     rootId: "a",
     nodes: [
-      { id: "a", text: "暂无知识图谱，可以点击生成知识图谱创建" }
-    ]
+      { id: "a", text: "计算机硬件的发展" },
+      { id: "b", text: "晶体管" },
+      { id: "c", text: "集成电路和微处理器" },
+      { id: "d", text: "电子管计算机" },
+      { id: "e", text: "冯·诺依曼体系结构" },
+    ],
+    lines: [
+      { from: "a", to: "b", text: "123 " },
+      { from: "a", to: "c", text: "" },
+      { from: "a", to: "d", text: "" },
+      { from: "c", to: "e", text: "" },
+    ],
   };
 
   nodesList.value = jsonData.nodes.map((item) => {
@@ -291,31 +264,32 @@ onMounted(() => {
     (item: any) => item.id === jsonData.rootId
   );
 
-
+  
   graphRef$.value.setJsonData(jsonData);
-
+  
 });
 
 const generate = async () => {
-  // alert(1)
   const res = await getKnowledgeChartAPI(
     parseInt(route.params.id as string)
   );
 
   if (res.data.code === 200) {
-
+    // ElMessage.success('生成成功')
     console.log(res.data.code);
-    if (res.data.data === null) return false
-    {
-      setChart(res.data.data)
-      return true;
-    }
+    return true;
   } else return false;
 };
 
-const setChart=(data)=>{
-  if (Array.isArray(data.nodes)) {
-      data.nodes = data.nodes.map((item) => {
+const getKnowledge = async () => {
+  const res = await teacherGetKnowledgeChartByCourseAPI(parseInt(route.params.id as string));
+
+  if (res.data.code === 200) {
+    console.log(res.data.data);
+
+    // Check if nodes and lines are arrays before using forEach
+    if (Array.isArray(res.data.data.nodes)) {
+      res.data.data.nodes = res.data.data.nodes.map((item) => {
         return {
           id: item.id + "",
           text: item.name,
@@ -324,32 +298,21 @@ const setChart=(data)=>{
       });
     }
 
-    if (Array.isArray(data.lines)) {
-      data.lines.forEach((item) => {
+    if (Array.isArray(res.data.data.lines)) {
+      res.data.data.lines.forEach((item) => {
         item.from = item.from + "";
         item.to = item.to + "";
       });
     }
 
-    let rootId = data.roodId;
+    let rootId = res.data.data.roodId;
     let jsonData = {
       rootId,
-      nodes: data.nodes, // Assign nodes and lines directly if they are arrays
-      lines: data.lines,
+      nodes: res.data.data.nodes, // Assign nodes and lines directly if they are arrays
+      lines: res.data.data.lines,
     };
 
     graphRef$.value.setJsonData(jsonData);
-}
-
-const getKnowledge = async () => {
-  // alert(2)
-  const res = await teacherGetKnowledgeChartByCourseAPI(parseInt(route.params.id as string));
-
-  if (res.data.code === 200) {
-    console.log(res.data.data);
-
-    setChart(res.data.data)
-    
   } else {
     ElMessage.error(res.data.message);
   }
@@ -420,15 +383,9 @@ const setKnowledge = () => {
 onMounted(async () => {
   let flag = await generate();
 
-  if (flag === false) {
-    ElMessage.error('暂无知识图谱，可以点击生成')
-    return;
-  }
-  else {
-    // getKnowledge()
-  }
+  if (flag === false) return;
 
-
+  getKnowledge()
 
   // setKnowledge();
 });

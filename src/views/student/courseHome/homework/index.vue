@@ -20,23 +20,18 @@
           <div>
             <p style="margin-bottom: 5px">{{ item.title }}</p>
             <el-tag
-              v-if="item.state === '已完成'"
+              v-if="item.state === '1'"
               type="primary"
               size="small"
-              >{{ item.state }}</el-tag
+              >已完成</el-tag
             >
             <el-tag
-              v-else-if="item.state === '未完成'"
+              v-else-if="item.state === '0'"
               type="danger"
               size="small"
-              >{{ item.state }}</el-tag
+              >未完成</el-tag
             >
-            <el-tag
-              v-if="item.state === '待批阅'"
-              type="success"
-              size="small"
-              >{{ item.state }}</el-tag
-            >
+            
           </div>
         </template>
         <template v-if="getTime(item)" #right>
@@ -94,8 +89,8 @@ const getDeathTime = (item: any) => {
 };
 
 const getItem = (item: any) => {
-  console.log(item.endTime);
-  const endTime = new Date(item.endTime); // 将截止日期转换为日期对象
+  console.log(item.endDate);
+  const endTime = new Date(item.endDate); // 将截止日期转换为日期对象
 
   const currentDate = new Date(); // 获取当前日期
 

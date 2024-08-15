@@ -26,7 +26,7 @@
         <el-table-column label="试卷名称" prop="title" />
         <el-table-column label="发放对象">
           <template #default="scope">
-            {{ scope.row.classList.map((myClass) => myClass.className) }}
+            {{ scope.row?.classList?.map((myClass) => myClass.className) }}
           </template>
         </el-table-column>
         <el-table-column prop="waitCorrectNum" label="待批阅" />
@@ -35,8 +35,10 @@
         <el-table-column label="操作">
           <template #default="scope">
             <el-button v-if="scope.row.state === 0" type="primary" @click="toPublish(scope.row)">发布</el-button>
-            <el-button v-else type="primary" @click="toMark(scope.row.assignmentId)">批阅</el-button>
-            <el-button type="primary" @click="toAIMark(scope.row.assignmentId)">智能批阅</el-button>
+            <el-button v-if="scope.row.state === 2" type="primary" @click="toMark(scope.row.assignmentId)">批阅</el-button>
+            <el-button v-if="scope.row.state === 2" type="primary" @click="toAIMark(scope.row.assignmentId)">智能批阅</el-button>
+            <el-button v-if="scope.row.state === 0" type="primary" @click="toEdit(scope.row)">编辑</el-button>
+            <el-button type="danger" @click="deleteExam(scope.row.item,scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -46,28 +48,17 @@
   <el-dialog v-model="dialogFormVisible" title="发放设置" width="640">
     <el-form :model="form">
       <el-form-item label="发放对象">
-        <el-select-v2 v-model="form.classList" :options="options" placeholder="选择班级" style="width: 240px" multiple />
+        <el-select-v2 v-model="form.classList" :options="classListOptions" placeholder="选择班级" style="width: 240px" multiple />
       </el-form-item>
       <el-form-item label="有效时段">
-        <el-date-picker v-model="form.beginDate" type="datetime" placeholder="开始时间" style="margin-right: 20px" />
+        <el-date-picker v-model="form.beginDate" value-format="YYYY-MM-DD HH:mm:ss" type="datetime" placeholder="开始时间" style="margin-right: 20px" />
         至
-        <el-date-picker v-model="form.endDate" type="datetime" placeholder="结束时间" style="margin-left: 20px" />
+        <el-date-picker v-model="form.endDate" value-format="YYYY-MM-DD HH:mm:ss" type="datetime" placeholder="结束时间" style="margin-left: 20px" />
       </el-form-item>
-      <el-form-item label="发放对象">
-        <el-input type="number" min="0" v-model="form.examTime"></el-input>
+      <el-form-item label="考试时间">
+        <el-input type="number" min="0" v-model.number="form.examTime"></el-input>
       </el-form-item>
-      <!-- <el-form-item label="督促设置">
-        <el-checkbox v-model="form.smartSupervise">
-          在作业截至<el-input
-            size="mid"
-            style="width: 50px; margin-left: 10px; margin-right: 10px"
-            v-model="form.smartSupervise"
-          ></el-input
-          >分钟的的时候发通知提醒学生
-        </el-checkbox>
-
-        <el-checkbox v-model="form.smartSupervise"> 智能提醒 </el-checkbox>
-      </el-form-item> -->
+     
     </el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -91,6 +82,9 @@ import {
 import { teacherGetAllClassAPI } from "../../../../apis/assignment";
 import { teacherAddPaperAPI } from "@/apis/paper";
 import { useUserStore } from "@/stores/userStore";
+import {
+  teacherDeleteAssignmentAPI
+} from "@/apis/assignment";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -154,12 +148,23 @@ const toAIMark = async (id: number) => {
   }
 }
 
+const classList = ref([]);
+const classListOptions = ref([])
+
 const setClassList = async () => {
   const res = await teacherGetAllClassAPI();
-
   if (res.data.code === 200) {
-    options.value = res.data.data;
-  } else ElMessage.error(res.data.message);
+    classList.value = res.data.data;
+
+    classListOptions.value = classList.value.map(item => {
+      return {
+        label: item.className,
+        value: item.id
+      }
+    })
+  } else {
+    ElMessage.error(res.data.message);
+  }
 };
 
 const currentAssignmentData = ref();
@@ -173,7 +178,7 @@ const toPublish = (row: any) => {
 const publish = async () => {
   const res = await teacherPublishAssignmentAPI(
     2,
-    parseInt(route.params.assignmentId as string),
+    currentAssignmentData.value.assignmentId,
     form.value.beginDate,
     form.value.endDate,
     form.value.examTime,
@@ -208,8 +213,28 @@ const toUploadPaper = async () => {
 onMounted(() => {
   getAllExam();
 
-  // setClassList()
+  setClassList()
 });
+
+// 删除考试
+
+const deleteExam = async (item: any, index: number) => {
+  const res = await teacherDeleteAssignmentAPI(item.assignmentId);
+
+  if (res.data.code === 200) {
+    ElMessage.success("删除成功");
+    tableData.value = tableData.value.filter((item, i) => {
+      return i !== index;
+    });
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
+
+// 编辑考试
+const toEdit=(item:any)=>{
+  router.push('/course/'+route.params.id+'/exam/editExam/'+item.assignmentId)
+}
 </script>
 
 <style lang="scss" scoped>

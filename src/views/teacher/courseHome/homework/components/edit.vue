@@ -61,11 +61,11 @@
                             plain :icon="Delete" @click="deleteCurrentQuestion()"></el-button>
                     </div>
                     <div class="questionsKind">
-                        <el-button type="primary" @click="saveQuestions">确认</el-button>
+                        <el-button type="primary" @click="saveQuestions">保存当前题目</el-button>
                         <span>{{ activeListIndex + 1 }}.{{
                             questionsContentList[activeListIndex].type
                             }}</span>
-                        <el-input style="width: 80px" v-model="questionsContentList[activeListIndex].questionScore"
+                        <el-input style="width: 80px" v-model.number="questionsContentList[activeListIndex].questionScore"
                             type="number"></el-input>
                         <span style="margin-left: 20px">分</span>
                     </div>
@@ -177,7 +177,7 @@
                         <div class="analysis" style="margin-top: 20px">
                             <span>请输入解析</span>
                             <div style="margin-top: 20px" class="editor">
-                                <myEditor ref="analysisRef"></myEditor>
+                                <myEditor :text="questionsContentList[activeListIndex].answerAnalysis" ref="analysisRef"></myEditor>
                             </div>
                         </div>
                     </div>
@@ -258,6 +258,7 @@ import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import myEditor from "@/views/components/editor.vue";
 import {
     teacherAddAssignmentAPI,
+    teacherGetAissgnmentDetailsAPI,
     teacherGetAllClassAPI,
     teacherPublishAssignmentAPI,
 } from "@/apis/assignment";
@@ -271,13 +272,13 @@ import {
     teacherPageSearchQuestionsAPI
 } from "../../../../../apis/question";
 
-let assignmentId = 0;
+const route = useRoute();
+const router = useRouter();
+
+let assignmentId = parseInt(route.params.assignmentId as string);
 const dialogFormVisible = ref(false);
 
 const classListOptions = ref([])
-
-const route = useRoute();
-const router = useRouter();
 const questionsRadio = ref("单选题");
 
 const replyAnswer = ref();
@@ -615,19 +616,21 @@ const deleteCurrentQuestion = () => {
     }
 
     if (confirm('您确认要删除当前这道题吗')) {
-        activeListIndex.value = 0;
         const currentIndex = activeListIndex.value; // 保存当前索引值
-        const newQuestionsContentList = questionsContentList.value.filter((item, i) => {
-            console.error(activeListIndex.value)
+
+        activeListIndex.value = 0;
+
+        console.log(questionsContentList.value)
+
+        let newQuestionsContentList = questionsContentList.value.filter((item, i) => {
+
             console.log(i, currentIndex)
             return i !== currentIndex;
         });
 
-
         questionsContentList.value = newQuestionsContentList;
-        nextTick(() => {
-            saveQuestions();
-        });
+
+        console.log(newQuestionsContentList)
     }
 }
 
@@ -827,15 +830,26 @@ const totalScore = computed(() => {
     }, 0)
 })
 
-const setEditHomework=async()=>{
-    // const res = await 
+const setEditHomework = async () => {
+    const res = await teacherGetAissgnmentDetailsAPI(parseInt(route.params.assignmentId as string))
+
+    if (res.data.code === 200) {
+        console.log(res.data.data)
+        publishSetting.value.name = res.data.data.title
+        publishSetting.value.beginDate = res.data.data.beginDate
+        publishSetting.value.endDate = res.data.data.endDate
+        questionsContentList.value = JSON.parse(res.data.data.content)
+    }
+    else {
+        ElMessage.error(res.data.message)
+    }
 }
 
 onMounted(() => {
     setClassList();
 
     // 设置 questionContentList
-
+    setEditHomework()
 });
 
 // 导入题库模块

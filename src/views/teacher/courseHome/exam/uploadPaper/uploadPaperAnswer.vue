@@ -140,14 +140,9 @@ const getDetails = async () => {
           item.title.options = JSON.parse(item.title.options);
         }
       } catch (error) {
-        // item.title=''
       }
       return item;
     });
-
-    // srcList.value = res.data.data.questionsImage;
-    // url.value = JSON.parse(res.data.data.questionsImage)[0];
-    // console.log(url.value)
 
     console.log(questionList.value);
   }
@@ -188,9 +183,9 @@ onMounted(() => {
 
   getAnswerDetails()
 
-  nextTick(()=>{
-    save()
-  })
+  // nextTick(()=>{
+  //   save()
+  // })
 });
 </script>
 

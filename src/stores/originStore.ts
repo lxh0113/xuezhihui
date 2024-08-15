@@ -8,8 +8,9 @@ export const useOriginStore = defineStore(
       questions: [
         {
           questionScore: 8,
-          title:
-            "{'text': '解释一下术语：进程、进程控制块、进程映像、线程、进程互斥和同步、临界区和临界资源、竞争条件、原语、信号量、管程、死锁、饥饿'}",
+          title: JSON.stringify({
+            text: "解释一下术语：进程、进程控制块、进程映像、线程、进程互斥和同步、临界区和临界资源、竞争条件、原语、信号量、管程、死锁、饥饿",
+          }),
           type: "简答题",
         },
       ],

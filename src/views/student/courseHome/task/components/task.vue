@@ -3,7 +3,7 @@
     <!-- 视频 -->
     <h2 class="title">{{ task.taskPointTitle }}</h2>
     <div v-if="task.type === 'video'" class="video-container">
-      <myVideo :startTime="videoBeginTime" :src="task.content" />
+      <myVideo :startTime="videoBeginTime" :src="task.content" :track-url="JSON.parse(task.knowledge).vttText" />
     </div>
 
     <div
@@ -13,7 +13,7 @@
       <span class="titleText">知识切片</span>
       <el-timeline v-if="task.knowledge !== null" style="max-width: 600px">
         <el-timeline-item
-          v-for="item in JSON.parse(task.knowledge)"
+          v-for="item in JSON.parse(task.knowledge).knowledge"
           :timestamp="item.beginTime"
           placement="top"
         >
@@ -96,7 +96,6 @@ const task = ref({
   ),
 });
 
-// pathUrl.value = JSON.parse(task.value.knowledge).videoPath;
 
 const getTask = async () => {
   console.log(route.params);
@@ -116,19 +115,17 @@ const getTask = async () => {
 const videoBeginTime = ref(0);
 
 const changeCurrentTime = (beginTime: string) => {
-  // 解析时间字符串
-  let parts = beginTime.split(":");
-  let secondsPart = parts[2].split(",")[0]; // 获取秒部分
-  let millisecondsPart = parts[2].split(",")[1]; // 获取毫秒部分
-
-  // 转换为数值
-  let seconds = parseInt(secondsPart, 10); // 秒数部分
-  let milliseconds = parseInt(millisecondsPart, 10); // 毫秒数部分
+  const [timePart, millisecondPart = '000'] = beginTime.split('.');
+  const [hours, minutes, seconds] = timePart.split(':').map(Number);
+  const milliseconds = Number(millisecondPart);
+  const secondsFromHours = hours * 3600;
+  const secondsFromMinutes = minutes * 60;
+  const secondsFromMilliseconds = milliseconds / 1000;
 
   // 计算总秒数
-  let totalSeconds = seconds + milliseconds / 1000;
-  console.log(totalSeconds);
-  videoBeginTime.value = totalSeconds;
+  let totalSeconds = secondsFromHours + secondsFromMinutes + seconds + secondsFromMilliseconds;
+  console.log(totalSeconds)
+  videoBeginTime.value = totalSeconds
 };
 
 onMounted(() => {

@@ -126,7 +126,7 @@ const getDetails = async () => {
   );
 
   questionList.value = questionList.value.map((item) => {
-    item.title = JSON.parse(item.title);
+    // item.title = item.title;
 
     if (item.type === "单选题" || item.type === "多选题") {
       item.title.options = JSON.parse(item.title.options);
@@ -134,6 +134,8 @@ const getDetails = async () => {
 
     return item;
   });
+
+  console.log(originStore.getOriginPaperData())
 
   srcList.value = originStore.getOriginPaperData()!.files;
   url.value = originStore.getOriginPaperData()!.files[0];
@@ -177,9 +179,9 @@ const totalScore = computed(() => {
 onMounted(() => {
   getDetails();
 
-  nextTick(()=>{
-    save()
-  })
+  // nextTick(()=>{
+  //   save()
+  // })
 
 });
 </script>

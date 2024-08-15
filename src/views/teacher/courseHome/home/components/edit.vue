@@ -7,90 +7,40 @@
       </div>
       <div class="setting">
         <div class="contentSetting">
-          <el-button
-            :icon="Plus"
-            type="primary"
-            text="primary"
-            @click="chooseNode"
-            >同级目录</el-button
-          >
-          <el-button
-            type="primary"
-            text="primary"
-            :icon="Plus"
-            @click="chooseChildren"
-            >子目录</el-button
-          >
+          <el-button :icon="Plus" type="primary" text="primary" @click="chooseNode">同级目录</el-button>
+          <el-button type="primary" text="primary" :icon="Plus" @click="chooseChildren">子目录</el-button>
         </div>
         <Toolbar style="min-width: 400px; flex: 1" :editor="editorRef" />
       </div>
     </div>
     <div class="bottom">
       <div class="left">
-        <el-tree
-          style="max-width: 600px"
-          :data="data"
-          highlight-current
-          :props="defaultProps"
-          @node-click="handleNodeClick"
-        />
+        <el-tree style="max-width: 600px" :data="data" highlight-current :props="defaultProps"
+          @node-click="handleNodeClick" />
       </div>
       <div class="right" style="min-width: 400px">
-        <Editor
-          v-if="chapterData.type === 'text'"
-          v-model="valueHtml"
-          :defaultConfig="editorConfig"
-          class="editor"
+        <Editor v-if="chapterData.type === 'text'" v-model="valueHtml" :defaultConfig="editorConfig" class="editor"
           style="
             min-width: calc(100vh - 420px);
             overflow-y: scroll;
             box-sizing: border-box;
             adding: 20px;
-          "
-          @onCreated="handleCreated"
-        />
+          " @onCreated="handleCreated" />
 
-        <myVideo
-          :startTime="videoBeginTime"
-          v-else-if="chapterData.type === 'video'"
-          :src="currentUrl"
-          style="min-height: 400px"
-        />
+        <myVideo :startTime="videoBeginTime" v-else-if="chapterData.type === 'video'" :src="currentUrl"
+          :track-url="trackUrl" style="min-height: 400px" />
 
-        <iframe
-          v-else
-          style="min-width: 600px"
-          class="ppt"
-          :src="
-            'http://view.officeapps.live.com/op/view.aspx?src=' +
-            chapterData.content
-          "
-          frameborder="0"
-        ></iframe>
+        <iframe v-else style="min-width: 600px" class="ppt" :src="'http://view.officeapps.live.com/op/view.aspx?src=' +
+          chapterData.content
+          " frameborder="0"></iframe>
 
-        <div
-          class="buttonOptions"
-          style="display: flex; background: white; padding-top: 20px"
-        >
-          <el-upload
-            ref="upload"
-            class="upload-demo"
-            :limit="1"
-            :on-exceed="handleExceed"
-            :auto-upload="false"
-            style="margin-left: 20px"
-            :on-change="submit"
-            accept=".ppt,.pptx,.mp4,.avi,.mov,.flv,.wmv"
-          >
+        <div class="buttonOptions" style="display: flex; background: white; padding-top: 20px">
+          <el-upload ref="upload" class="upload-demo" :limit="1" :on-exceed="handleExceed" :auto-upload="false"
+            style="margin-left: 20px" :on-change="submit" accept=".ppt,.pptx,.mp4,.avi,.mov,.flv,.wmv">
             <template #trigger>
               <el-button type="primary">选择文件</el-button>
             </template>
-            <el-button
-              style="margin-left: 20px"
-              class="ml-3"
-              type="success"
-              @click="submitUpload"
-            >
+            <el-button style="margin-left: 20px" class="ml-3" type="success" @click="submitUpload">
               上传
             </el-button>
 
@@ -99,33 +49,18 @@
             </template>
           </el-upload>
 
-          <el-button
-            @click="deleteCurrentChapter"
-            type="danger"
-            style="margin-left: 20px"
-            >删除当前章节</el-button
-          >
+          <el-button @click="deleteCurrentChapter" type="danger" style="margin-left: 20px">删除当前章节</el-button>
 
-          <el-button
-            @click="addSubtitle"
-            type="warning"
-            style="margin-left: 20px"
-            v-if="chapterData.type === 'video'"
-            >AI视频总结</el-button
-          >
+          <el-button @click="addSubtitle" type="warning" style="margin-left: 20px"
+            v-if="chapterData.type === 'video'">AI视频总结</el-button>
+
+            <el-button v-if="chapterData.type === 'video'&&chapterData.knowledge!=null" type="primary">编辑已有字幕</el-button>
         </div>
 
         <div class="addSubtitleBox" v-if="chapterData.type === 'video'">
           <span class="titleText">知识切片</span>
-          <el-timeline
-            v-if="chapterData.knowledge !== null"
-            style="max-width: 600px"
-          >
-            <el-timeline-item
-              v-for="item in subTitleContent"
-              :timestamp="item.beginTime"
-              placement="top"
-            >
+          <el-timeline v-if="chapterData.knowledge !== null" style="max-width: 600px">
+            <el-timeline-item v-for="item in subTitleContent" :timestamp="item.beginTime" placement="top">
               <el-card @click="changeCurrentTime(item.beginTime)">
                 <!-- <h4></h4> -->
                 <p>{{ item.knowledge }}</p>
@@ -140,11 +75,7 @@
   <el-dialog v-model="dialogVisible" title="新建章节" width="500">
     <el-form>
       <el-form-item label="章节名称">
-        <el-input
-          v-model="chapterData.chapterTitle"
-          placeholder="请输入章节名称"
-          style="width: 300px"
-        >
+        <el-input v-model="chapterData.chapterTitle" placeholder="请输入章节名称" style="width: 300px">
         </el-input>
       </el-form-item>
     </el-form>
@@ -167,6 +98,7 @@ import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Plus } from "@element-plus/icons-vue";
 import {
   getAllChaptersAPI,
+  getVieoVttAPI,
   teacherAddChapterAPI,
   teacherDeleteChapterAPI,
   teacherModifyChaptersAPI,
@@ -179,7 +111,9 @@ import type { UploadInstance, UploadProps, UploadRawFile } from "element-plus";
 import { uploadImageAPI } from "../../../../../apis/activity";
 import myEditor from "@/views/components/editor.vue";
 
-const currentUrl=ref("https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/05:11:26-29ebcc0e90cc445d9761ff3b6c808844out_video.mp4")
+const currentUrl = ref("https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/05:11:26-29ebcc0e90cc445d9761ff3b6c808844out_video.mp4")
+const trackUrl=ref('')
+
 const route = useRoute();
 const router = useRouter();
 let cache = [];
@@ -261,14 +195,16 @@ const handleNodeClick = (node: any, data: Tree) => {
     console.log(cache);
 
     chapterData.value = cache.find((item) => item.id === node.id);
-
     if (chapterData.value.knowledge !== null) {
-      subTitleContent.value = JSON.parse(chapterData.value.knowledge);
-
+      
+      subTitleContent.value = JSON.parse(chapterData.value.knowledge).knowledge;
+      trackUrl.value=JSON.parse(chapterData.value.knowledge).vttText
+      console.log(trackUrl.value)
     }
 
-    if(chapterData.value.type==='video'){
-      currentUrl.value=chapterData.value.content
+    if (chapterData.value.type === 'video') {
+      currentUrl.value = chapterData.value.content
+      console.log(JSON.parse(chapterData.value.knowledge))
     }
 
     console.log(chapterData.value);
@@ -278,9 +214,6 @@ const handleNodeClick = (node: any, data: Tree) => {
     }
 
   }
-
-
-
   // console.log(data)
   // 设置
 };
@@ -572,7 +505,7 @@ const handleExceed: UploadProps["onExceed"] = (files) => {
 
 let file = new FormData();
 
-let cacheType:string='text'
+let cacheType: string = 'text'
 
 const submit = async (rawFile: UploadRawFile) => {
   console.log(rawFile);
@@ -584,7 +517,7 @@ const submit = async (rawFile: UploadRawFile) => {
     ["mp4", "avi", "mov", "flv", "wmv"].indexOf(FileExt.toLowerCase()) !== -1
   ) {
     cacheType = "video";
-    
+
   } else {
     ElMessage.error("您必须上传ppt或者视频");
     return;
@@ -607,9 +540,9 @@ const submitUpload = async () => {
     console.log(res.data.data);
 
     chapterData.value.content = res.data.data;
-    currentUrl.value=res.data.data
+    currentUrl.value = res.data.data
 
-    chapterData.value.type=cacheType;
+    chapterData.value.type = cacheType;
     toSave();
   } else {
     ElMessage.error("上传失败");
@@ -627,19 +560,32 @@ const toSave = async () => {
 
   console.log(chapterData.value);
 
-  chapterData.value.knowledge=JSON.stringify(chapterData.value.knowledge)
-    console.log(chapterData.value)
+  // chapterData.value.knowledge = chapterData.value.knowledge
+  console.log(chapterData.value)
 
   if (chapterData.value.id === null) {
     // 新建
 
-    chapterData.value.knowledge=null
-    
+    chapterData.value.knowledge = null
+
     const res = await teacherAddChapterAPI(chapterData.value);
 
     if (res.data.code === 200) {
       ElMessage.success("保存成功");
       getAllChapters();
+
+      chapterData.value = {
+        id: null,
+        chapterTitle: "",
+        chapterNumber: 1,
+        level: 1,
+        fatherId: 1,
+        courseId: parseInt(route.params.id as string),
+        taskPointTitle: "",
+        content: "新的内容",
+        type: "text",
+        knowledge: null
+      }
     } else {
       ElMessage.error(res.data.message);
     }
@@ -675,16 +621,23 @@ const deleteCurrentChapter = async () => {
 const subTitleContent = ref([]);
 
 const addSubtitle = async () => {
-  const res = await videoAddSubtitleAPI(chapterData.value.content);
+  const res = await getVieoVttAPI(chapterData.value.content);
 
   if (res.data.code === 200) {
-    chapterData.value.content = res.data.data.videoPath;
-    subTitleContent.value = res.data.data.knowledge;
 
-    chapterData.value.knowledge = res.data.data.knowledge;
-    chapterData.value.content = res.data.data.videoPath;
-    
-    currentUrl.value=res.data.data.videoPath
+    let knowledge = JSON.stringify({
+      knowledge: res.data.data.knowledge,
+      vttText: res.data.data.vttText
+    })
+
+    // console.log(chapterData.value)
+    subTitleContent.value = JSON.parse(res.data.data.knowledge).knowledge
+    trackUrl.value=res.data.data.vttText
+
+    console.log(trackUrl.value)
+
+    chapterData.value.knowledge = knowledge;
+
     ElMessage.success("获取含字幕视频成功");
     toSave();
   } else {
@@ -696,19 +649,17 @@ const videoBeginTime = ref(0);
 
 const changeCurrentTime = (beginTime: string) => {
 
-  // 解析时间字符串
-  let parts = beginTime.split(":");
-  let secondsPart = parts[2].split(",")[0]; // 获取秒部分
-  let millisecondsPart = parts[2].split(",")[1]; // 获取毫秒部分
-
-  // 转换为数值
-  let seconds = parseInt(secondsPart, 10); // 秒数部分
-  let milliseconds = parseInt(millisecondsPart, 10); // 毫秒数部分
+  const [timePart, millisecondPart = '000'] = beginTime.split('.');
+  const [hours, minutes, seconds] = timePart.split(':').map(Number);
+  const milliseconds = Number(millisecondPart);
+  const secondsFromHours = hours * 3600;
+  const secondsFromMinutes = minutes * 60;
+  const secondsFromMilliseconds = milliseconds / 1000;
 
   // 计算总秒数
-  let totalSeconds = seconds + milliseconds / 1000;
+  let totalSeconds = secondsFromHours + secondsFromMinutes + seconds + secondsFromMilliseconds;
   console.log(totalSeconds)
-  videoBeginTime.value=totalSeconds
+  videoBeginTime.value = totalSeconds
 };
 
 onMounted(() => {
@@ -734,14 +685,14 @@ onMounted(() => {
   --el-color-primary-light-9: #2f3ced;
 }
 
-.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+.el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
   // 设置颜色
   background-color: #f0f6ff; // 透明度为0.2的skyblue，作者比较喜欢的颜色
   color: #3a8bff !important; // 节点的字体颜色
   font-weight: bold; // 字体加粗
 }
 
-.el-tree-node:focus > .el-tree-node__content {
+.el-tree-node:focus>.el-tree-node__content {
   background-color: #f0f6ff; // 透明度为0.2的skyblue，作者比较喜欢的颜色
   color: #3a8bff !important; // 节点的字体颜色
   font-weight: bold !important; // 字体加粗

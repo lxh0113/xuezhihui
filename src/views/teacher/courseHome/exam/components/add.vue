@@ -74,11 +74,11 @@
               :icon="Delete" @click="deleteCurrentQuestion"></el-button>
           </div>
           <div class="questionsKind">
-            <el-button type="primary" @click="saveQuestions">确认</el-button>
+            <el-button type="primary" @click="saveQuestions">保存当前题目</el-button>
             <span>{{ activeListIndex + 1 }}.{{
               questionsContentList[activeListIndex].type
             }}</span>
-            <el-input style="width: 80px" v-model="questionsContentList[activeListIndex].questionScore"
+            <el-input style="width: 80px" v-model.number="questionsContentList[activeListIndex].questionScore"
               type="number"></el-input>
             <span style="margin-left: 20px">分</span>
           </div>
@@ -187,7 +187,7 @@
             <div class="analysis" style="margin-top: 20px">
               <span>请输入解析</span>
               <div style="margin-top: 20px" class="editor">
-                <myEditor ref="analysisRef"></myEditor>
+                <myEditor :text="questionsContentList[activeListIndex].answerAnalysis" ref="analysisRef"></myEditor>
               </div>
             </div>
           </div>
@@ -243,14 +243,13 @@
         <!-- <template #header>
         </template> -->
         <template #default="scope">
-          <el-checkbox v-model="checkList[scope.$index]">
+          <el-checkbox v-model="checkList[scope.$index+(pageData.current - 1) * pageSize]">
           </el-checkbox>
         </template>
       </el-table-column>
       <el-table-column label="题干">
         <template #default="scope">
           <p v-html="JSON.parse(scope.row.title).text"></p>
-          <!-- {{ JSON.parse(scope.row.title).text }} -->
         </template>
       </el-table-column>
 
@@ -291,6 +290,7 @@ import { ElMessage } from "element-plus";
 import E from "wangeditor";
 import { useUserStore } from "@/stores/userStore";
 import {
+  teacherViewCourseQuestionAPI,
   teacherPageSearchQuestionsAPI
 } from "../../../../../apis/question";
 
@@ -634,19 +634,21 @@ const deleteCurrentQuestion = () => {
   }
 
   if (confirm('您确认要删除当前这道题吗')) {
-    activeListIndex.value = 0;
     const currentIndex = activeListIndex.value; // 保存当前索引值
-    const newQuestionsContentList = questionsContentList.value.filter((item, i) => {
-      console.error(activeListIndex.value)
+    
+    activeListIndex.value = 0;
+
+    console.log(questionsContentList.value)
+
+    let newQuestionsContentList = questionsContentList.value.filter((item, i) => {
+      
       console.log(i, currentIndex)
       return i !== currentIndex;
     });
 
-
     questionsContentList.value = newQuestionsContentList;
-    nextTick(() => {
-      saveQuestions();
-    });
+
+    console.log(newQuestionsContentList)
   }
 }
 
@@ -906,8 +908,8 @@ const getQuestions = async () => {
     tableData.value = reponse.data.data
 
     for (let i = 0; i < tableData.value.length; i++) {
-      checkList.value[i] = false
-    }
+    checkList.value[i] = false
+  }
   }
 
   const res = await teacherPageSearchQuestionsAPI(parseInt(route.params.id as string), pageData.value.current, pageSize)
@@ -934,6 +936,8 @@ const importQuestion = () => {
   // 导入题目
 
   for (let i = 0; i < checkList.value.length; i++) {
+
+
     if (checkList.value[i]) {
       questionsContentList.value.push({
         questionScore: 3,

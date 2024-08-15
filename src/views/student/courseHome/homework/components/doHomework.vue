@@ -27,8 +27,8 @@
       <div class="setting">
         <span>题量:{{ questionsList.length }}&nbsp;&nbsp;</span>
         <span>满分:100&nbsp;&nbsp;</span>
-        <span>作答时间：{{ homeworkData.examBeginTime }} 至
-          {{ homeworkData.examEndTime }}&nbsp;&nbsp;</span>
+        <!-- <span>作答时间：{{ homeworkData.examBeginTime }} 至 -->
+          <!-- {{ homeworkData.examEndTime }}&nbsp;&nbsp;</span> -->
       </div>
       <div class="questions">
         <!-- <h3>选择题</h3> -->

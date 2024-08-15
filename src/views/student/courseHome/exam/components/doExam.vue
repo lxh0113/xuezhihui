@@ -248,8 +248,10 @@ function formatDateTime(date) {
   const minutes = ("0" + date.getMinutes()).slice(-2);
   const seconds = ("0" + date.getSeconds()).slice(-2);
 
-  return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+let startTime=''
 
 const dealHomework = async () => {
   getHomework();
@@ -260,7 +262,7 @@ const dealHomework = async () => {
     1,
     questionsList.value,
     2,
-    formatDateTime(new Date()),
+    startTime,
     formatDateTime(new Date()),
   );
 
@@ -284,7 +286,7 @@ const handInHomework = async () => {
   const res = await studentDoAssignmentAPI(
     userStore.getUserInfo().roleId,
     homeworkData.value.assignmentId,
-    1,
+    2,
     questionsList.value,
     2,
     formatDateTime(new Date()),
@@ -356,6 +358,9 @@ const restTime = computed(() => {
   return formatTime(rawRestTime.value); // 将分钟转换回秒来格式化
 });
 
+onMounted(()=>{
+  startTime=formatDateTime(new Date())
+})
 
 </script>
 

@@ -291,7 +291,7 @@ onMounted(async () => {
   
   await getStudentPaper();
   
-  save()
+  // save()
   
 });
 </script>

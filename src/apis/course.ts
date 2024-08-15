@@ -10,6 +10,16 @@ export const videoAddSubtitleAPI = (video: string) => {
   });
 };
 
+export const getVieoVttAPI=(video:string)=>{
+  return http({
+    url:"/python/getVtt",
+    method:"POST",
+    data:{
+      video
+    }
+  })
+}
+
 export const studentViewMyCourseAPI = (studentId: number) => {
   return http({
     url: "/course/courses/" + studentId,

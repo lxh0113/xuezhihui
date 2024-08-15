@@ -4,16 +4,13 @@
       <el-step title="上传原试卷" @click="activeIndex = 0">
       </el-step>
 
-      <el-step title="上传试卷答案" @click="() => { activeIndex = maxIndex >= activeIndex ? 1 : activeIndex }">
-
+      <el-step title="上传试卷答案" @click="() => { activeIndex = maxIndex >= 1 ? 1 : activeIndex }">
       </el-step>
 
-      <el-step title="批量上传学生试卷" @click="() => { activeIndex = maxIndex >= activeIndex ? 1 : activeIndex }">
-
+      <el-step title="批量上传学生试卷" @click="() => { activeIndex = maxIndex >= 2 ? 2 : activeIndex }">
       </el-step>
 
-      <el-step title="识别及批阅" @click="() => { activeIndex = maxIndex >= activeIndex ? 1 : activeIndex }">
-
+      <el-step title="识别及批阅" @click="() => { activeIndex = maxIndex >= 3 ? 3 : activeIndex }">
       </el-step>
 
     </el-steps>
@@ -146,14 +143,17 @@ import type { UploadProps, UploadUserFile, UploadRawFile } from "element-plus";
 import {
   teacherGetAnswerByDocAPI,
   teacherGetPaperQuestionInfoAPI,
+  teacherSavePaperInfoAPI,
   teacherUploadZipAPI,
+  teacherSavePaperAnswerAPI
 } from "@/apis/paper";
 import { useOriginStore } from "@/stores/originStore";
 import { useAnswerStore } from "@/stores/answerStore";
 import { useStudentStore } from "@/stores/studentStore";
 import { teacherSaveStudentAnswerAPI } from '../../../../../apis/paper';
+import { useUploadPaperStore } from "@/stores/uploadPaperStore";
 
-const baseUrl='192.168.50.199:5173'
+const baseUrl = '192.168.50.199:5173'
 
 const maxIndex = ref(0)
 const activeIndex = ref(0)
@@ -174,7 +174,6 @@ const originFileList = ref<UploadUserFile[]>([]);
 
 const originDialogImageUrl = ref("");
 const originDialog = ref(false);
-const srcList = ref([]);
 
 const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
@@ -195,8 +194,6 @@ const successUploadOriginImage = (response: any) => {
 
   console.log(originFileList.value);
 };
-
-let originDocUrl = ref("");
 
 let originFile = new FormData();
 
@@ -221,9 +218,31 @@ const originSubmitUpload = async () => {
 
     ElMessage.success("上传成功");
   } else {
-    ElMessage.error("上传失败");
+    ElMessage.error("上传失败,请重新再试");
   }
 };
+
+const saveOrigin = async () => {
+
+  let score = originStore.getOriginPaperData().questions.reduce((accumulator, question) => {
+    // 这里假设每个问题对象有一个 score 属性来表示分数
+    return accumulator + question.questionScore;
+  }, 0);
+
+  const res = await teacherSavePaperInfoAPI(
+    parseInt(route.params.paperId as string),
+    'test',
+    JSON.stringify(originStore.getOriginPaperData().files),
+    JSON.stringify(originStore.getOriginPaperData().questions),
+    score
+  );
+
+  if (res.data.code === 200) {
+    // ElMessage.success("保存成功");
+  } else {
+    ElMessage.error("保存失败");
+  }
+}
 
 const uploadOriginPaper = async () => {
   let files = originFileList.value.map((item) => item.url);
@@ -236,6 +255,7 @@ const uploadOriginPaper = async () => {
 
   if (res.data.code === 200) {
     originFlag.value = 1;
+
     console.log(res.data.data);
 
     originStore.setOriginPaperData({
@@ -244,22 +264,28 @@ const uploadOriginPaper = async () => {
       type: originPaperType.value,
     });
 
-    console.log(originStore.getOriginPaperData());
-
     ElMessage.success("上传成功");
+
+    activeIndex.value = 1;
+
+    // 设置maxIndex
+    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+
+    // 保存一下
+    saveOrigin()
+
   } else {
     originFlag.value = 0;
-    ElMessage.error(res.data.message);
+
+    ElMessage.error('上传失败,请重新再试');
   }
+
+  uploadPaperStore.setUploadResultByIndex(0, originFlag.value)
 };
 
 const toViewOrigin = () => {
 
-  activeIndex.value = 1;
-
-  maxIndex.value = maxIndex.value < activeIndex.value ? activeIndex.value : maxIndex.value;
-
-  window.open("http://"+baseUrl+"/upload/origin/" + route.params.paperId);
+  window.open("http://" + baseUrl + "/upload/origin/" + route.params.paperId);
 };
 
 // 上传试卷答案部分
@@ -287,10 +313,25 @@ const answerSubmitUpload = async () => {
   }
 };
 
+const saveAnswer = async () => {
+  const res = await teacherSavePaperAnswerAPI(
+    parseInt(route.params.paperId as string),
+    answerStore.getAnswerData().answerUrl,
+    JSON.stringify(answerStore.getAnswerData().answerList)
+  )
+
+  if (res.data.code === 200) {
+    // ElMessage.success("保存成功");
+  } else {
+    ElMessage.error("保存失败");
+  }
+}
+
 const getAnswer = async () => {
   const res = await teacherGetAnswerByDocAPI(answerUrl.value);
 
   if (res.data.code === 200) {
+
     answerFlag.value = 1;
 
     console.log(res.data.data);
@@ -300,31 +341,25 @@ const getAnswer = async () => {
       answerUrl: answerUrl.value,
     });
 
-    // const response=await teacherSaveStudentAnswerAPI(
-    //   parseInt(route.params.paperId as string),
-    //   "第一次月考",
-    //   answerStore.getAnswerData().answerList,
-    //   "软件五班",
-
-    // )
-
     ElMessage.success("获取成功");
 
+    activeIndex.value = 2;
+
+    // 设置maxIndex
+    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+    saveAnswer()
 
   } else {
     answerFlag.value = 0;
 
     ElMessage.error(res.data.message);
   }
+
+  uploadPaperStore.setUploadResultByIndex(1, answerFlag.value)
 };
 
 const toViewAnswer = () => {
-
-  activeIndex.value = 2;
-
-  maxIndex.value = maxIndex.value < activeIndex.value ? activeIndex.value : maxIndex.value;
-
-  window.open("http://"+baseUrl+"/upload/answer/" + route.params.paperId);
+  window.open("http://" + baseUrl + "/upload/answer/" + route.params.paperId);
 };
 
 // 批量上传学生试卷
@@ -341,6 +376,7 @@ const studentSubmitUpload = async () => {
   uploadZip()
 };
 
+
 const uploadZip = async () => {
   const res = await teacherUploadZipAPI(
     parseInt(route.params.paperId as string),
@@ -353,29 +389,70 @@ const uploadZip = async () => {
 
     ElMessage.success('上传成功')
 
+    activeIndex.value = 3;
+
+    // 设置maxIndex
+    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+
+    // 保存
 
   } else {
     studentFlag.value = 0
     ElMessage.error(res.data.message);
   }
+
+  uploadPaperStore.setUploadResultByIndex(2, studentFlag.value)
 };
 
 const toViewStudent = () => {
 
-  activeIndex.value = 3;
-
-  maxIndex.value = maxIndex.value < activeIndex.value ? activeIndex.value : maxIndex.value;
-
-  window.open("http://"+baseUrl+"/upload/student/" + route.params.paperId);
+  window.open("http://" + baseUrl + "/upload/student/" + route.params.paperId);
 };
 
 const toViewResult = () => {
-  window.open("http://"+baseUrl+"/upload/result/" + route.params.paperId);
+  window.open("http://" + baseUrl + "/upload/result/" + route.params.paperId);
 };
 
 // 查看批阅接口
 
+// 设置本地保存上传
 
+const uploadPaperStore = useUploadPaperStore()
+
+const setInitData = () => {
+
+  let paperId = parseInt(route.params.paperId as string);
+
+  if (uploadPaperStore.getPaperId() !== paperId) {
+    uploadPaperStore.setPaperId(paperId)
+    uploadPaperStore.clear()
+    return
+  }
+
+  if (uploadPaperStore.getCurrentUploadStep() !== 0) {
+    // 如果不为0就需要修改
+    activeIndex.value = uploadPaperStore.getCurrentUploadStep() + 1
+    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+
+    if (activeIndex.value > 0) {
+      // 第一个
+
+      originFlag.value = uploadPaperStore.getUploadResult()[0]
+    }
+
+    if (activeIndex.value > 1) {
+      answerFlag.value = uploadPaperStore.getUploadResult()[1]
+    }
+
+    if (activeIndex.value > 2) {
+      studentFlag.value = uploadPaperStore.getUploadResult()[2]
+    }
+  }
+}
+
+onMounted(() => {
+  setInitData()
+})
 </script>
 
 <style lang="scss" scoped>

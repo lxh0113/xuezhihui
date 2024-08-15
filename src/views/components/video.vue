@@ -1,7 +1,8 @@
 <template>
   <div style="height:600px;min-height:600px">
-    <video id="my-player" ref="videoRef" :src="src" class="video-js w-full h-full">
+    <video crossOrigin="anonymous" id="my-player" ref="videoRef" :src="src" class="video-js w-full h-full">
       <source :src="src" />
+      <track default kind="captions" srclang='zh' label='Chinese' :src="currentTrackUrl" />
     </video>
   </div>
 </template>
@@ -16,10 +17,11 @@ type MyVideoProps = {
   src: string;
   width?: string;
   height?: string;
-  startTime?:number
+  startTime?: number;
+  trackUrl?: string;
 };
 const props = withDefaults(defineProps<MyVideoProps>(), {
-  startTime:0
+  startTime: 0
 });
 // video标签
 const videoRef = ref<HTMLElement | null>(null);
@@ -29,7 +31,7 @@ const videoWrapStyles = computed<CSSProperties>(() => {
   return {
     width: props.width || "100%",
     height: props.height || "100%",
-    
+
   };
 });
 // 初始化videojs
@@ -50,17 +52,27 @@ const initVideo = () => {
   }
 };
 
-watch(()=>props.startTime,(newValue)=>{
-
+watch(() => props.startTime, (newValue) => {
   console.log(newValue)
-  videoRef.value.currentTime =newValue
+  videoRef.value.currentTime = newValue
 })
 
+const currentTrackUrl=ref('')
+
+watch(()=>props.trackUrl,(newValue)=>{
+  // if(newValue!==null)
+  console.log(newValue)
+  currentTrackUrl.value=newValue
+},{
+  immediate:true
+})
 
 // video初始化完成的回调函数
-const onPlayerReady = () => {};
+const onPlayerReady = () => { };
 onMounted(() => {
   initVideo();
+
+  console.log(props.trackUrl)
 });
 </script>
 
@@ -68,6 +80,7 @@ onMounted(() => {
 .w-full {
   width: 100%;
 }
+
 .h-full {
   height: 100%;
 }

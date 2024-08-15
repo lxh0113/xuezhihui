@@ -400,6 +400,10 @@ const teacherRouter: RouteRecordRaw = {
           component: () => import("@/views/teacher/courseHome/exam/index.vue"),
         },
         {
+          path:'exam/editExam/:assignmentId',
+          component:()=>import("@/views/teacher/courseHome/exam/components/edit.vue")
+        },
+        {
           path: "questions",
           component: () => import("@/views/teacher/questions/index.vue"),
         },

@@ -381,10 +381,7 @@ const setKnowledge = () => {
 };
 
 onMounted(async () => {
-  let flag = await generate();
-
-  if (flag === false) return;
-
+ 
   getKnowledge()
 
   // setKnowledge();

@@ -151,7 +151,7 @@ onMounted(async() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
   // background: red;
   margin-right: 20px;
   margin-bottom:20px;

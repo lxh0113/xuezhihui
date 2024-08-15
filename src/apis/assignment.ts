@@ -223,6 +223,15 @@ export const examAnalysisAPI = (courseId: number) => {
   return http({
     url: "/assignment/study_analysis",
     method: "GET",
-    params: courseId,
+    params: {
+      courseId
+    }
   });
 };
+
+export const teacherGetAissgnmentDetailsAPI=(assignmentId:number)=>{
+  return http({
+    url:'/assignment/one/'+assignmentId,
+    method:"GET"
+  })
+}

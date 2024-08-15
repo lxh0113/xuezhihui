@@ -1,5 +1,5 @@
 <template>
-  <div class="bigBox">
+  <div class="bigBox" @click="toAccompany">
     <div class="left">
       <img src="@/assets/image/accompany.png" alt="" />
     </div>
@@ -13,7 +13,14 @@
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useRouter } from 'vue-router';
+const router=useRouter()
+
+const toAccompany=()=>{
+  router.push('/accompany')
+}
+</script>
 
 <style lang="scss" scoped>
 .bigBox {

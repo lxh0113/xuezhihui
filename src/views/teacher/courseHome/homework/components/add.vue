@@ -61,11 +61,11 @@
               :icon="Delete" @click="deleteCurrentQuestion()"></el-button>
           </div>
           <div class="questionsKind">
-            <el-button type="primary" @click="saveQuestions">确认</el-button>
+            <el-button type="primary" @click="saveQuestions">保存当前题目</el-button>
             <span>{{ activeListIndex + 1 }}.{{
               questionsContentList[activeListIndex].type
             }}</span>
-            <el-input style="width: 80px" v-model="questionsContentList[activeListIndex].questionScore"
+            <el-input style="width: 80px" v-model.number="questionsContentList[activeListIndex].questionScore"
               type="number"></el-input>
             <span style="margin-left: 20px">分</span>
           </div>
@@ -174,7 +174,7 @@
             <div class="analysis" style="margin-top: 20px">
               <span>请输入解析</span>
               <div style="margin-top: 20px" class="editor">
-                <myEditor ref="analysisRef"></myEditor>
+                <myEditor :text="questionsContentList[activeListIndex].answerAnalysis" ref="analysisRef"></myEditor>
               </div>
             </div>
           </div>
@@ -223,7 +223,6 @@
       <el-table-column label="题干">
         <template #default="scope">
           <p v-html="JSON.parse(scope.row.title).text"></p>
-          <!-- {{ JSON.parse(scope.row.title).text }} -->
         </template>
       </el-table-column>
 
@@ -612,19 +611,21 @@ const deleteCurrentQuestion = () => {
   }
 
   if (confirm('您确认要删除当前这道题吗')) {
-    activeListIndex.value = 0;
     const currentIndex = activeListIndex.value; // 保存当前索引值
-    const newQuestionsContentList = questionsContentList.value.filter((item, i) => {
-      console.error(activeListIndex.value)
+    
+    activeListIndex.value = 0;
+
+    console.log(questionsContentList.value)
+
+    let newQuestionsContentList = questionsContentList.value.filter((item, i) => {
+      
       console.log(i, currentIndex)
       return i !== currentIndex;
     });
 
-
     questionsContentList.value = newQuestionsContentList;
-    nextTick(() => {
-      saveQuestions();
-    });
+
+    console.log(newQuestionsContentList)
   }
 }
 

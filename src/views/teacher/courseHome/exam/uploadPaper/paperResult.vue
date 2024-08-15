@@ -2,7 +2,7 @@
   <div class="markBox">
     <div class="outerBox">
       <div class="left">
-        <el-button style="margin-bottom: 20px" @click="save" type="primary">批阅</el-button>
+        <el-button style="margin-bottom: 20px" @click="save" type="primary">保存当前批阅结果</el-button>
         <div class="demo-image__preview">
           <el-image style="width: 400px; height: 700px" :src="url" :zoom-rate="1.2" :max-scale="7" :min-scale="0.2"
             :preview-src-list="srcList" :initial-index="4" fit="fill" />
@@ -101,14 +101,11 @@ import {
 } from "../../../../../apis/paper";
 
 const originStore = useOriginStore();
-const answerStore = useAnswerStore();
-const studentStore = useStudentStore();
 
 const url = ref("");
 const srcList = ref([]);
 
 const route = useRoute();
-const checkboxGroup1 = ref(["1"]);
 
 const eleRefs = ref([]);
 const setRef = (el: any) => {
@@ -292,11 +289,11 @@ const studentInfo = ref({
 const studentAnswer = ref([]);
 
 const getStudentPaper = async () => {
-  const res = await teacherGetStudentInfoAPI(srcList.value);
+  const res = await teacherGetStudentAnswerAPI(parseInt(route.params.paperId as string),srcList.value);
 
   if (res.data.code === 200) {
     console.log(res.data.data);
-    studentAnswer.value = res.data.data.studentAnswers;
+    studentAnswer.value =JSON.parse(res.data.data.content);
     studentInfo.value = res.data.data;
   } else {
     ElMessage.error(res.data.message);
@@ -326,7 +323,7 @@ const getAllQuestion = async () => {
 
   if (res.data.code === 200) {
     // 获取成功
-    1
+    markList.value=res.data.data
   }
   else {
     ElMessage.error(res.data.message)
@@ -334,15 +331,6 @@ const getAllQuestion = async () => {
 };
 
 const smartMarkQuestion = async (i: number) => {
-
-  // let data= {
-  //   title: JSON.stringify(questionList.value[i].title),
-  //   type: questionList.value[i].type,
-  //   studentAnswer: studentAnswer.value[i].studentAnswer,
-  //   questionScore: questionList.value[i].questionScore,
-  //   correctAnswer: answerList.value[i].answer
-  // }
-
   const res = await teacherMarkSingleQuestionAPI(JSON.stringify(questionList.value[i].title),
     questionList.value[i].type,
     studentAnswer.value[i].studentAnswer,

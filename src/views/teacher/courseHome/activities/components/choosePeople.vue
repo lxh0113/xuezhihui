@@ -69,8 +69,8 @@ const uploadImage = async (uploadFile) => {
 
     const response = await teacherCreateChoosePeopleAPI(
       parseInt(route.params.id as string),
-      // classStore.getCurrentClass(),
-      6,
+      classStore.getCurrentClass(),
+      // 6,
       userStore.getUserInfo().roleId,
       "选人",
       null,
@@ -101,9 +101,8 @@ const setTimer = () => {
   timer = setInterval(() => {
     currentImage.value = imageList.value[index].faceImage;
     index = (index + 1) % imageList.value.length;
-  }, 400);
+  }, 200);
 };
-
 const stop = async () => {
   if (timer !== null) clearInterval(timer);
 

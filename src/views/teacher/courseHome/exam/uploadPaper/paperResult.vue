@@ -159,7 +159,7 @@ const getDetails = async () => {
       }
     });
 
-    studentAnswer.value = questionList.value.map((item) => {""});
+    studentAnswer.value = questionList.value.map((item) => "");
 
     markList.value = questionList.value.map((item) => {
       return {
@@ -295,6 +295,7 @@ const getStudentPaper = async () => {
   if (res.data.code === 200) {
     console.log(res.data.data);
     studentAnswer.value =JSON.parse(res.data.data.content);
+    console.log(studentAnswer.value)
     studentInfo.value = res.data.data;
   } else {
     ElMessage.error(res.data.message);

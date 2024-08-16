@@ -104,6 +104,38 @@ const startRecording = () => {
     xfVoice.start();
 };
 
+import Recorder from 'js-audio-recorder'
+
+//启动录音
+function handleStart() {
+    let recorder = new Recorder({
+        sampleBits: 16, // 采样位数，支持 8 或 16，默认是16
+        sampleRate: 16000, // 采样率，支持 11025、16000、22050、24000、44100、48000，根据浏览器默认值，我的chrome是48000
+        numChannels: 1, // 声道，支持 1 或 2， 默认是1
+        // compiling: true//(0.x版本中生效,1.x增加中)  // 是否边录边转换，默认是false
+    });
+
+    // 获取录音权限
+    Recorder.getPermission().then(
+        () => {
+            console.log("开始录音");
+            // startTall = true
+            // recorder.start(); // 开始录音
+        },
+        (error) => {
+            this.$message({
+                message: "请允许该网页使用麦克风",
+                type: "info",
+            });
+            console.log(`${error.name} : ${error.message}`);
+        }
+    );
+}
+
+onMounted(() => {
+    handleStart()
+})
+
 // 语音合成模块
 
 //先引入下载好的插件
@@ -136,7 +168,7 @@ speech
         lang: 'zh-CN', // 语言
         rate: 1, // 语速
         pitch: 1, // 音调
-        voice:'Google UK English Male',
+        voice: 'Google UK English Male',
         splitSentences: true, // 在句子结束时暂停
         listeners: {
             // 事件

@@ -1,30 +1,11 @@
 <template>
   <div>
-    <beautiful-chat
-      :participants="participants"
-      :titleImageUrl="titleImageUrl"
-      :onMessageWasSent="onMessageWasSent"
-      :messageList="messageList"
-      :newMessagesCount="newMessagesCount"
-      :isOpen="isChatOpen"
-      :close="closeChat"
-      :icons="icons"
-      :open="openChat"
-      :showEmoji="true"
-      :showFile="false"
-      :showEdition="true"
-      :showDeletion="true"
-      :deletionConfirmation="true"
-      :showTypingIndicator="showTypingIndicator"
-      :showLauncher="true"
-      :showCloseButton="true"
-      :colors="colors"
-      :alwaysScrollToBottom="alwaysScrollToBottom"
-      :disableUserListToggle="false"
-      :messageStyling="messageStyling"
-      @onType="handleOnType"
-      @edit="editMessage"
-    />
+    <beautiful-chat :participants="participants" :titleImageUrl="titleImageUrl" :onMessageWasSent="onMessageWasSent"
+      :messageList="messageList" :newMessagesCount="newMessagesCount" :isOpen="isChatOpen" :close="closeChat"
+      :icons="icons" :open="openChat" :showEmoji="true" :showFile="false" :showEdition="true" :showDeletion="true"
+      :deletionConfirmation="true" :showTypingIndicator="showTypingIndicator" :showLauncher="true"
+      :showCloseButton="true" :colors="colors" :alwaysScrollToBottom="alwaysScrollToBottom"
+      :disableUserListToggle="false" :messageStyling="messageStyling" @onType="handleOnType" @edit="editMessage" />
   </div>
 </template>
 
@@ -185,18 +166,20 @@ export default {
 </script>
 
 <style>
-
 .sc-chat-window {
   width: 800px !important;
-  z-index:999;
+  z-index: 999;
 }
+
 .sc-message-list {
   width: 800px !important;
 }
+
 .sc-message {
   width: 760px !important;
 }
-.sc-launcher{
-  z-index:999;
+
+.sc-launcher {
+  z-index: 999;
 }
 </style>

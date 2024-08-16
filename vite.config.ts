@@ -31,8 +31,8 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         // 这里的路径要和刚刚写的 index.scss 文件路径一致
-        additionalData: `
-          @use "@/styles/theme.scss" as *;
+        additionalData: 
+        ` @use "@/styles/theme.scss" as *;
           @use "@/styles/element/index.scss" as *;
         `,
       },

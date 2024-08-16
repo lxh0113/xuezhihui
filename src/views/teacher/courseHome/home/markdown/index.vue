@@ -10,10 +10,32 @@
         <el-button type="primary" @click="zoomOut">缩小</el-button>
         <el-button type="primary" @click="fitToScreen">适应屏幕</el-button>
         <el-button type="primary" @click="onSave">下载</el-button>
+        <el-button type="primary" @click="editMarkdown">编辑思维导图</el-button>
         <el-button type="success" @click="init">生成思维导图</el-button>
       </div>
     </div>
   </div>
+
+  <el-dialog
+    v-model="editDialogVisiable"
+    title="编辑思维导图"
+    width="90%"
+    top="100px"
+  >
+    <el-form>
+      <el-form-item >
+        <el-input type="textarea" rows="30" v-model="content" placeholder="请输入……"></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="editDialogVisiable = false">取消</el-button>
+        <el-button type="primary" @click="modifyMarkdown">
+          修改
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -145,6 +167,27 @@ onMounted(async () => {
 });
 
 onUpdated(update);
+
+// 编辑思维导图
+
+const editDialogVisiable=ref(false)
+
+const content=ref('')
+
+const editMarkdown=()=>{
+  content.value=initValue
+  editDialogVisiable.value=true
+}
+
+const modifyMarkdown=()=>{
+
+  initValue=content.value
+
+  update()
+
+  editDialogVisiable.value=false
+}
+
 </script>
 
 <style lang="scss" scoped>

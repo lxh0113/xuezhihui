@@ -2,44 +2,19 @@
   <div class="markBox">
     <div class="outerBox">
       <div class="left">
-        <el-button style="margin-bottom: 20px" @click="save" type="success"
-          >保存</el-button
-        >
+        <el-button style="margin-bottom: 20px" @click="save" type="success">保存</el-button>
         <div class="demo-image__preview">
-          <el-image
-            style="width: 400px; height: 700px"
-            :src="url"
-            :zoom-rate="1.2"
-            :max-scale="7"
-            :min-scale="0.2"
-            :preview-src-list="srcList"
-            :initial-index="4"
-            fit="fill"
-          />
+          <el-image style="width: 400px; height: 700px" :src="url" :zoom-rate="1.2" :max-scale="7" :min-scale="0.2"
+            :preview-src-list="srcList" :initial-index="4" fit="fill" />
         </div>
         <div style="height: 10px"></div>
-        <el-button :disabled="currentStudentIndex === 0" @click="lastPapers"
-          >上一套学生试卷</el-button
-        >
-        <el-button
-          :disabled="paperIndex === 0"
-          @click="minusPapers"
-          circle
-          :icon="ArrowLeft"
-          type="primary"
-        ></el-button>
-        <el-button
-          :disabled="paperIndex === srcList.length - 1"
-          @click="addPapers"
-          circle
-          :icon="ArrowRight"
-          type="primary"
-        ></el-button>
-        <el-button
-          :disabled="currentStudentIndex == studentImageList.length - 1"
-          @click="nextPapers"
-          >下一套学生试卷</el-button
-        >
+        <el-button :disabled="currentStudentIndex === 0" @click="lastPapers">上一套学生试卷</el-button>
+        <el-button :disabled="paperIndex === 0" @click="minusPapers" circle :icon="ArrowLeft"
+          type="primary"></el-button>
+        <el-button :disabled="paperIndex === srcList.length - 1" @click="addPapers" circle :icon="ArrowRight"
+          type="primary"></el-button>
+        <el-button :disabled="currentStudentIndex == studentImageList.length - 1"
+          @click="nextPapers">下一套学生试卷</el-button>
       </div>
     </div>
 
@@ -63,10 +38,7 @@
           {{ item.title.text }}
         </p>
 
-        <p
-          v-if="item.type === '单选题' || item.type === '多选题'"
-          v-for="(option, optionIndex) in item.title.options"
-        >
+        <p v-if="item.type === '单选题' || item.type === '多选题'" v-for="(option, optionIndex) in item.title.options">
           {{ String.fromCharCode("A".charCodeAt(0) + optionIndex) }}
           {{ item.title.options[optionIndex] }}
         </p>
@@ -77,11 +49,7 @@
 
         <!-- <p>学生答案</p> -->
         <el-form-item label="学生答案">
-          <el-input
-            type="textarea"
-            cols="5"
-            v-model="studentAnswer[index].studentAnswer"
-          ></el-input>
+          <el-input type="textarea" cols="5" v-model="studentAnswer[index].studentAnswer"></el-input>
         </el-form-item>
 
         <!-- <p class="studentAnswerBox">
@@ -108,6 +76,7 @@ import {
   teacherGetStudentAnswerAPI,
   teacherSavePaperAnswerAPI,
   teacherGetStudentInfoAPI,
+  teacherGetAllStudentPaperAPI,
 } from "@/apis/paper";
 import { useAnswerStore } from "@/stores/answerStore";
 import { useStudentStore } from "@/stores/studentStore";
@@ -253,12 +222,21 @@ const nextPapers = () => {
 };
 
 const getStudentDetails = async () => {
-  console.log(studentStore.getStudentList());
-  studentImageList.value = studentStore.getStudentList();
-  currentStudentIndex.value = 0;
-  srcList.value = studentImageList.value[currentStudentIndex.value];
-  url.value = srcList.value[0];
-  paperIndex.value = 0;
+  // console.log(studentStore.getStudentList());
+
+  const res = await teacherGetAllStudentPaperAPI(parseInt(route.params.paperId as string))
+
+  if (res.data.code === 200) {
+    studentImageList.value = res.data.data
+    currentStudentIndex.value = 0;
+
+    srcList.value = studentImageList.value[currentStudentIndex.value];
+    url.value = srcList.value[0];
+    paperIndex.value = 0;
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
 };
 
 const studentInfo = ref({
@@ -288,11 +266,11 @@ onMounted(async () => {
   await getAnswerDetails();
 
   await getStudentDetails();
-  
+
   await getStudentPaper();
-  
+
   // save()
-  
+
 });
 </script>
 
@@ -304,6 +282,7 @@ onMounted(async () => {
 label {
   color: black;
 }
+
 .markBox {
   display: flex;
   background: #f5f7fd;
@@ -468,9 +447,11 @@ label {
 .demo-image__error .image-slot {
   font-size: 30px;
 }
+
 .demo-image__error .image-slot .el-icon {
   font-size: 30px;
 }
+
 .demo-image__error .el-image {
   width: 100%;
   height: 200px;

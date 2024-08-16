@@ -7,6 +7,11 @@ const studentRouter: RouteRecordRaw = {
   redirect: "/student/course",
   children: [
     {
+      path:'accompany',
+      component: () =>
+        import("@/views/student/accompany/index.vue")
+    },
+    {
       path: "studentRoute",
       component: () =>
         import("@/views/student/courseHome/home/components/studentRoute.vue"),

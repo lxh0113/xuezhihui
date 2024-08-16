@@ -631,11 +631,12 @@ const addSubtitle = async () => {
     })
 
     // console.log(chapterData.value)
-    subTitleContent.value = JSON.parse(res.data.data.knowledge).knowledge
+    subTitleContent.value = res.data.data.knowledge
     trackUrl.value=res.data.data.vttText
 
     console.log(trackUrl.value)
 
+    console.log(knowledge)
     chapterData.value.knowledge = knowledge;
 
     ElMessage.success("获取含字幕视频成功");

@@ -20,7 +20,7 @@
 
     <div class="right">
       <div style="display: flex; margin-bottom: 20px">
-        <h3>{{ paperData.title }}</h3>
+        <h3 >{{ paperData.title }}</h3>
         <p style="margin-left: 20px" class="scoreText">
           总分：{{ totalScore }}
         </p>
@@ -62,7 +62,7 @@
         </p>
         <div style="display:flex;aligns-item:center;margin-bottom:20px;">
           <span style="font-weight:bold;width:70px">得分</span>
-          <el-input v-model="markList[index].studentScore" style="margin-left:20px;" min="0"
+          <el-input v-model.number="markList[index].studentScore" style="margin-left:20px;" min="0"
             :max="questionList[index].questionScore"></el-input>
         </div>
         <div style="display:flex;aligns-item:center;">
@@ -159,7 +159,7 @@ const getDetails = async () => {
       }
     });
 
-    studentAnswer.value = questionList.value.map((item) => "");
+    studentAnswer.value = questionList.value.map((item) => {""});
 
     markList.value = questionList.value.map((item) => {
       return {
@@ -175,7 +175,8 @@ const getDetails = async () => {
 
 const save = async () => {
 
-  let sumScore = markList.value.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  let sumScore = markList.value.reduce((s, a) => s + a.studentScore, 0);
+  console.log(sumScore)
 
   const res = await teacherSaveStudentAnswerAPI(
     parseInt(route.params.paperId as string),
@@ -208,7 +209,7 @@ const totalScore = computed(() => {
 });
 
 const studentScore=computed(() => {
-  return questionList.value.reduce((accumulator, question) => {
+  return markList.value.reduce((accumulator, question) => {
     // 这里假设每个问题对象有一个 score 属性来表示分数
     if(question.studentScore)  return accumulator + question.studentScore;
     else return accumulator
@@ -408,7 +409,7 @@ label {
       color: #3B90FF;
       font-weight: bold;
       margin-left: 20px;
-      font-size: 20px;
+      font-size: 18px;
     }
 
     .question {

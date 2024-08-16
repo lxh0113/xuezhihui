@@ -23,6 +23,7 @@
     "element-plus": "^2.7.2",
     "file-saver": "^2.0.5",
     "html-to-image": "^1.11.11",
+    "js-audio-recorder": "^1.0.7",
     "json5": "^2.2.3",
     "markmap-lib": "^0.17.0",
     "markmap-view": "^0.17.0",

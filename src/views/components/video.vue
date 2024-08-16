@@ -2,7 +2,7 @@
   <div style="height:600px;min-height:600px">
     <video crossOrigin="anonymous" id="my-player" ref="videoRef" :src="src" class="video-js w-full h-full">
       <source :src="src" />
-      <track default kind="captions" srclang='zh' label='Chinese' :src="currentTrackUrl" />
+      <track v-if="visiable" default kind="captions" srclang='en' :src="currentTrackUrl" />
     </video>
   </div>
 </template>
@@ -57,14 +57,21 @@ watch(() => props.startTime, (newValue) => {
   videoRef.value.currentTime = newValue
 })
 
-const currentTrackUrl=ref('')
+const currentTrackUrl = ref('')
+const visiable = ref(true)
 
-watch(()=>props.trackUrl,(newValue)=>{
-  // if(newValue!==null)
+watch(() => props.trackUrl, (newValue) => {
+  visiable.value = false
   console.log(newValue)
-  currentTrackUrl.value=newValue
-},{
-  immediate:true
+
+  // alert(21)
+  currentTrackUrl.value = newValue
+
+  setTimeout(() => {
+    visiable.value = true
+  }, 200)
+}, {
+  immediate: true
 })
 
 // video初始化完成的回调函数

@@ -145,9 +145,14 @@ export const useWsStore = defineStore("ws", () => {
 
     }
 
+    const getMyMessage=()=>{
+        return myMessage.value
+    }
+
     return {
         ws,
         myMessage,
+        getMyMessage,
         status,
         wsInit,
         sendMessage

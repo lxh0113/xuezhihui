@@ -9,7 +9,9 @@ const studentRouter: RouteRecordRaw = {
     {
       path:'accompany',
       component: () =>
-        import("@/views/student/accompany/index.vue")
+        // import("@/views/student/accompany/index.vue")
+      import("@/views/student/accompany/components/myDictation.vue")
+
     },
     {
       path: "studentRoute",

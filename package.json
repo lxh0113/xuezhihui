@@ -17,6 +17,7 @@
     "animate.css": "^4.1.1",
     "axios": "^1.6.8",
     "base-64": "^1.0.0",
+    "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",
     "echarts": "^5.5.0",
@@ -27,6 +28,7 @@
     "json5": "^2.2.3",
     "markmap-lib": "^0.17.0",
     "markmap-view": "^0.17.0",
+    "md5": "^2.3.0",
     "mockjs": "^1.1.0",
     "naive-chat": "^0.1.13",
     "pinia": "^2.1.7",
@@ -57,6 +59,7 @@
     "unplugin-vue-components": "^0.27.0",
     "vite": "^5.2.8",
     "vite-plugin-vue-devtools": "^7.0.25",
-    "vue-tsc": "^2.0.11"
+    "vue-tsc": "^2.0.11",
+    "worker-loader": "^3.0.8"
   }
 }

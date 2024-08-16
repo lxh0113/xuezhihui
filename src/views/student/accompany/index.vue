@@ -7,15 +7,15 @@
                 <p>{{ replyText }}</p>
                 <div class="question">
                     <el-input v-model="text" type="textarea" placeholder=""></el-input>
-                    <el-button style="height: 52px;" type="primary" @click="intercomBegin">询问</el-button>
-                    <!-- <el-button style="height: 52px;" type="primary" @click="intercomEnd">结束</el-button> -->
+                    <el-button style="height: 52px;" type="primary" @click="intercomBegin">发送</el-button>
+                    <button id="btn_control">开始录音</button>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
-<script lang="ts" setup>
+<script setup>
 import { ref } from 'vue'
 const text = ref('')
 import Recorder from 'js-audio-recorder'
@@ -89,24 +89,25 @@ function intercomEnd() {
 
 // 语言对话
 
-const wsStore=useWsStore()
-const replyText=ref('')
+const wsStore = useWsStore()
+const replyText = ref('')
 
-const chat=()=>{
-
-    // wsStore.wsInit()
-
+const chat = () => {
 
     wsStore.sendMessage(text.value)
 }
 
-watch(()=>wsStore.myMessage,()=>{
-    console.log(wsStore.getMyMessage()[wsStore.getMyMessage().length-1])
+watch(() => wsStore.myMessage, () => {
 
-    replyText.value=wsStore.getMyMessage()[wsStore.getMyMessage().length-1].data.text
+    console.log(wsStore.getMyMessage()[wsStore.getMyMessage().length - 1])
+    replyText.value = wsStore.getMyMessage()[wsStore.getMyMessage().length - 1].data.text
+
+}, {
+    deep: true
+});
+
+onMounted(()=>{
     
-},{
-    deep:true
 })
 
 </script>
@@ -142,7 +143,7 @@ watch(()=>wsStore.myMessage,()=>{
             border-radius: 10px;
             box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
             opacity: 0.9;
-            display: flex; 
+            display: flex;
             flex-direction: column;
             justify-content: space-around;
 

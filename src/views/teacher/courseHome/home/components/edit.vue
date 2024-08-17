@@ -142,11 +142,11 @@ const editorRef = shallowRef();
 const valueHtml = ref("<p>hello</p>");
 
 // 模拟 ajax 异步获取内容
-onMounted(() => {
-  setTimeout(() => {
-    valueHtml.value = "<p></p>";
-  }, 1500);
-});
+// onMounted(() => {
+//   setTimeout(() => {
+//     valueHtml.value = "<p></p>";
+//   }, 1500);
+// });
 
 // 编辑器配置
 const editorConfig = {
@@ -339,6 +339,8 @@ const addNode = async () => {
   }
 
   chapterData.value.id = null;
+
+  toSave()
 };
 
 const chooseNode = () => {
@@ -425,6 +427,8 @@ const addChildren = () => {
       if (j < data.value[i].children.length) break;
     }
   }
+
+  toSave()
 };
 
 const setTreeData = (value: any) => {
@@ -481,6 +485,29 @@ const setTreeData = (value: any) => {
   }
 
   console.log(data.value);
+
+  // chapterData.value=data.value[0];
+  console.log(cache)
+  chapterData.value=cache[0]
+
+  if (chapterData.value.knowledge !== null) {
+      
+      subTitleContent.value = JSON.parse(chapterData.value.knowledge).knowledge;
+      trackUrl.value=JSON.parse(chapterData.value.knowledge).vttText
+      console.log(trackUrl.value)
+    }
+
+    if (chapterData.value.type === 'video') {
+      currentUrl.value = chapterData.value.content
+      console.log(JSON.parse(chapterData.value.knowledge))
+    }
+
+    // console.log(chapterData.value);
+
+    if (chapterData.value.type === "text") {
+      valueHtml.value = chapterData.value.content;
+    }
+
 };
 
 const getAllChapters = async () => {
@@ -565,6 +592,8 @@ const toSave = async () => {
 
   if (chapterData.value.id === null) {
     // 新建
+
+    chapterData.value.content=''
 
     chapterData.value.knowledge = null
 

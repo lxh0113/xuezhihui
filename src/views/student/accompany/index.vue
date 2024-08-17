@@ -1,42 +1,52 @@
 <template>
     <div class="accompanyBox">
         <div class="chatBox">
-            <img src="../../../assets/accompany/fox.gif" alt="">
-
-            <div class="textBox">
-                <p>{{ replyText }}</p>
-                <div class="question">
-                    <el-input v-model="question" type="textarea" placeholder=""></el-input>
-                    <el-button style="height: 52px;" type="primary" @click="chat">发送</el-button>
-                    <el-button type="primary" @click="startRecording()">{{ statusText }}</el-button>
-                    <!-- <h1 @click="voice">{{ $t('home.title') }}</h1> -->
-                    <el-button @click="voice">test</el-button>
-                </div>
-            </div>
+            <img class="fox" v-if="status === 1" src="../../../assets/accompany/fox_wait.gif" alt="">
+            <img class="fox" v-if="status === 2" src="../../../assets/accompany/fox.gif" alt="">
+            <img class="fox" v-if="status === 0" src="../../../assets/accompany/fox_dance.gif" alt="">
         </div>
+
+        <button @click="startRecording" class="voiceButton" type="primary" circle plain>
+            <svg v-if="status !== 0" t="1723877577120" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                xmlns="http://www.w3.org/2000/svg" p-id="15866" width="48" height="48">
+                <path
+                    d="M640 469.333333a128 128 0 1 1-256 0V213.333333a128 128 0 0 1 256 0v256zM512 0a213.333333 213.333333 0 0 0-213.333333 213.333333v256a213.333333 213.333333 0 0 0 426.666666 0V213.333333a213.333333 213.333333 0 0 0-213.333333-213.333333z"
+                    fill="#4E4E4E" p-id="15867"></path>
+                <path
+                    d="M256 554.666667a42.666667 42.666667 0 1 0-85.333333 0c0 81.493333 37.845333 158.08 102.4 213.418666C326.954667 814.336 396.16 842.965333 469.333333 850.986667A43.093333 43.093333 0 0 0 469.333333 853.333333v128a42.666667 42.666667 0 1 0 85.333334 0v-128l-0.042667-2.346666c73.173333-8.021333 142.378667-36.693333 196.309333-82.901334C815.530667 712.746667 853.333333 636.16 853.333333 554.666667a42.666667 42.666667 0 1 0-85.333333 0c0 54.272-25.088 107.946667-72.576 148.608C647.722667 744.149333 581.845333 768 512 768c-69.845333 0-135.722667-23.850667-183.424-64.725333C281.088 662.613333 256 608.938667 256 554.666667z"
+                    fill="#4180FF" p-id="15868"></path>
+            </svg>
+            <img v-if="status===0" class="wave" src="../../../assets/accompany/button.gif" alt="">
+        </button>
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useWsStore } from '../../../stores/wsStore.js'
+import _ from "lodash";
 
 // 语言对话
 
 const wsStore = useWsStore()
-const replyText = ref('')
+const replyText = ref('你好呀，我是您的智能小助手')
 const question = ref('')
+const status = ref(1)
+
+const foxStatus = ref(1)
 
 const chat = () => {
-
     wsStore.sendMessage(question.value)
 }
 
-watch(() => wsStore.myMessage, () => {
+watch(() => wsStore.currentMessage, (newValue) => {
 
-    console.log(wsStore.getMyMessage()[wsStore.getMyMessage().length - 1])
-    replyText.value = wsStore.getMyMessage()[wsStore.getMyMessage().length - 1].data.text
+    console.log(newValue)
+    replyText.value = newValue
 
+    textToVoice()
+
+    // 防抖设置
 }, {
     deep: true
 });
@@ -48,9 +58,11 @@ import { XfVoiceDictation } from '@muguilin/xf-voice-dictation';
 
 let times = null;
 
-let statusText = ref('开始识别')
-
 // 实例化迅飞语音听写（流式版）WebAPI
+
+watch(() => status, newValue => {
+
+})
 
 const xfVoice = new XfVoiceDictation({
     APPID: 'f17e53d0',
@@ -66,16 +78,16 @@ const xfVoice = new XfVoiceDictation({
         console.log('识别状态：', oldStatus, newStatus);
 
         if (newStatus === 'init') {
-            statusText.value = '加载中……'
+            status.value = 1
         }
         else if (newStatus === 'ing') {
-            statusText.value = '监听中……'
+            status.value = 0
         }
         else if (newStatus === 'end') {
-            statusText.value = '开始识别'
-        }
+            status.value = 1
 
-        //statusText.value = newStatus
+            chat(replyText.value)
+        }
     },
 
     // 监听识别结果的变化回调
@@ -106,98 +118,43 @@ const startRecording = () => {
 
 import Recorder from 'js-audio-recorder'
 
-//启动录音
-function handleStart() {
-    let recorder = new Recorder({
-        sampleBits: 16, // 采样位数，支持 8 或 16，默认是16
-        sampleRate: 16000, // 采样率，支持 11025、16000、22050、24000、44100、48000，根据浏览器默认值，我的chrome是48000
-        numChannels: 1, // 声道，支持 1 或 2， 默认是1
-        // compiling: true//(0.x版本中生效,1.x增加中)  // 是否边录边转换，默认是false
-    });
-
-    // 获取录音权限
-    Recorder.getPermission().then(
-        () => {
-            console.log("开始录音");
-            // startTall = true
-            // recorder.start(); // 开始录音
-        },
-        (error) => {
-            this.$message({
-                message: "请允许该网页使用麦克风",
-                type: "info",
-            });
-            console.log(`${error.name} : ${error.message}`);
-        }
-    );
-}
-
 onMounted(() => {
-    handleStart()
+    // handleStart()
 })
 
 // 语音合成模块
 
-//先引入下载好的插件
-import Speech from 'speak-tts';
-//引入ele - 可忽略
-import { ElMessageBox, ElNotification } from 'element-plus';
+import TTSRecorder from "./js/onlineTTS.js";
 
-//定义一个源
-const speech = new Speech();
-//判断用户当前浏览器是否支持语音播报
-if (speech.hasBrowserSupport()) {
-    // ElNotification({
-    //     title: '语音提示',
-    //     message: '支持语音合成',
-    //     type: 'success',
-    //     showClose: false,
-    // });
-} else {
-    ElNotification({
-        title: '语音提示',
-        message: '不支持语音合成',
-        type: 'error',
-        showClose: false,
-    });
-}
-//初始化语音插件 - init内可以全部为空 - 自定义
-speech
-    .init({
-        volume: 1, // 音量
-        lang: 'zh-CN', // 语言
-        rate: 1, // 语速
-        pitch: 1, // 音调
-        voice: 'Google UK English Male',
-        splitSentences: true, // 在句子结束时暂停
-        listeners: {
-            // 事件
-            onvoiceschanged: voices => {
-                // console.log('事件声音已更改', voices);
-            },
-        },
+const title = ref('')
+const content = ref(`你好，我是你的小帮手，有什么可以帮您`)
+const isPlaying = ref(false)
+const ttsRecorder = ref(null)
+
+const textToVoice = () => {
+    console.log("正在识别")
+    ttsRecorder.value = new TTSRecorder()
+    ttsRecorder.value.setParams({
+        voiceName: 'xiaoyan',
+        tte: 'UTF8',
+        text: replyText.value
     })
-    .then(data => {
-        console.log('语音已准备好，声音可用', data);
-    })
-    .catch(e => {
-        console.error('初始化时发生错误 : ', e);
-    });
-//语音播报按钮
-function voice() {
-    speech
-        .speak({
-            // text: replyText.value, //这里使用文字或者i18n 都可以 看自己需求
-            text: '从输出信息来看，你已经升级了 Vite 和相关的插件至 5.x 版本，但仍遇到了 worker-loader 的 peer 依赖问题。这是因为 worker-loader 仍然要求 webpack 的版本为 ^3.0.0 || ^4.0.0。'
-        })
-        .then(() => {
-            console.log('Success !');
-        })
-        .catch(e => {
-            console.error('An error occurred :', e);
-        });
+
+    handlePlay()
 }
 
+onMounted(() => {
+    textToVoice()
+})
+
+const handlePlay = () => {
+    console.log('正在识别')
+    if (['init', 'endPlay', 'errorTTS'].includes(ttsRecorder.value.status)) {
+        ttsRecorder.value.start()
+    } else {
+        ttsRecorder.value.stop()
+    }
+}
 
 </script>
 
@@ -207,20 +164,23 @@ function voice() {
     min-height: 100vh;
     min-width: 100vw;
     background: url(../../../assets/image/room.png) no-repeat center/cover;
-
+    position: relative;
 
     .chatBox {
-        width: 100vw;
-        height: 100vh;
+
         display: flex;
-        // align-items: center;
+        align-items: flex-end;
+        // margin-bottom: 10%;
         justify-content: center;
         // background-color: red;
-        position: relative;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
 
         img {
-            height: 500px;
-            width: 500px;
+            height: 600px;
+            width: 600px;
         }
 
         .textBox {
@@ -243,5 +203,27 @@ function voice() {
             }
         }
     }
+
+    .voiceButton {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: $primary-white-color;
+        border: 1px solid $primary-color;
+
+        &:hover {
+            background-color: #e4e4e4;
+        }
+    }
+
+    .wave {
+        width: 80px;
+        // background-color: gray
+    }
+
 }
 </style>

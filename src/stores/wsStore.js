@@ -11,6 +11,8 @@ export const useWsStore = defineStore("ws", () => {
 
     let status = '未开始'
 
+    let currentMessage=ref('')
+
     let myMessage = ref([
         { type: 'text', author: `me`, data: { text: `你好!` } },
         { type: 'text', author: `ai`, data: { text: `你好，我是您的语言小助手.` } }
@@ -64,6 +66,12 @@ export const useWsStore = defineStore("ws", () => {
             //console.log("收到了消息" + newMessage)
             console.log("状态" + newMessage.status)
 
+            if(newMessage.status===2)
+            {
+                // 这是新的修改新消息
+                currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
+            }
+
             if (newMessage.content) {
                 putAIContent(newMessage.content)
             }
@@ -111,10 +119,7 @@ export const useWsStore = defineStore("ws", () => {
     const sendMessage = async (question) => {
 
         let flag = await wsInit()
-        // data.value.messages.push({
-        //     "role": "user",
-        //     "content": question
-        // })
+        
 
         if (flag) {
             putMyContent(question)
@@ -140,9 +145,6 @@ export const useWsStore = defineStore("ws", () => {
 
         }
 
-
-
-
     }
 
     const getMyMessage=()=>{
@@ -152,6 +154,7 @@ export const useWsStore = defineStore("ws", () => {
     return {
         ws,
         myMessage,
+        currentMessage,
         getMyMessage,
         status,
         wsInit,

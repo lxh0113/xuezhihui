@@ -153,7 +153,7 @@ const addNewNode = () => {
   });
 
   graphRef$.value.setJsonData(jsonData);
-
+  // graphRef$.value.refresh()
   addDialog.value = false;
 };
 
@@ -162,40 +162,60 @@ function generateUniqueId() {
   return Math.random().toString(36).substr(2, 9); // 生成随机字符串作为ID
 }
 
+
 const deleteCurrentNode = () => {
-  // 删除当前节点
-  let flag = confirm("您确定要删除当前节点吗，这将删除当前节点以及子节点");
+  console.log(jsonData)
+  if (!jsonData || !Array.isArray(jsonData.nodes) || !Array.isArray(jsonData.lines)) {
+    console.error("Invalid jsonData structure. Ensure jsonData.nodes and jsonData.lines are arrays.");
+    return;
+  }
+
+  let flag = confirm("您确定要删除当前节点吗？这将删除当前节点以及子节点。");
 
   if (currentNode.value.id === jsonData.rootId) {
     ElMessage.error("根节点不能删除");
     return;
   }
-  if (flag) {
-    const currentNodeId = currentNode.value.id; // 获取当前节点的ID，假设节点信息存储在currentNode中
 
-    // 在jsonData中找到并移除当前节点以及其子节点
+  if (flag) {
+    const currentNodeId = currentNode.value.id; // 获取当前节点的ID
+
     const removeNodeAndChildren = (nodeId) => {
-      const nodeIndex = jsonData.nodes.findIndex((node) => node.id === nodeId);
-      if (nodeIndex !== -1) {
-        jsonData.nodes.splice(nodeIndex, 1); // 删除节点
+      if (!Array.isArray(jsonData.lines) || !Array.isArray(jsonData.nodes)) {
+        console.error("Invalid jsonData structure inside removeNodeAndChildren.");
+        return;
       }
-      // 递归删除子节点
-      const children = jsonData.lines
-        .filter((line) => line.from === nodeId)
-        .map((line) => line.to);
-      children.forEach((childId) => removeNodeAndChildren(childId));
+
       // 删除与当前节点相关的线条
       jsonData.lines = jsonData.lines.filter(
         (line) => line.from !== nodeId && line.to !== nodeId
       );
+
+      const nodeIndex = jsonData.nodes.findIndex((node) => node.id === nodeId);
+      if (nodeIndex !== -1) {
+        jsonData.nodes.splice(nodeIndex, 1); // 删除节点
+      }
+
+      // 递归删除子节点
+      const children = jsonData.lines
+        .filter((line) => line.from === nodeId)
+        .map((line) => line.to);
+
+      children.forEach((childId) => removeNodeAndChildren(childId));
     };
 
     removeNodeAndChildren(currentNodeId);
 
     // 更新图形数据
-    graphRef$.value.setJsonData(jsonData);
+    if (graphRef$.value && typeof graphRef$.value.setJsonData === 'function') {
+      graphRef$.value.setJsonData(jsonData);
+      // graphRef$.value.refresh()
+    } else {
+      console.error("graphRef$ is not properly initialized.");
+    }
   }
 };
+
 
 const dealEdit = () => {
   if (currentNode.value === null) {
@@ -225,6 +245,7 @@ const editCurrentNode = () => {
 
     // 更新图形数据
     graphRef$.value.setJsonData(jsonData);
+    // graphRef$.value.refresh()
 
     // 关闭编辑对话框等其他操作
     editDialog.value = false;
@@ -268,6 +289,7 @@ const editCurrentLines = (linkObject) => {
   }
 
   graphRef$.value.setJsonData(jsonData);
+  // graphRef$.value.refresh()
 
   editLinesDialog.value = false; // Close the edit lines dialog
 };
@@ -277,6 +299,9 @@ onMounted(() => {
     rootId: "a",
     nodes: [
       { id: "a", text: "暂无知识图谱，可以点击生成知识图谱创建" }
+    ],
+    lines: [
+
     ]
   };
 
@@ -313,32 +338,39 @@ const generate = async () => {
   } else return false;
 };
 
-const setChart=(data)=>{
+const setChart = (data) => {
   if (Array.isArray(data.nodes)) {
-      data.nodes = data.nodes.map((item) => {
-        return {
-          id: item.id + "",
-          text: item.name,
-          courseId: item.courseId,
-        };
-      });
-    }
+    data.nodes = data.nodes.map((item) => {
+      return {
+        id: item.id + "",
+        text: item.name,
+        courseId: item.courseId,
+      };
+    });
+  }
 
-    if (Array.isArray(data.lines)) {
-      data.lines.forEach((item) => {
-        item.from = item.from + "";
-        item.to = item.to + "";
-      });
-    }
+  if (Array.isArray(data.lines)) {
+    data.lines.forEach((item) => {
+      item.from = item.from + "";
+      item.to = item.to + "";
+    });
+  }
 
-    let rootId = data.roodId;
-    let jsonData = {
-      rootId,
-      nodes: data.nodes, // Assign nodes and lines directly if they are arrays
-      lines: data.lines,
+  let rootId = data.roodId;
+  jsonData = {
+    rootId,
+    nodes: data.nodes, // Assign nodes and lines directly if they are arrays
+    lines: data.lines,
+  };
+
+  nodesList.value = jsonData.nodes.map((item) => {
+    return {
+      label: item.text,
+      value: item.id,
     };
+  });
 
-    graphRef$.value.setJsonData(jsonData);
+  graphRef$.value.setJsonData(jsonData);
 }
 
 const getKnowledge = async () => {
@@ -349,72 +381,10 @@ const getKnowledge = async () => {
     console.log(res.data.data);
 
     setChart(res.data.data)
-    
+
   } else {
     ElMessage.error(res.data.message);
   }
-};
-
-const setKnowledge = () => {
-  jsonData = {
-    rootId: "a",
-    nodes: [
-      { id: "a", text: "计算机硬件的发展" },
-      { id: "b", text: "晶体管" },
-      { id: "c", text: "集成电路和微处理器" },
-      { id: "d", text: "电子管计算机" },
-      { id: "e", text: "冯·诺依曼体系结构" },
-      { id: "f", text: "摩尔定律" },
-      { id: "g", text: "存储技术发展" },
-      { id: "h", text: "操作系统" },
-      { id: "i", text: "计算机网络" },
-      { id: "j", text: "云计算" },
-      { id: "k", text: "量子计算" },
-      { id: "l", text: "超级计算机" },
-      { id: "m", text: "计算机图形学" },
-      { id: "n", text: "嵌入式系统" },
-      { id: "o", text: "人工智能芯片" },
-      { id: "p", text: "并行计算架构" },
-      { id: "q", text: "分布式系统" },
-      { id: "r", text: "虚拟化技术" },
-      { id: "s", text: "内存技术" },
-      { id: "t", text: "显示技术" },
-      { id: "u", text: "输入输出设备" },
-    ],
-    lines: [
-      { from: "a", to: "b", text: "晶体管的发明与应用" },
-      { from: "a", to: "c", text: "集成电路的演进" },
-      { from: "a", to: "d", text: "电子管计算机的历史" },
-      { from: "c", to: "e", text: "冯·诺依曼体系结构的提出" },
-      { from: "b", to: "f", text: "摩尔定律对硬件发展的影响" },
-      { from: "c", to: "g", text: "存储技术的发展与应用" },
-      { from: "h", to: "a", text: "硬件与操作系统的关系" },
-      { from: "i", to: "h", text: "操作系统在计算机网络中的作用" },
-      { from: "i", to: "j", text: "云计算对硬件架构的影响" },
-      { from: "j", to: "k", text: "量子计算在未来计算机中的潜力" },
-      { from: "l", to: "h", text: "超级计算机与硬件架构的关系" },
-      { from: "m", to: "h", text: "计算机图形学对硬件性能的要求" },
-      { from: "n", to: "h", text: "嵌入式系统的硬件设计特点" },
-      { from: "o", to: "c", text: "人工智能芯片与集成电路的结合" },
-      { from: "p", to: "a", text: "并行计算与计算机硬件架构" },
-      { from: "q", to: "i", text: "分布式系统中的硬件设计考量" },
-      { from: "r", to: "h", text: "虚拟化技术对硬件资源的利用" },
-      { from: "s", to: "g", text: "内存技术与集成电路的发展" },
-      { from: "t", to: "h", text: "显示技术对计算机用户接口的影响" },
-      { from: "u", to: "h", text: "输入输出设备在硬件系统中的角色" },
-    ],
-  };
-
-  const loading = ElLoading.service({
-    lock: true,
-    text: "加载中……",
-    background: "rgba(0, 0, 0, 0.7)",
-  });
-
-  setTimeout(() => {
-    graphRef$.value.setJsonData(jsonData);
-    loading.close();
-  }, 5 * 1000);
 };
 
 onMounted(async () => {
@@ -427,8 +397,6 @@ onMounted(async () => {
   else {
     // getKnowledge()
   }
-
-
 
   // setKnowledge();
 });

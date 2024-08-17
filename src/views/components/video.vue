@@ -2,7 +2,7 @@
   <div style="height:600px;min-height:600px">
     <video crossOrigin="anonymous" id="my-player" ref="videoRef" :src="src" class="video-js w-full h-full">
       <source :src="src" />
-      <track v-if="visiable" default kind="captions" srclang='en' :src="currentTrackUrl" />
+      <track default kind="captions" srclang='en' :src="currentTrackUrl" />
     </video>
   </div>
 </template>
@@ -44,7 +44,8 @@ const initVideo = () => {
     autoplay: true, // 是否自动播放
     fluid: false, // 自适应宽高
     src: props.src, // 要嵌入的视频源的源 URL
-    playbackRates: [0.5, 1.0, 1.5, 2.0]
+    playbackRates: [0.5, 1.0, 1.5, 2.0],
+    audioTracks: { "length": 20 }
   };
   if (videoRef.value) {
     // 创建 video 实例
@@ -81,14 +82,20 @@ onMounted(() => {
 
   console.log(props.trackUrl)
 });
+
+
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .w-full {
   width: 100%;
 }
 
 .h-full {
   height: 100%;
+}
+
+#my-player::cue(c.red) {
+  font-size: 10px;
 }
 </style>

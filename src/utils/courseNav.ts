@@ -16,7 +16,7 @@ const studentCourseNavList: NavList = [
 ];
 
 const teacherCourseNavList: NavList = [
-  { path: "/home", icon: "iconfont icon-home", text: "首页" },
+  { path: "/home", icon: "iconfont icon-home", text: "章节" },
   { path: "/activities", icon: "iconfont icon-Interaction", text: "活动" },
   {
     path: "/homework",

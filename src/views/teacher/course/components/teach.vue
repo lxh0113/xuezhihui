@@ -1,20 +1,9 @@
 <template>
-  <el-button
-    @click="dialogFormVisible = true"
-    :icon="Plus"
-    type="primary"
-    text="primary"
-    style="margin-top: 10px"
-    >新建</el-button
-  >
+  <el-button @click="dialogFormVisible = true" :icon="Plus" type="primary" text="primary"
+    style="margin-top: 10px">新建</el-button>
   <div class="bigBox">
-    <Course
-      @click="toCourse(item.id)"
-      @delete="deleteItem"
-      v-for="(item, index) in myCourseList"
-      :key="index"
-      :course="item"
-    ></Course>
+    <Course @click="toCourse(item.id)" @delete="deleteItem" v-for="(item, index) in myCourseList" :key="index"
+      :course="item"></Course>
   </div>
 
   <el-dialog v-model="dialogFormVisible" title="新建课程" width="500">
@@ -23,20 +12,17 @@
         <el-input v-model="form.courseName" autocomplete="off" />
       </el-form-item>
       <el-form-item label="上传封面">
-        <el-upload
-          size="large"
-          class="avatar-uploader"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload"
-        >
-          <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        <el-upload size="large" class="avatar-uploader" action="http://192.168.50.199:8079/activity/getImagePath"
+          :show-file-list="false" name="image" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+          <img style="max-width: 300px;" v-if="imageUrl" :src="imageUrl" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon">
+            <Plus />
+          </el-icon>
         </el-upload>
       </el-form-item>
       <el-form-item label="授课对象">
-        <el-select placeholder="请选择授课对象" autocomplete="off" />
+        <el-select-v2 v-model="form.classList" :options="classListOptions" placeholder="选择班级" style="width: 240px"
+          multiple />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -60,7 +46,8 @@ import { useUserStore } from "@/stores/userStore";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from 'element-plus'
-import { teacherDeleteCourseAPI, teacherViewMyTeachCourseAPI,teacherAddCourseAPI } from '../../../../apis/course';
+import { teacherDeleteCourseAPI, teacherViewMyTeachCourseAPI, teacherAddCourseAPI, setCourseClassAPI } from '../../../../apis/course';
+import { teacherGetAllClassAPI } from "../../../../apis/assignment";
 
 const imageUrl = ref('')
 const dialogFormVisible = ref(false);
@@ -83,6 +70,7 @@ const form = ref({
   createTime: "",
   userId: 0,
   image: "",
+  classList: []
 });
 
 const toCourse = (id: number): void => {
@@ -100,24 +88,74 @@ const getCourse = async () => {
   }
 };
 
-const addNewCourse =async () => {
+const classList = ref([]);
+const classListOptions = ref([])
 
-  form.value.userId=userStore.getUserInfo().id;
-  form.value.createTime= new Date().toLocaleString();
+const setClassList = async () => {
+  const res = await teacherGetAllClassAPI();
+  if (res.data.code === 200) {
+    classList.value = res.data.data;
 
-  const res=await teacherAddCourseAPI(form.value.id,form.value.courseName,form.value.createTime,imageUrl.value)
+    classListOptions.value = classList.value.map(item => {
+      return {
+        label: item.className,
+        value: item.id
+      }
+    })
+  } else {
+    ElMessage.error(res.data.message);
+  }
+};
 
-  if(res.data.code===200)
-  {
+let courseId = null
+
+const setClass = async () => {
+  const res = await setCourseClassAPI(courseId, form.value.classList)
+
+  if (res.data.code === 200) {
+
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
+
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以要加1
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
+const addNewCourse = async () => {
+
+  form.value.userId = userStore.getUserInfo().id;
+  form.value.createTime = formatDate(new Date());
+
+  const res = await teacherAddCourseAPI(form.value.id, form.value.courseName, form.value.createTime, imageUrl.value, null)
+
+  if (res.data.code === 200) {
     ElMessage.success("新建成功")
     myCourseList.value.push({
-      courseName:form.value.courseName,
-      id:form.value.id,
-      createTime:form.value.createTime,
-      userId:form.value.userId,
-      image:form.value.image
+      courseName: form.value.courseName,
+      id: form.value.id,
+      createTime: form.value.createTime,
+      userId: form.value.userId,
+      image: form.value.image
     })
-  }else ElMessage.error(res.data.message)
+
+    courseId = res.data.data
+
+    // 设置授课对象
+    setClass()
+
+  } else ElMessage.error(res.data.message)
   dialogFormVisible.value = false
 };
 
@@ -134,10 +172,9 @@ const deleteItem = async (item: any) => {
 };
 
 const handleAvatarSuccess: UploadProps['onSuccess'] = (
-  response,
-  uploadFile
+  response
 ) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+  imageUrl.value = response.data
 }
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
@@ -153,6 +190,8 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 
 onMounted(() => {
   getCourse();
+
+  setClassList()
 });
 </script>
 
@@ -166,7 +205,7 @@ onMounted(() => {
 
 .avatar-uploader .el-upload {
   border: 1px dashed var(--el-border-color);
-  border:1px dashed #dcdfe6;
+  border: 1px dashed #dcdfe6;
   border-radius: 6px;
   cursor: pointer;
   position: relative;

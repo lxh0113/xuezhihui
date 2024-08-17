@@ -104,6 +104,9 @@ export default class TTSWSS {
         this.volume = volume;
         this.pitch = pitch
         const url = getWebSocketUrl(API_KEY, API_SECRET);
+
+        console.log(url)
+
         if ("WebSocket" in window) {  //构造函数时就创建websocket对象
             this.ttsWS = new WebSocket(url);
         } else if ("MozWebSocket" in window) {

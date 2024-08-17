@@ -22,7 +22,7 @@
         <el-option label="图片" :value="0"></el-option>
         <el-option label="文档" :value="1"></el-option>
       </el-select>
-      <el-upload v-if="originPaperType === 0" action="http://localhost:8079/activity/getImagePath" method="post"
+      <el-upload v-if="originPaperType === 0" action="http://192.168.50.199:8079/activity/getImagePath" method="post"
         name="image" :file-list="originFileList" list-type="picture-card" :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove" :auto-upload="true" :on-success="(response: any) => {
           return successUploadOriginImage(response);
@@ -114,15 +114,11 @@
       </el-upload>
 
       <el-result v-if="studentFlag === 1" icon="success" title="上传成功" sub-title="识别成功啦，(*^_^*)">
-        <template #extra>
-          <el-button type="primary" @click="toViewStudent">识别成功，去编辑识别结果</el-button>
-        </template>
+        
       </el-result>
 
       <el-result v-else-if="studentFlag === 1" icon="error" title="识别失败" sub-title="识别失败，请再次尝试">
-        <template #extra>
-          <el-button type="primary" @click="studentFlag = -1">识别失败，请再次尝试</el-button>
-        </template>
+        
       </el-result>
     </div>
 
@@ -266,7 +262,7 @@ const uploadOriginPaper = async () => {
 
     ElMessage.success("上传成功");
 
-    activeIndex.value = 1;
+    // activeIndex.value = 1;
 
     // 设置maxIndex
     maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
@@ -343,7 +339,7 @@ const getAnswer = async () => {
 
     ElMessage.success("获取成功");
 
-    activeIndex.value = 2;
+    // activeIndex.value = 2;
 
     // 设置maxIndex
     maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
@@ -389,7 +385,7 @@ const uploadZip = async () => {
 
     ElMessage.success('上传成功')
 
-    activeIndex.value = 3;
+    // activeIndex.value = 3;
 
     // 设置maxIndex
     maxIndex.value = Math.max(maxIndex.value, activeIndex.value);

@@ -20,6 +20,16 @@ export const getVieoVttAPI=(video:string)=>{
   })
 }
 
+export const setCourseClassAPI=(courseId:number,classIdList:any[])=>{
+  return http({
+    url:'/course/set_class',
+    method:"PUT",
+    data:{
+      courseId,classIdList
+    }
+  })
+}
+
 export const studentViewMyCourseAPI = (studentId: number) => {
   return http({
     url: "/course/courses/" + studentId,
@@ -45,7 +55,8 @@ export const teacherAddCourseAPI = (
   id: number,
   courseName: string,
   createTime: string,
-  image: string
+  image: string,
+  mindMap:string
 ) => {
   return http({
     url: "/course",
@@ -55,6 +66,7 @@ export const teacherAddCourseAPI = (
       courseName,
       createTime,
       image,
+      mindMap
     },
   });
 };

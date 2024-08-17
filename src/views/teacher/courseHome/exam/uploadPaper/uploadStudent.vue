@@ -43,20 +43,12 @@
           {{ item.title.options[optionIndex] }}
         </p>
 
-        <!-- <p class="corretAnswer">
-          <span>正确答案</span>{{ answerList[index].answer }}
-        </p> -->
-
+       
         <!-- <p>学生答案</p> -->
         <el-form-item label="学生答案">
           <el-input type="textarea" cols="5" v-model="studentAnswer[index].studentAnswer"></el-input>
         </el-form-item>
-
-        <!-- <p class="studentAnswerBox">
-          <span> 学生答案 </span>
-          {{ studentAnswer[index].studentAnswer }}
-        </p> -->
-
+       
         <hr style="margin-bottom: 20px" />
       </div>
     </div>
@@ -143,6 +135,7 @@ const getDetails = async () => {
     studentAnswer.value = questionList.value.map((item) => "");
 
     console.log(questionList.value);
+    console.log(studentAnswer.value)
   }
 };
 

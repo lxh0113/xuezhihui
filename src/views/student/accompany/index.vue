@@ -23,18 +23,18 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useVoiceChartSore } from '../../../stores/voiceChat.js'
+import { useVoiceCharStore } from '../../../stores/voiceChat.js'
 import _ from "lodash";
 
 // 语言对话
-=
+
 const replyText = ref('你好呀，我是您的智能小助手')
 const question = ref('')
 const status = ref(1)
 
-const voiceChat=useVoiceChartSore()
+const voiceChat=useVoiceCharStore()
 
-const foxStatus = ref(1)
+// const foxStatus = ref(1)
 
 const chat = () => {
     voiceChat.sendMessage(question.value)
@@ -61,16 +61,10 @@ let times = null;
 
 // 实例化迅飞语音听写（流式版）WebAPI
 
-watch(() => status, newValue => {
-
-})
-
 const xfVoice = new XfVoiceDictation({
     APPID: 'f17e53d0',
     APISecret: 'MmNkMjBkZDFiY2RjMGU5ZjdkYTVjMDBh',
     APIKey: 'f90a475bbf4eac0d8eb57524cbed229e',
-
-    // webSocket请求地址 非必传参数，默认为：wss://iat-api.xfyun.cn/v2/iat
     url: 'wss://iat-api.xfyun.cn/v2/iat',
 
     // 监听录音状态变化回调
@@ -87,7 +81,7 @@ const xfVoice = new XfVoiceDictation({
         else if (newStatus === 'end') {
             status.value = 1
 
-            chat(replyText.value)
+            setTimeout(chat,1000)
         }
     },
 

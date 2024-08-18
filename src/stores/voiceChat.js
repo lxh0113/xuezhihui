@@ -30,10 +30,9 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
     })
 
     const wsInit = async () => {
-
-
         if (ws && ws.readyState === WebSocket.OPEN) {
             console.log('WebSocket 连接已经存在');
+            
             return false
         }
 
@@ -58,17 +57,14 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
         console.log("ws连接已经建立")
 
         ws.onmessage = (event) => {
-            // console.log("收到了消息" + event.data)
-
             let newMessage = JSON.parse(event.data)
-
-            //console.log("收到了消息" + newMessage)
             console.log("状态" + newMessage.status)
 
             if(newMessage.status===2)
             {
                 // 这是新的修改新消息
                 currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
+                ws.close()
             }
 
             if (newMessage.content) {
@@ -105,7 +101,7 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
     }
 
     const getContent = async (question) => {
-        const res = await getContentAPI(question);
+        const res = await voiceChatAPI(question);
 
         if (res.data.code === 200) {
             return res.data.data.content
@@ -127,9 +123,7 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
                 type: 'text', author: `ai`, data: { text: '' }
             })
 
-            // console.log(JSON.stringify(data.value))
-
-            const content = await voiceChatAPI(question);
+            const content = await getContent(question);
 
             if (content === 'false') {
                 ElMessage.error('网络出错了，请重新连接')

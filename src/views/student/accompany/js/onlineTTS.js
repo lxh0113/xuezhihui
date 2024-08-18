@@ -23,9 +23,9 @@
 
 
 //APPID，APISecret，APIKey在控制台-我的应用-语音合成（流式版）页面获取
-const APPID = 'f17e53d0'
-const API_SECRET = 'MmNkMjBkZDFiY2RjMGU5ZjdkYTVjMDBh'
-const API_KEY = 'f90a475bbf4eac0d8eb57524cbed229e'
+const APPID = 'd4e89d02'
+const API_SECRET = 'OTRiMmZiOWM5ODMyZDNlNGEyOGZiNmQy'
+const API_KEY = '7578cfdd45def20134659be2a843fe26'
 
 import CryptoJS from 'crypto-js'
 import { Base64 } from 'js-base64'
@@ -40,7 +40,7 @@ function getWebsocketUrl() {
         var apiKey = API_KEY
         var apiSecret = API_SECRET
         var url = 'wss://tts-api.xfyun.cn/v2/tts'
-        //var host = location.host
+        // var host = location.host
         var host = 'tts-api.xfyun.cn'
         var date = new Date().toGMTString()
         var algorithm = 'hmac-sha256'
@@ -54,6 +54,8 @@ function getWebsocketUrl() {
         resolve(url)
     })
 }
+
+
 export default class TTSRecorder {
     constructor({
         speed = 50,
@@ -229,7 +231,7 @@ export default class TTSRecorder {
     audioPlay() {
         this.setStatus('play')
 
-        document.querySelector('.fox').src='https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/19:11:18-5bbb148d7e554f80824d78761e40cabaQQ图片20240817190941.gif'
+        document.querySelector('.fox').src = 'https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/19:11:18-5bbb148d7e554f80824d78761e40cabaQQ图片20240817190941.gif'
 
         let audioData = this.audioData.slice(this.audioDataOffset)
         this.audioDataOffset += audioData.length
@@ -261,7 +263,7 @@ export default class TTSRecorder {
     audioStop() {
         this.setStatus('endPlay')
 
-        document.querySelector('.fox').src='https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/19:11:18-4cd6decab173468a9b7bd870636e2ee0QQ图片20240817191045.gif'
+        document.querySelector('.fox').src = 'https://yuejuanpt.oss-cn-zhangjiakou.aliyuncs.com/wisdomHub/19:11:18-4cd6decab173468a9b7bd870636e2ee0QQ图片20240817191045.gif'
 
         clearTimeout(this.playTimeout)
         this.audioDataOffset = 0

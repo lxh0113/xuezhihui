@@ -3,6 +3,7 @@
     <div class="outerBox">
       <div class="left">
         <el-button style="margin-bottom: 20px" @click="save" type="primary">保存当前批阅结果</el-button>
+        <el-button style="margin-bottom: 20px" type="primary" @click="getAllQuestion">批阅当前试卷</el-button>
         <div class="demo-image__preview">
           <el-image style="width: 400px; height: 700px" :src="url" :zoom-rate="1.2" :max-scale="7" :min-scale="0.2"
             :preview-src-list="srcList" :initial-index="4" fit="fill" />
@@ -51,15 +52,11 @@
           <span>正确答案：</span>{{ answerList[index].answer }}
         </p>
 
-        <!-- <p>学生答案</p> -->
-        <!-- <el-form-item label="学生答案">
-          <el-input type="textarea" cols="5" v-model="studentAnswer[index].studentAnswer"></el-input>
-        </el-form-item> -->
-
-        <p class="studentAnswerBox">
+        <div class="studentAnswerBox" style="display:flex;aligns-item:center;margin-bottom:20px;">
           <span> 学生答案： </span>
-          {{ studentAnswer[index].studentAnswer }}
-        </p>
+          <el-input type="textarea" v-model="studentAnswer[index].studentAnswer"></el-input>
+          <!-- {{ studentAnswer[index].studentAnswer }} -->
+        </div>
         <div style="display:flex;aligns-item:center;margin-bottom:20px;">
           <span style="font-weight:bold;width:70px">得分</span>
           <el-input v-model.number="markList[index].studentScore" style="margin-left:20px;" min="0"
@@ -89,12 +86,9 @@ import {
   teacherGetPaperAnswerAPI,
   teacherGetPaperInfoAPI,
   teacherGetStudentAnswerAPI,
-  teacherSavePaperAnswerAPI,
-  teacherGetStudentInfoAPI,
+  teacherGetStudentInfoAPI
 } from "@/apis/paper";
-import { useAnswerStore } from "@/stores/answerStore";
-import { useStudentStore } from "@/stores/studentStore";
-import { teacherSaveMarkingAPI, teacherGetAllStudentPaperAPI, teacherMarkSingleQuestionAPI } from '../../../../../apis/paper';
+import { teacherGetAllStudentPaperAPI, teacherMarkSingleQuestionAPI } from '../../../../../apis/paper';
 import {
   teacherSaveStudentAnswerAPI,
   markAllQuestionAPI,
@@ -290,16 +284,26 @@ const studentInfo = ref({
 const studentAnswer = ref([]);
 
 const getStudentPaper = async () => {
-  const res = await teacherGetStudentAnswerAPI(parseInt(route.params.paperId as string),srcList.value);
+  const res = await teacherGetStudentInfoAPI(
+    srcList.value
+  );
 
   if (res.data.code === 200) {
-    console.log(res.data.data);
-    studentAnswer.value =JSON.parse(res.data.data.content);
-    console.log(studentAnswer.value)
+    studentAnswer.value = res.data.data.studentAnswers;
     studentInfo.value = res.data.data;
   } else {
-    ElMessage.error(res.data.message);
+    ElMessage.error(res.data.message)
   }
+  // const res = await teacherGetStudentAnswerAPI(parseInt(route.params.paperId as string),srcList.value);
+
+  // if (res.data.code === 200) {
+  //   console.log(res.data.data);
+  //   studentAnswer.value =JSON.parse(res.data.data.content);
+  //   console.log(studentAnswer.value)
+  //   studentInfo.value = res.data.data;
+  // } else {
+  //   ElMessage.error(res.data.message);
+  // }
 };
 
 const markList = ref([])
@@ -362,7 +366,7 @@ onMounted(async () => {
 
   await getStudentPaper();
 
-  getAllQuestion()
+  // getAllQuestion()
 });
 </script>
 

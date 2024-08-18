@@ -114,16 +114,17 @@
       </el-upload>
 
       <el-result v-if="studentFlag === 1" icon="success" title="上传成功" sub-title="识别成功啦，(*^_^*)">
-        
+
       </el-result>
 
       <el-result v-else-if="studentFlag === 1" icon="error" title="识别失败" sub-title="识别失败，请再次尝试">
-        
+
       </el-result>
     </div>
 
     <div v-else-if="activeIndex === 3">
       <el-button type="primary" @click="toViewResult">开始批阅</el-button>
+      <el-button type="success" @click="complete">完成批阅</el-button>
     </div>
 
   </div>
@@ -141,7 +142,8 @@ import {
   teacherGetPaperQuestionInfoAPI,
   teacherSavePaperInfoAPI,
   teacherUploadZipAPI,
-  teacherSavePaperAnswerAPI
+  teacherSavePaperAnswerAPI,
+  completePaperAPI
 } from "@/apis/paper";
 import { useOriginStore } from "@/stores/originStore";
 import { useAnswerStore } from "@/stores/answerStore";
@@ -265,7 +267,7 @@ const uploadOriginPaper = async () => {
     // activeIndex.value = 1;
 
     // 设置maxIndex
-    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+    maxIndex.value = Math.max(maxIndex.value, 1);
 
     // 保存一下
     saveOrigin()
@@ -342,7 +344,7 @@ const getAnswer = async () => {
     // activeIndex.value = 2;
 
     // 设置maxIndex
-    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+    maxIndex.value = Math.max(maxIndex.value, 2);
     saveAnswer()
 
   } else {
@@ -388,7 +390,7 @@ const uploadZip = async () => {
     // activeIndex.value = 3;
 
     // 设置maxIndex
-    maxIndex.value = Math.max(maxIndex.value, activeIndex.value);
+    maxIndex.value = Math.max(maxIndex.value, 3);
 
     // 保存
 
@@ -449,6 +451,23 @@ const setInitData = () => {
 onMounted(() => {
   setInitData()
 })
+
+// 完成批阅
+
+const complete = async () => {
+  const res = await completePaperAPI(parseInt(route.params.paperId as string))
+
+  if (res.data.code === 200) {
+    ElMessage.success('批阅完成')
+
+    setTimeout(()=>{
+      router.push('/course/'+route.params.id+'/exam')
+    })
+  }
+  else {
+    ElMessage.error(res.data.message)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

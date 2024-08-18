@@ -11,19 +11,14 @@
         <el-button type="primary" @click="fitToScreen">适应屏幕</el-button>
         <el-button type="primary" @click="onSave">下载</el-button>
         <el-button type="primary" @click="editMarkdown">编辑思维导图</el-button>
-        <el-button type="success" @click="init">生成思维导图</el-button>
+        <el-button type="success" @click="generateMindMap">生成思维导图</el-button>
       </div>
     </div>
   </div>
 
-  <el-dialog
-    v-model="editDialogVisiable"
-    title="编辑思维导图"
-    width="90%"
-    top="100px"
-  >
+  <el-dialog v-model="editDialogVisiable" title="编辑思维导图" width="90%" top="100px">
     <el-form>
-      <el-form-item >
+      <el-form-item>
         <el-input type="textarea" rows="30" v-model="content" placeholder="请输入……"></el-input>
       </el-form-item>
     </el-form>
@@ -47,6 +42,7 @@ import { saveAs } from "file-saver";
 import { createMindMapByCourseIdAPI, getMindMapByCourseIdAPI } from "../../../../../apis/course";
 import { ElMessage } from "element-plus";
 import { useRoute } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 
 const route = useRoute()
 const transformer = new Transformer();
@@ -127,6 +123,8 @@ const init = async () => {
   if (res.data.code === 200) {
     initValue = res.data.data;
     update()
+
+    ws.close()
   } else {
     ElMessage.error(res.data.message);
   }
@@ -162,7 +160,7 @@ onMounted(async () => {
   if (flag === false) {
     ElMessage.error('还没有思维导图，可以点击生成按钮生成')
   }
-  
+
   // init()
 });
 
@@ -170,23 +168,51 @@ onUpdated(update);
 
 // 编辑思维导图
 
-const editDialogVisiable=ref(false)
+const editDialogVisiable = ref(false)
 
-const content=ref('')
+const content = ref('')
 
-const editMarkdown=()=>{
-  content.value=initValue
-  editDialogVisiable.value=true
+const editMarkdown = () => {
+  content.value = initValue
+  editDialogVisiable.value = true
 }
 
-const modifyMarkdown=()=>{
+const modifyMarkdown = () => {
 
-  initValue=content.value
+  initValue = content.value
 
   update()
 
-  editDialogVisiable.value=false
+  editDialogVisiable.value = false
 }
+
+const userStore = useUserStore()
+
+let ws = null
+
+const startWS=()=>{
+  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws.onmessage = (event) => {
+    console.log("收到了消息" + event.data)
+
+    initValue = event.data
+    update()
+  }
+
+  ws.onerror = () => {
+    ElMessage.error("网络连接出错")
+  }
+}
+
+const generateMindMap = async () => {
+  init()
+
+  startWS()
+}
+
+onMounted(() => {
+  
+})
 
 </script>
 

@@ -233,3 +233,13 @@ export const teacherGetStudentAnswerAPI = (
     },
   });
 };
+
+export const completePaperAPI=(id:number)=>{
+  return http({
+    url:'/testPaper/finishTestPaper',
+    method:'POST',
+    params:{
+      id
+    }
+  })
+}

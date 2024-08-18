@@ -17,13 +17,8 @@
     <el-form label-position="top">
       <el-form-item style="margin-top: 20px" label="您对我们的回答是否满意">
         <div style="display: flex">
-          <el-input
-            v-model="query1"
-            style="width: 400px; height: 60px"
-          ></el-input>
-          <el-button :disabled="flag" @click="submit" style="height: 60px" type="primary"
-            >提交</el-button
-          >
+          <el-input v-model="query1" style="width: 400px; height: 60px"></el-input>
+          <el-button :disabled="flag" @click="submit" style="height: 60px" type="primary">提交</el-button>
         </div>
       </el-form-item>
     </el-form>
@@ -41,6 +36,8 @@ import { ElMessage } from "element-plus";
 import { useRoute } from "vue-router";
 import { recommedStudyPathAPI } from "../../../../../apis/course";
 import { setTimeout } from "timers";
+import { useUploadPaperStore } from "@/stores/uploadPaperStore";
+import { useUserStore } from "@/stores/userStore";
 
 const route = useRoute();
 const transformer = new Transformer();
@@ -123,17 +120,19 @@ const getRoute = async () => {
   if (res.data.code === 200) {
     initValue = res.data.data;
     update();
+
+    ws.close()
   } else {
     ElMessage.error(res.data.message);
   }
 };
 
-let flag=ref(false)
+let flag = ref(false)
 
 const submit = () => {
   if (query1.value.trim() !== "") {
     ElMessage.success("提交成功")
-    flag.value=true
+    flag.value = true
   }
   else ElMessage.error("您还没填写内容");
 };
@@ -144,9 +143,33 @@ onMounted(() => {
   // 更新思维导图渲染
   update();
   getRoute();
+
+  startWS()
+
+
 });
 
 onUpdated(update);
+
+let ws = null
+
+const userStore=useUserStore()
+
+const startWS = () => {
+  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws.onmessage = (event) => {
+    console.log("收到了消息" + event.data)
+
+    initValue = event.data
+    update()
+  }
+
+  ws.onerror = () => {
+    ElMessage.error("网络连接出错")
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -165,6 +188,7 @@ onUpdated(update);
     font-size: 20px;
   }
 }
+
 .mind {
   width: 90%;
   max-width: 1200px;
@@ -172,6 +196,7 @@ onUpdated(update);
   display: flex;
   flex-direction: column;
   background-color: white;
+
   .svg-container {
     svg {
       min-height: 700px;
@@ -179,6 +204,7 @@ onUpdated(update);
       height: 100%;
     }
   }
+
   .controls {
     display: flex;
     justify-content: center;

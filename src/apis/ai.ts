@@ -11,3 +11,12 @@ export const getContentAPI=(question:string)=>{
     })
 }
 
+export const voiceChatAPI=(question:string)=>{
+    return http({
+        url:'/python/voiceChat',
+        method:'POST',
+        data:{
+            question
+        }
+    })
+}

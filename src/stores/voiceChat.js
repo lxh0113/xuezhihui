@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { h, ref } from 'vue'
 import { ElMessage, ElNotification } from "element-plus";
 import { getUrlAPI } from '../apis/activity.ts'
-import { getContentAPI } from '../apis/ai.ts'
+import { getContentAPI, voiceChatAPI } from '../apis/ai.ts'
 import { init } from "echarts";
 
-export const useWsStore = defineStore("ws", () => {
+export const useVoiceCharStore = defineStore("voiceChat", () => {
 
     let ws = null
 
@@ -29,7 +29,7 @@ export const useWsStore = defineStore("ws", () => {
         ]
     })
 
-    const wsInit = async (flag=0) => {
+    const wsInit = async () => {
 
 
         if (ws && ws.readyState === WebSocket.OPEN) {
@@ -129,7 +129,7 @@ export const useWsStore = defineStore("ws", () => {
 
             // console.log(JSON.stringify(data.value))
 
-            const content = await getContent(question);
+            const content = await voiceChatAPI(question);
 
             if (content === 'false') {
                 ElMessage.error('网络出错了，请重新连接')

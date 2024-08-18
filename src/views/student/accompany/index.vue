@@ -23,23 +23,24 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useWsStore } from '../../../stores/wsStore.js'
+import { useVoiceChartSore } from '../../../stores/voiceChat.js'
 import _ from "lodash";
 
 // 语言对话
-
-const wsStore = useWsStore()
+=
 const replyText = ref('你好呀，我是您的智能小助手')
 const question = ref('')
 const status = ref(1)
 
+const voiceChat=useVoiceChartSore()
+
 const foxStatus = ref(1)
 
 const chat = () => {
-    wsStore.sendMessage(question.value)
+    voiceChat.sendMessage(question.value)
 }
 
-watch(() => wsStore.currentMessage, (newValue) => {
+watch(() => voiceChat.currentMessage, (newValue) => {
 
     console.log(newValue)
     replyText.value = newValue

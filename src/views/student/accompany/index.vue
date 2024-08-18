@@ -16,14 +16,20 @@
                     d="M256 554.666667a42.666667 42.666667 0 1 0-85.333333 0c0 81.493333 37.845333 158.08 102.4 213.418666C326.954667 814.336 396.16 842.965333 469.333333 850.986667A43.093333 43.093333 0 0 0 469.333333 853.333333v128a42.666667 42.666667 0 1 0 85.333334 0v-128l-0.042667-2.346666c73.173333-8.021333 142.378667-36.693333 196.309333-82.901334C815.530667 712.746667 853.333333 636.16 853.333333 554.666667a42.666667 42.666667 0 1 0-85.333333 0c0 54.272-25.088 107.946667-72.576 148.608C647.722667 744.149333 581.845333 768 512 768c-69.845333 0-135.722667-23.850667-183.424-64.725333C281.088 662.613333 256 608.938667 256 554.666667z"
                     fill="#4180FF" p-id="15868"></path>
             </svg>
-            <img v-if="status===0" class="wave" src="../../../assets/accompany/button.gif" alt="">
+            <img v-if="status === 0" class="wave" src="../../../assets/accompany/button.gif" alt="">
         </button>
+
+        <button ref="playButton" type="primary" @click="toPlay" style="opacity: 0;">123</button>
+        <audio ref="audioRef" controls style="opacity: 0;">
+            <source :src="audioSrc">
+        </audio>
+        <!-- <el-button type="primary" @click="voice">播放</el-button> -->
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useVoiceCharStore } from '../../../stores/voiceChat.js'
+import { useVoiceChatStore } from '../../../stores/voiceChat.js'
 import _ from "lodash";
 
 // 语言对话
@@ -32,21 +38,21 @@ const replyText = ref('你好呀，我是您的智能小助手')
 const question = ref('')
 const status = ref(1)
 
-const voiceChat=useVoiceCharStore()
+const voiceChatStore = useVoiceChatStore()
 
 // const foxStatus = ref(1)
 
 const chat = () => {
-    voiceChat.sendMessage(question.value)
+    voiceChatStore.sendMessage(question.value)
 }
 
-watch(() => voiceChat.currentMessage, (newValue) => {
+watch(() => voiceChatStore.currentMessage, (newValue) => {
 
+    console.log('监听到消息……')
     console.log(newValue)
     replyText.value = newValue
 
-    textToVoice()
-
+    handleTextToAudio()
     // 防抖设置
 }, {
     deep: true
@@ -81,7 +87,10 @@ const xfVoice = new XfVoiceDictation({
         else if (newStatus === 'end') {
             status.value = 1
 
-            setTimeout(chat,1000)
+            // setTimeout(chat, 1000)
+            chat()
+            console.log('---')
+            // voice()
         }
     },
 
@@ -96,6 +105,8 @@ const xfVoice = new XfVoiceDictation({
         if (text) {
             clearTimeout(times);
             times = setTimeout(() => xfVoice.stop(), 3000);
+
+
         };
     },
 
@@ -118,39 +129,100 @@ onMounted(() => {
 })
 
 // 语音合成模块
+import axios from "axios";
+import qs from "qs";
+import { ElMessage, ElMessageBox } from "element-plus";
+// import { HZRecorder } from "./utils/recorder";
 
-import TTSRecorder from "./js/onlineTTS.js";
+// 提示
+const openMsg = (message, type) => {
+    ElMessage({
+        message,
+        type,
+    });
+};
 
-const title = ref('')
-const content = ref(`你好，我是你的小帮手，有什么可以帮您`)
-const isPlaying = ref(false)
-const ttsRecorder = ref(null)
+// 1.获取AccessToken
+// client_id是你创建的应用的API Key，client_secret是你创建应用的Secret Key
+const client_id = ref("oQEDes0o2TsfOR8N5XCkrtXi");
+const client_secret = ref("VYLYGTe9K7F062cOBXvAVRLO9ZCFYHIJ");
 
-const textToVoice = () => {
-    console.log("正在识别")
-    ttsRecorder.value = new TTSRecorder()
-    ttsRecorder.value.setParams({
-        voiceName: 'xiaoyan',
-        tte: 'UTF8',
-        text: replyText.value
-    })
+const handleGetAccessToken = async () => {
+    try {
+        const option = {
+            grant_type: "client_credentials",
+            client_id: client_id.value,
+            client_secret: client_secret.value,
+        };
+        const res = await axios.post("/oauth/2.0/token", qs.stringify(option));
+        if (res.status !== 200) {
+            return openMsg(res.statusText, "warning");
+        }
+        // openMsg("获取token成功", "success");
+        localStorage.setItem("access_token", res.data.access_token);
+        client_id.value = "oQEDes0o2TsfOR8N5XCkrtXi";
+        client_secret.value = "VYLYGTe9K7F062cOBXvAVRLO9ZCFYHIJ";
+    } catch (error) {
+        console.log(error);
+    }
+};
 
-    handlePlay()
-}
+// 2.语音合成接口调用
+// per配音角色
+const per = ref("111");
+let audioSrc = ref('')
+let audioRef = ref(null)
+const playButton = ref(null)
+
+const handleTextToAudio = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        return openMsg("请先获取token！", "warning");
+    }
+    textToAudio(token);
+};
+const textToAudio = async (token) => {
+    const option = {
+        tex: replyText.value,
+        tok: token,
+        cuid: `${Math.floor(Math.random() * 1000000)}`,
+        ctp: "1",
+        lan: "zh",
+        per: per.value,
+    };
+    const res = await axios.post("/text2audio", qs.stringify(option), {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        responseType: "blob",
+    });
+    if (res.status !== 200) {
+        return openMsg(res.statusText, "warning");
+    }
+    else {
+        audioSrc.value = URL.createObjectURL(res.data);
+        // console.log(audioRef.value.src)
+        console.log(playButton.value)
+        audioRef.value.play()
+        // document.querySelector('audio').play()
+        status.value = 2
+    }
+    // openMsg("语音合成成功", "success");
+
+};
+
+// document.querySelector('body').addEventListener('click', () => {
+//     textToAudio()
+// })
 
 onMounted(() => {
-    textToVoice()
+
+    handleGetAccessToken()
+
+    audioRef.value.addEventListener('ended', () => {
+        status.value = 1
+    })
+
+
 })
-
-const handlePlay = () => {
-    console.log('正在识别')
-    if (['init', 'endPlay', 'errorTTS'].includes(ttsRecorder.value.status)) {
-        ttsRecorder.value.start()
-    } else {
-        ttsRecorder.value.stop()
-    }
-}
-
 </script>
 
 <style lang="scss" scoped>

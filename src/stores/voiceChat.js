@@ -5,7 +5,7 @@ import { getUrlAPI } from '../apis/activity.ts'
 import { getContentAPI, voiceChatAPI } from '../apis/ai.ts'
 import { init } from "echarts";
 
-export const useVoiceCharStore = defineStore("voiceChat", () => {
+export const useVoiceChatStore = defineStore("voiceChat", () => {
 
     let ws = null
 
@@ -28,8 +28,9 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
             }
         ]
     })
-
+    let count=0
     const wsInit = async () => {
+        console.log(++count)
         if (ws && ws.readyState === WebSocket.OPEN) {
             console.log('WebSocket 连接已经存在');
             
@@ -113,10 +114,11 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
 
     const sendMessage = async (question) => {
 
-        let flag = await wsInit()
+        // let flag = await wsInit()
         
 
-        if (flag) {
+
+        // if (flag) {
             putMyContent(question)
 
             myMessage.value.push({
@@ -136,7 +138,7 @@ export const useVoiceCharStore = defineStore("voiceChat", () => {
                 ws.send(JSON.stringify(data.value))
             }
 
-        }
+        // }
 
     }
 

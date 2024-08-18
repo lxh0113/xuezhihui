@@ -24,15 +24,21 @@ http.interceptors.request.use(
 
     let reqUrl = config.url; // 直接获取到当前请求的 URL 地址
 
-    const regex = new RegExp("^/course/create-mindMap/.*$");
+    const regex1 = new RegExp("^/course/create-mindMap/.*$");
+
+    const regex2=new RegExp("^/question/generatedQuestions.*$")
+
+    const regex3 = new RegExp("^/question/createQuestion.*$")
 
     // 如果至少有一个模式匹配，则 isMatched 为 true
     if (
       reqUrl === "/python/getContent" ||
       reqUrl === "/course/createPPT" ||
-      regex.test(reqUrl)
+      regex1.test(reqUrl)||
+      regex2.test(reqUrl)||
+      regex3.test(reqUrl)
     ) {
-      console.log(1);
+      console.log(config.url);
     } else {
       showLoading();
     }

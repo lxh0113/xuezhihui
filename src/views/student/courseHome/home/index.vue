@@ -26,13 +26,8 @@
     </div>
   </div>
 
-  <el-dialog
-    v-model="dialogTableVisible"
-    top="10%"
-    title="推荐错题集"
-    width="90%"
-  >
-    <el-table :data="tableData">
+  <el-dialog v-model="dialogTableVisible" top="20px" title="推荐错题集" width="90%">
+    <!-- <el-table :data="tableData">
       <el-table-column prop="type" label="题目类型" />
       <el-table-column prop="title" label="题干">
         <template #default="scope">
@@ -45,11 +40,58 @@
             <span v-html="option"></span>
           </span>
         </template>
-      </el-table-column>
-      <el-table-column prop="answer" label="答案" />
-      <el-table-column prop="answerAnalysis" label="答案解析" />
-      <el-table-column prop="courseName" label="课程名" />
-    </el-table>
+</el-table-column>
+<el-table-column prop="answer" label="答案" />
+<el-table-column prop="answerAnalysis" label="答案解析" />
+<el-table-column prop="courseName" label="课程名" />
+</el-table> -->
+
+    <div class="questionContent">
+      <!-- <span class="text">出题结果</span> -->
+      <!-- <el-form label-position="top" label-width="100px">
+          <el-form-item ref="ref6" label="AI出题结果">
+            <el-input
+              rows="30"
+              v-model="resultContent"
+              type="textarea"
+              resize="false"
+            />
+            
+          </el-form-item>
+        </el-form> -->
+
+      <div style="display: flex;">
+        <span v-if="status !== 1" class="text">出题结果</span>
+        <img v-if="status === 1" style="width:50px;height: 50px;" src="../../../../assets/accompany/ai.gif" alt="">
+      </div>
+
+      <div style="margin-top:0px;margin-bottom:20px;" v-for="(item, index) in questionsList" class="questions">
+        <div class="button">
+          <el-button type="success">保存</el-button>
+          <el-button type="primary" size="large" :icon="Edit" style="margin-left:0px;border-radius: 0"></el-button>
+          <el-button type="danger" size="large" :icon="Delete" style="margin-left: 0px;border-radius: 0 5px 0 0px;"
+            </el-button>
+        </div>
+        <h4>{{ item.type }}</h4>
+        <p class="questionArea">
+          {{ item.title.text }}
+        </p>
+
+        <p style="margin-bottom: 10px;" v-for="(option, optionIndex) in item.title.options">
+          {{ String.fromCharCode(65 + optionIndex) }} {{ option }}
+        </p>
+
+        <p class="corretAnswer">
+          <span>正确答案：</span>{{ item.answer }}
+        </p>
+
+        <p class="analysisText">
+          <span>答案解析：</span>{{ item.answerAnalysis }}
+        </p>
+        <!-- <hr style="margin-top:30px;margin-bottom: 30px" /> -->
+      </div>
+    </div>
+
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogTableVisible = false">取消</el-button>
@@ -62,17 +104,8 @@
     <el-form label-position="top">
       <el-form-item style="margin-top: 20px" label="您对我们的回答是否满意">
         <div style="display: flex">
-          <el-input
-            v-model="query2"
-            style="width: 400px; height: 60px"
-          ></el-input>
-          <el-button
-            :disabled="flag"
-            @click="submit"
-            style="height: 60px"
-            type="primary"
-            >提交</el-button
-          >
+          <el-input v-model="query2" style="width: 400px; height: 60px"></el-input>
+          <el-button :disabled="flag" @click="submit" style="height: 60px" type="primary">提交</el-button>
         </div>
       </el-form-item>
     </el-form>
@@ -95,38 +128,30 @@ import { useRoute } from "vue-router";
 import { generateMistakesByInputAPI } from "../../../../apis/question";
 import { useRouter } from "vue-router";
 import { teacherSavePaperAnswerAPI } from "../../../../apis/paper";
+import { Delete, Edit } from "@element-plus/icons-vue";
+import { useUserStore } from "@/stores/userStore";
 
 const router = useRouter();
 const dialogTableVisible = ref(false);
 const route = useRoute();
+const status = ref(0)
 
 const query2 = ref("");
 
 const tableData = ref([]);
 
 const getMistakes = async () => {
+  status.value=1
   const res = await generateMistakesByInputAPI("ff");
 
   if (res.data.code === 200) {
     console.log(res.data.data);
-    tableData.value = res.data.data;
-
-    for (let i = 0; i < tableData.value.length; i++) {
-      tableData.value[i].title = JSON.parse(tableData.value[i].title);
-      console.log(tableData.value[i]);
-      if (
-        tableData.value[i].type === "单选题" ||
-        tableData.value[i].type === "多选题"
-      ) {
-        tableData.value[i].title.options = JSON.parse(
-          tableData.value[i].title.options
-        );
-      }
-    }
+    status.value = 0
+    
   } else ElMessage.error(res.data.message);
 };
 
-onMounted(() => {});
+onMounted(() => { });
 
 const books: BooksList = reactive<BooksList>([
   {
@@ -233,9 +258,31 @@ const toGetStudyRoute = () => {
 };
 
 const toGetMistakes = async () => {
-  await getMistakes();
+  getMistakes();
   dialogTableVisible.value = true;
+
+  startWS()
 };
+
+const userStore = useUserStore()
+
+let ws = null
+const questionsList = ref([])
+
+const startWS = () => {
+  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws.onmessage = (event) => {
+    console.log("收到了消息" + event.data)
+
+    if (event.data !== '连接建立成功') questionsList.value = JSON.parse(event.data)
+  }
+
+  ws.onerror = () => {
+    ElMessage.error("网络连接出错")
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -296,6 +343,174 @@ const toGetMistakes = async () => {
     display: grid;
     grid-template-columns: repeat(auto-fill, 220px);
     gap: 20px;
+  }
+}
+
+.questionContent {
+  min-width: 500px;
+  margin-right: 30px;
+  flex: 1;
+  overflow-y: scroll;
+  max-height: calc(100vh - 300px);
+  padding: 10px;
+  // margin-top: 20px;
+
+
+  .text {
+    color: #3B90FF;
+    font-weight: bold;
+    // margin-left: 20px;
+    display: block;
+    // margin-bottom: 20px;
+    font-size: 18px;
+    line-height: 50px;
+  }
+
+  .question {
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+
+  .radioOptions {
+    width: 100%;
+    display: flex;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .setting {
+    color: $primary-gray-text-color;
+    margin-top: 20px;
+    margin-bottom: 50px;
+  }
+
+  .bigTitle {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .mark {
+    border-bottom: 1px solid #dcdfe6;
+    padding-bottom: 20px;
+  }
+
+  .correctAnswer,
+  .studentAnswer,
+  .answerAnalysis {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+
+    span {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  }
+
+  .correctAnswer span {
+    color: green;
+  }
+
+  .answerAnalysis span {
+    color: #3B90FF;
+  }
+
+  .studentAnswer span {
+    color: red;
+  }
+
+  .questions {
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    position: relative;
+
+    .button {
+      display: none;
+    }
+
+    &:hover .button {
+      display: block;
+      display: flex;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+
+  .corretAnswer {
+    margin-bottom: 20px;
+    line-height: 1.5rem;
+    //background-color: #eaecfd;
+    box-sizing: border-box;
+    //padding: 20px;
+    border-radius: 5px;
+    //box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    color: #00B86E;
+
+
+    span {
+      //color: green;
+      font-weight: bold;
+      margin-right: 20px;
+    }
+  }
+
+  .analysisText {
+
+    span {
+      font-weight: bold;
+      margin-right: 20px;
+    }
+  }
+
+  .infoBox {
+    display: flex;
+    justify-content: space-between;
+
+    span {
+      line-height: 40px;
+      //color:#3B90FF;
+      //color: red;
+      color: #a6a5ab;
+      font-weight: bold;
+    }
+  }
+
+  .studentAnswerBox {
+    margin-bottom: 20px;
+    line-height: 1.5rem;
+    //background-color: #eaecfd;
+    box-sizing: border-box;
+    //padding: 20px;
+    border-radius: 5px;
+    //box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+    span {
+      //color: red;
+      font-weight: bold;
+      margin-right: 20px;
+    }
+  }
+
+  .infoBox {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fe;
+  }
+}
+
+.questionArea {
+
+  box-sizing: border-box;
+  //padding: 20px;
+
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+
+  span {
+    font-weight: bold;
   }
 }
 </style>

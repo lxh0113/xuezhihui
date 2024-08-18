@@ -259,7 +259,7 @@ const dealHomework = async () => {
   const res = await studentDoAssignmentAPI(
     userStore.getUserInfo().roleId,
     homeworkData.value.assignmentId,
-    1,
+    2,
     questionsList.value,
     2,
     startTime,

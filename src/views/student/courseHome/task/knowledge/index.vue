@@ -282,7 +282,7 @@ const generate = async () => {
 };
 
 const getKnowledge = async () => {
-  const res = await teacherGetKnowledgeChartByCourseAPI(parseInt(route.params.id as string));
+  const res = await getKnowledgeChartAPI(parseInt(route.params.id as string));
 
   if (res.data.code === 200) {
     console.log(res.data.data);

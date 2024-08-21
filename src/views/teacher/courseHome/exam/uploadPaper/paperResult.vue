@@ -21,7 +21,7 @@
 
     <div class="right">
       <div style="display: flex; margin-bottom: 20px">
-        <h3 >{{ paperData.title }}</h3>
+        <h3>{{ paperData.title }}</h3>
         <p style="margin-left: 20px" class="scoreText">
           总分：{{ totalScore }}
         </p>
@@ -202,10 +202,10 @@ const totalScore = computed(() => {
   }, 0); // 初始值设为 0
 });
 
-const studentScore=computed(() => {
+const studentScore = computed(() => {
   return markList.value.reduce((accumulator, question) => {
     // 这里假设每个问题对象有一个 score 属性来表示分数
-    if(question.studentScore)  return accumulator + question.studentScore;
+    if (question.studentScore) return accumulator + question.studentScore;
     else return accumulator
   }, 0); // 初始值设为 0
 });
@@ -284,6 +284,9 @@ const studentInfo = ref({
 const studentAnswer = ref([]);
 
 const getStudentPaper = async () => {
+
+  studentAnswer.value = questionList.value.map((item) => "");
+
   const res = await teacherGetStudentInfoAPI(
     srcList.value
   );
@@ -294,16 +297,7 @@ const getStudentPaper = async () => {
   } else {
     ElMessage.error(res.data.message)
   }
-  // const res = await teacherGetStudentAnswerAPI(parseInt(route.params.paperId as string),srcList.value);
 
-  // if (res.data.code === 200) {
-  //   console.log(res.data.data);
-  //   studentAnswer.value =JSON.parse(res.data.data.content);
-  //   console.log(studentAnswer.value)
-  //   studentInfo.value = res.data.data;
-  // } else {
-  //   ElMessage.error(res.data.message);
-  // }
 };
 
 const markList = ref([])
@@ -323,13 +317,20 @@ const getAllQuestion = async () => {
 
   console.log(data)
 
+  markList.value = questionList.value.map((item) => {
+    return {
+      questionComment: '',
+      studentScore: ''
+    }
+  });
+
   const res = await markAllQuestionAPI(
     data
   )
 
   if (res.data.code === 200) {
     // 获取成功
-    markList.value=res.data.data
+    markList.value = res.data.data
   }
   else {
     ElMessage.error(res.data.message)
@@ -348,8 +349,8 @@ const smartMarkQuestion = async (i: number) => {
 
     markList.value[i] = res.data.data
 
-    questionList.value[i].studentScore=res.data.data.studentScore;
-    questionList.value[i].questionComment=res.data.data.questionComment
+    questionList.value[i].studentScore = res.data.data.studentScore;
+    questionList.value[i].questionComment = res.data.data.questionComment
   }
   else {
     ElMessage.error(res.data.message)

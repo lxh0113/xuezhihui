@@ -3,9 +3,9 @@
     <router-link active-class="active" to="/teacher/course/teach">
       <span>我教的课</span>
     </router-link>
-    <router-link active-class="active" to="/teacher/course/learn">
+    <!-- <router-link active-class="active" to="/teacher/course/learn">
       <span>我学的课</span>
-    </router-link>
+    </router-link> -->
   </div>
 
   <div class="bottom">

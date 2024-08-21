@@ -2,7 +2,7 @@
   <div>
     <beautiful-chat :participants="participants" :titleImageUrl="titleImageUrl" :onMessageWasSent="onMessageWasSent"
       :messageList="messageList" :newMessagesCount="newMessagesCount" :isOpen="isChatOpen" :close="closeChat"
-      :icons="icons" :open="openChat" :showEmoji="true" :showFile="false" :showEdition="true" :showDeletion="true"
+       :open="openChat" :showEmoji="true" :showFile="false" :showEdition="true" :showDeletion="true"
       :deletionConfirmation="true" :showTypingIndicator="showTypingIndicator" :showLauncher="true"
       :showCloseButton="true" :colors="colors" :alwaysScrollToBottom="alwaysScrollToBottom"
       :disableUserListToggle="false" :messageStyling="messageStyling" @onType="handleOnType" @edit="editMessage" />

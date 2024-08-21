@@ -58,7 +58,7 @@ export const useWsStore = defineStore("ws", () => {
         console.log("ws连接已经建立")
 
         ws.onmessage = (event) => {
-            // console.log("收到了消息" + event.data)
+            console.log("收到了消息" + event.data)
 
             let newMessage = JSON.parse(event.data)
 
@@ -130,6 +130,8 @@ export const useWsStore = defineStore("ws", () => {
             // console.log(JSON.stringify(data.value))
 
             const content = await getContent(question);
+
+            console.log(content)
 
             if (content === 'false') {
                 ElMessage.error('网络出错了，请重新连接')

@@ -27,7 +27,11 @@ export default defineConfig(({ mode, command }) => {
   });
   return {
     optimizeDeps: {
-      include: optimizeDepsElementPlusIncludes,
+      include: [
+        ...optimizeDepsElementPlusIncludes,
+        'element-plus'
+      ],
+      force:true
     },
     plugins: [
       vue(),

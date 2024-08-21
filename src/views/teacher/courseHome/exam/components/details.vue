@@ -31,7 +31,7 @@
         <template #default="scope">
           <el-button type="primary" plain v-if="scope.row.state !== 0" @click="markExam(scope.row,scope.$index)">查看</el-button>
           <el-button type="warning" plain v-if="scope.row.state === 2"
-            @click="analysisStudent(scope.row.sno)">学情分析</el-button>
+            @click="analysisStudent(scope.row)">学情分析</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -90,7 +90,14 @@ const analysis = () => {
   );
 };
 
-const analysisStudent = (id: number) => {
+import { useNameStore } from "@/stores/nameStore";
+
+const nameStore=useNameStore()
+
+const analysisStudent = (item:any) => {
+
+  nameStore.setName(item.name)
+
   // 用的是学号
   router.push(
     "/course/" +
@@ -98,7 +105,7 @@ const analysisStudent = (id: number) => {
     "/exam/" +
     route.params.assignmentId +
     "/analysis/" +
-    id
+    item.sno
   );
 };
 

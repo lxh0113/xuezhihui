@@ -7,7 +7,8 @@
         </div>
 
         <button @click="startRecording" class="voiceButton" type="primary" circle plain>
-            <svg v-if="status !== 0" t="1723877577120" class="icon" viewBox="0 0 1024 1024" version="1.1"
+            <img style="width:100px" v-if="buttonStatus===1" src="../../../assets/accompany/ai.gif" alt="">
+            <svg v-else-if="status !== 0" t="1723877577120" class="icon" viewBox="0 0 1024 1024" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" p-id="15866" width="48" height="48">
                 <path
                     d="M640 469.333333a128 128 0 1 1-256 0V213.333333a128 128 0 0 1 256 0v256zM512 0a213.333333 213.333333 0 0 0-213.333333 213.333333v256a213.333333 213.333333 0 0 0 426.666666 0V213.333333a213.333333 213.333333 0 0 0-213.333333-213.333333z"
@@ -19,9 +20,8 @@
             <img v-if="status === 0" class="wave" src="../../../assets/accompany/button.gif" alt="">
         </button>
 
-        <button ref="playButton" type="primary" @click="toPlay" style="opacity: 0;">123</button>
-        <audio ref="audioRef" controls style="opacity: 0;">
-            <source :src="audioSrc">
+        <!-- <button ref="playButton" type="primary" @click="toPlay" style="opacity: 0;">123</button> -->
+        <audio ref="audioRef" hidden :src="audioSrc" controls>
         </audio>
         <!-- <el-button type="primary" @click="voice">播放</el-button> -->
     </div>
@@ -41,9 +41,12 @@ const status = ref(1)
 const voiceChatStore = useVoiceChatStore()
 
 // const foxStatus = ref(1)
+const buttonStatus=ref(0)
 
 const chat = () => {
+
     voiceChatStore.sendMessage(question.value)
+    buttonStatus.value=1
 }
 
 watch(() => voiceChatStore.currentMessage, (newValue) => {
@@ -105,8 +108,6 @@ const xfVoice = new XfVoiceDictation({
         if (text) {
             clearTimeout(times);
             times = setTimeout(() => xfVoice.stop(), 3000);
-
-
         };
     },
 
@@ -126,6 +127,8 @@ import Recorder from 'js-audio-recorder'
 
 onMounted(() => {
     // handleStart()
+    
+    voiceChatStore.wsInit()
 })
 
 // 语音合成模块
@@ -182,6 +185,7 @@ const handleTextToAudio = async () => {
     textToAudio(token);
 };
 const textToAudio = async (token) => {
+
     const option = {
         tex: replyText.value,
         tok: token,
@@ -198,30 +202,26 @@ const textToAudio = async (token) => {
         return openMsg(res.statusText, "warning");
     }
     else {
+        buttonStatus.value=0
         audioSrc.value = URL.createObjectURL(res.data);
-        // console.log(audioRef.value.src)
-        console.log(playButton.value)
-        audioRef.value.play()
-        // document.querySelector('audio').play()
+
+        let audio=new Audio(audioSrc.value)
+        audio.play()
         status.value = 2
+
+        audio.addEventListener('ended', () => {
+        status.value = 1
+
+        voiceChatStore.wsInit()
+    })
     }
     // openMsg("语音合成成功", "success");
 
 };
 
-// document.querySelector('body').addEventListener('click', () => {
-//     textToAudio()
-// })
-
 onMounted(() => {
 
     handleGetAccessToken()
-
-    audioRef.value.addEventListener('ended', () => {
-        status.value = 1
-    })
-
-
 })
 </script>
 

@@ -33,7 +33,8 @@
 
         <div class="radioQuestions" v-for="(item, index) in questionList" :id="'part' + index" :ref="setRef"
           :key="index" style="margin-bottom: 20px">
-          <div class="question">{{ JSON.parse(item.title).text }}</div>
+          
+          <div class="question" v-html="JSON.parse(item.title).text"></div>
           <div class="radio" v-if="item.type === '单选题'">
             <div class="radioOptions" v-for="(option, optionIndex) in JSON.parse(
               JSON.parse(item.title).options

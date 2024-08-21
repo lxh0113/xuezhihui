@@ -2,18 +2,15 @@
   <div class="backBox">
     <!-- <div class="title">学情分析</div> -->
     <div class="chart">
-      <div class="firstChart"></div>
-      <div class="secondChart"></div>
+      <div id="oneChart"></div>
+      <div id="twoChart"></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, getCurrentInstance, ref } from "vue";
-// import { generateExamAnalysisClass } from "../../../mock/teacher/examAnalysis.js";
 import { ElMessage } from "element-plus";
-// import { getMaxMinAveAPI, teacherGetAllClassDetailsAPI } from "@/apis/exam.js";
-import { useUserStore } from "@/stores/userStore";
 import { examAnalysisAPI } from "@/apis/assignment";
 import { useRoute } from 'vue-router'
 
@@ -108,16 +105,15 @@ const chartData2 = ref({
 });
 
 
-const classScoreList = ref([]);
-const userStore = useUserStore();
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance.appContext.config.globalProperties.$echarts;
 
 const setChart = () => {
-  const dom1 = document.querySelector(".firstChart");
+  const dom1 = document.querySelector("#oneChart");
   const myChart1 = echarts.init(dom1);
-  const dom2 = document.querySelector(".secondChart");
+  const dom2 = document.querySelector("#twoChart");
   const myChart2 = echarts.init(dom2);
+
   // 指定图表的配置项和数据
   var option1 = chartData1.value;
   var option2 = chartData2.value;
@@ -130,10 +126,10 @@ const setChart = () => {
     myChart2.resize();
   });
 
-  onUnmounted(() => {
-    myChart1.dispose();
-    myChart2.dispose();
-  });
+  // onUnmounted(() => {
+  //   myChart1.dispose();
+  //   myChart2.dispose();
+  // });
 };
 
 const setChartData1 = async () => {
@@ -142,14 +138,16 @@ const setChartData1 = async () => {
 
   if (res.data.code === 200) {
     console.log(res.data.data)
+    // console.log(res.data.data[0])
 
-    chartData1.value.xAxis.data = res.data.data.classScoreList?.map(item => {
+    // 横坐标
+    chartData1.value.xAxis.data = res.data.data[0].classScoreList?.map(item => {
       return item.className
     })
 
-    chartData1.value.series = res.data.data.classScoreList?.map(item => {
+    chartData1.value.series = res.data.data.map(item => {
       return {
-        name: item.className,
+        name: item.title,
         type: 'line',
         data: [],
         label: {
@@ -168,13 +166,13 @@ const setChartData1 = async () => {
     })
 
     for (let i = 0; i < chartData1.value.series?.length; i++) {
-      chartData1.value.series[i].data = res.data.data.map(item => {
-        return item.classScoreList[i]?.avgScore || 0
+      chartData1.value.series[i].data = res.data.data[i].classScoreList.map(item => {
+        return item.avgScore || 0
       })
     }
 
-    // initChart()
-    setChart()
+    console.log(chartData1.value)
+    // setChart()
 
   }
   else {
@@ -188,11 +186,11 @@ const setChartData2 = async () => {
   if (res.data.code === 200) {
     console.log(res.data.data)
 
-    chartData2.value.xAxis.data = res.data?.data?.classScoreList?.map(item => {
+    chartData2.value.xAxis.data = res.data?.data[0]?.classScoreList?.map(item => {
       return item.className
     })
 
-    chartData2.value.series = res.data?.data?.classScoreList?.map(item => {
+    chartData2.value.series = res.data?.data?.map(item => {
       return {
         name: item.className,
         type: 'bar',
@@ -213,13 +211,11 @@ const setChartData2 = async () => {
     })
 
     for (let i = 0; i < chartData2.value.series?.length; i++) {
-      chartData2.value.series[i].data = res.data.data.map(item => {
-        return item.classScoreList[i]?.passingStudentsCount || 0
+      chartData2.value.series[i].data = res.data.data[i].classScoreList.map(item => {
+        return item.passingStudentsCount || 0
       })
     }
-
-    // initChart()
-    setChart()
+    // setChart()
 
   }
   else {
@@ -227,13 +223,15 @@ const setChartData2 = async () => {
   }
 }
 
-const initChart = () => {
-  setChartData1()
-  setChartData2()
+const initChart = async() => {
+  await setChartData1()
+  await setChartData2()
+
+  setChart()
 }
 
 onMounted(() => {
-  setChart();
+  // setChart();
   initChart()
 });
 </script>
@@ -264,8 +262,8 @@ onMounted(() => {
     height: 100%;
     // flex-wrap: wrap;
 
-    .firstChart,
-    .secondChart {
+    #oneChart,
+    #twoChart {
       flex: 1;
       background-color: #fff;
       min-width: 400px;

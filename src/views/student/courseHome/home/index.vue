@@ -68,8 +68,8 @@
       <div style="margin-top:0px;margin-bottom:20px;" v-for="(item, index) in questionsList" class="questions">
         <div class="button">
           <el-button type="success">保存</el-button>
-          <el-button type="primary" size="large" :icon="Edit" style="margin-left:0px;border-radius: 0"></el-button>
-          <el-button type="danger" size="large" :icon="Delete" style="margin-left: 0px;border-radius: 0 5px 0 0px;"
+          <el-button type="primary" size="large" @click="toEditQuestion" :icon="Edit" style="margin-left:0px;border-radius: 0"></el-button>
+          <el-button type="danger" size="large" @click="deleteQuestion" :icon="Delete" style="margin-left: 0px;border-radius: 0 5px 0 0px;"
             </el-button>
         </div>
         <h4>{{ item.type }}</h4>
@@ -110,6 +110,34 @@
       </el-form-item>
     </el-form>
   </el-dialog>
+
+  <el-dialog v-model="dialogVisible" title="编辑题目" width="800">
+        <el-form label-width="50px">
+            <el-form-item label="标题">
+                <el-input v-model="currentQuestion.title.text" placeholder=""></el-input>
+            </el-form-item>
+            <div v-for="item in currentQuestion.title.options">
+                <el-form-item>
+                    <el-input :value="item" placeholder=""></el-input>
+                </el-form-item>
+            </div>
+
+            <el-form-item label="答案">
+                <el-input v-model="currentQuestion.answer" placeholder=""></el-input>
+            </el-form-item>
+            <el-form-item label="分析">
+                <el-input v-model="currentQuestion.answerAnalysis" placeholder=""></el-input>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button @click="dialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="editQuestion">
+                    确认
+                </el-button>
+            </div>
+        </template>
+    </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -127,7 +155,7 @@ import { ElMessage } from "element-plus";
 import { useRoute } from "vue-router";
 import { generateMistakesByInputAPI } from "../../../../apis/question";
 import { useRouter } from "vue-router";
-import { teacherSavePaperAnswerAPI } from "../../../../apis/paper";
+import { teacherAddSingleQuestionAPI } from "@/apis/question";
 import { Delete, Edit } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/userStore";
 
@@ -269,8 +297,10 @@ const userStore = useUserStore()
 let ws = null
 const questionsList = ref([])
 
+import {wsUrl} from '@/utils/baseUrl'
+
 const startWS = () => {
-  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws = new WebSocket(wsUrl+"/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
   ws.onmessage = (event) => {
     console.log("收到了消息" + event.data)
 
@@ -282,6 +312,61 @@ const startWS = () => {
   }
 }
 
+
+const saveQuestion = async (index) => {
+    console.log(questionsList.value[index])
+
+    const res = await teacherAddSingleQuestionAPI({
+        id: null,
+        type: questionsList.value[index].type,
+        title: JSON.stringify({
+            text: questionsList.value[index].text,
+            options: JSON.stringify(questionsList.value[index].options)
+        }),
+        answer: questionsList.value[index].answer,
+        answerAnalysis: questionsList.value[index].answerAnalysis,
+        courseId: null,
+        courseName: '',
+        creatorId: userStore.getUserInfo().roleId,
+        creatorName: userStore.getUserInfo().name
+    })
+
+    if (res.data.code === 200) {
+        ElMessage.success('保存成功！')
+    }
+    else ElMessage.error(res.data.message)
+}
+
+const dialogVisible = ref(false)
+let currentQuestion = ref({
+    title: {
+        text: '', options: ['','']
+    },
+    answer: '',
+    answerAnalysis: ''
+})
+
+let currentIndex = ref(1)
+
+const toEditQuestion = (index) => {
+    dialogVisible.value = true
+    currentIndex.value = index
+    currentQuestion.value.title = questionsList.value[index].title
+    currentQuestion.value.answer = questionsList.value[index].answer
+    currentQuestion.value.answerAnalysis = questionsList.value[index].answerAnalysis
+}
+
+const editQuestion = () => {
+    questionsList.value[currentIndex.value].title = currentQuestion.value.title
+    questionsList.value[currentIndex.value].answer = currentQuestion.value.answer
+    questionsList.value[currentIndex.value].answerAnalysis = currentQuestion.value.answerAnalysis
+
+    dialogVisible.value = false
+}
+
+const deleteQuestion = (index) => {
+    questionsList.value = questionsList.value.filter((item, i) => i !== index)
+}
 
 </script>
 

@@ -159,8 +159,10 @@ const updatePercent = (newPercent) => {
 
 }
 
+import {wsUrl} from '@/utils/baseUrl'
+
 const startWS = () => {
-  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws = new WebSocket(wsUrl+"/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
   ws.onmessage = (event) => {
     console.log("收到了消息" + event.data)
 

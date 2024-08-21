@@ -26,9 +26,13 @@ const userStore = useUserStore();
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance.appContext.config.globalProperties.$echarts;
 
+import { useNameStore } from "@/stores/nameStore";
+
+const name=useNameStore().getName()
+
 const chartData1 = ref({
   title: {
-    text: "文旅航" + "成绩历次分布",
+    text: name + "成绩历次分布",
   },
   legend: {},
   color: ["#748eed", "#91cc75", "#fac858"],
@@ -46,7 +50,7 @@ const chartData1 = ref({
   yAxis: {},
   series: [
     {
-      name: "文旅航",
+      name: name,
       type: "line",
       data: [85, 92, 78, 89, 94, 87],
       label: {
@@ -74,7 +78,7 @@ const chartData1 = ref({
 
 const chartData2 = ref({
   title: {
-    text: "文旅航" + "成绩评定状况",
+    text: name + "成绩评定状况",
   },
   legend: {
     orient: "vertical", //图例的布局，水平布局、垂直布局
@@ -133,7 +137,7 @@ const chartData2 = ref({
 
 const chartData3 = ref({
   title: {
-    text: "文旅航" + "班级排名趋势",
+    text: name + "班级排名趋势",
   },
   legend: {},
   color: ["#91cc75"],
@@ -183,7 +187,7 @@ const chartData3 = ref({
 
 const chartData4 = ref({
   title: {
-    text: "文旅航" + "年级排名趋势",
+    text: name + "年级排名趋势",
   },
   legend: {},
   color: ["#ee6666"],

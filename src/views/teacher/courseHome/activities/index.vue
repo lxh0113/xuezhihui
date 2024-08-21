@@ -108,7 +108,7 @@ const setClassList = async () => {
 
   if (res.data.code === 200) {
     classList.value = res.data.data;
-    myClass.value = res.data.data[0].id;
+    myClass.value = 7;
 
     classStore.setCurrentClass(myClass.value)
   } else {

@@ -65,7 +65,7 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
             {
                 // 这是新的修改新消息
                 currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
-                ws.close()
+                // ws.close()
             }
 
             if (newMessage.content) {
@@ -79,8 +79,8 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
         }
 
         ws.onclose = () => {
-            // ElMessage.error("连接已经关闭")
-            // reload()
+            
+            console.log('我被关闭了')
         }
 
         return true
@@ -115,8 +115,6 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
     const sendMessage = async (question) => {
 
         // let flag = await wsInit()
-        
-
 
         // if (flag) {
             putMyContent(question)
@@ -135,10 +133,11 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
                     "role": "user",
                     "content": content
                 })
+                console.log(content)
                 ws.send(JSON.stringify(data.value))
-            }
+            // }
 
-        // }
+        }
 
     }
 

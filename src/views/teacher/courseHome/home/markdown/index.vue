@@ -47,6 +47,8 @@ import { useUserStore } from "@/stores/userStore";
 const route = useRoute()
 const transformer = new Transformer();
 
+import {wsUrl} from '@/utils/baseUrl'
+
 let initValue = `
 # STM32 GPIO原理与项目实践
 
@@ -191,7 +193,7 @@ const userStore = useUserStore()
 let ws = null
 
 const startWS=()=>{
-  ws = new WebSocket("ws://192.168.50.13:8089/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
+  ws = new WebSocket(wsUrl+"/apk-info/websocket/" + userStore.getUserInfo().roleId + "?k=v")
   ws.onmessage = (event) => {
     console.log("收到了消息" + event.data)
 

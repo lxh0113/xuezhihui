@@ -179,7 +179,7 @@ const uploadImage = async (uploadFile) => {
 
 const toModify = () => {
   modifyStatus(currentStudent, parseInt(route.params.activityId as string), reason.value);
-
+  
   dialogVisible.value = false;
 };
 

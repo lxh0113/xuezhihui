@@ -54,7 +54,7 @@
           <el-button @click="addSubtitle" type="warning" style="margin-left: 20px"
             v-if="chapterData.type === 'video'">AI视频总结</el-button>
 
-            <el-button v-if="chapterData.type === 'video'&&chapterData.knowledge!=null" type="primary">编辑已有字幕</el-button>
+            <!-- <el-button v-if="chapterData.type === 'video'&&chapterData.knowledge!=null" type="primary">编辑已有字幕</el-button> -->
         </div>
 
         <div class="addSubtitleBox" v-if="chapterData.type === 'video'">

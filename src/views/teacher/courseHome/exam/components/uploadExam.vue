@@ -22,7 +22,7 @@
         <el-option label="图片" :value="0"></el-option>
         <el-option label="文档" :value="1"></el-option>
       </el-select>
-      <el-upload v-if="originPaperType === 0" action="http://192.168.50.199:8079/activity/getImagePath" method="post"
+      <el-upload v-if="originPaperType === 0" :action="baseUrl+'/activity/getImagePath'" method="post"
         name="image" :file-list="originFileList" list-type="picture-card" :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove" :auto-upload="true" :on-success="(response: any) => {
           return successUploadOriginImage(response);
@@ -151,7 +151,7 @@ import { useStudentStore } from "@/stores/studentStore";
 import { teacherSaveStudentAnswerAPI } from '../../../../../apis/paper';
 import { useUploadPaperStore } from "@/stores/uploadPaperStore";
 
-const baseUrl = '192.168.50.199:5173'
+import { baseUrl,nowUrl } from '@/utils/baseUrl'
 
 const maxIndex = ref(0)
 const activeIndex = ref(0)
@@ -283,7 +283,7 @@ const uploadOriginPaper = async () => {
 
 const toViewOrigin = () => {
 
-  window.open("http://" + baseUrl + "/upload/origin/" + route.params.paperId);
+  window.open(nowUrl + "/upload/origin/" + route.params.paperId);
 };
 
 // 上传试卷答案部分
@@ -357,7 +357,7 @@ const getAnswer = async () => {
 };
 
 const toViewAnswer = () => {
-  window.open("http://" + baseUrl + "/upload/answer/" + route.params.paperId);
+  window.open(nowUrl + "/upload/answer/" + route.params.paperId);
 };
 
 // 批量上传学生试卷
@@ -404,11 +404,11 @@ const uploadZip = async () => {
 
 const toViewStudent = () => {
 
-  window.open("http://" + baseUrl + "/upload/student/" + route.params.paperId);
+  window.open(nowUrl + "/upload/student/" + route.params.paperId);
 };
 
 const toViewResult = () => {
-  window.open("http://" + baseUrl + "/upload/result/" + route.params.paperId);
+  window.open(nowUrl + "/upload/result/" + route.params.paperId);
 };
 
 // 查看批阅接口

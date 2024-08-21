@@ -5,9 +5,11 @@ import { ElMessage } from "element-plus";
 // import { useUserStore } from "@/stores/userStore.ts";
 import { useRoute, useRouter } from "vue-router";
 
+import { baseUrl } from '@/utils/baseUrl'
+
 import { showLoading, hideLoading } from "@/utils/loading.js";
 const http = axios.create({
-  baseURL: "http://192.168.50.199:8079",
+  baseURL: baseUrl,
   // baseURL:'/mock',
   timeout: 6000 * 1000,
 });
@@ -30,13 +32,17 @@ http.interceptors.request.use(
 
     const regex3 = new RegExp("^/question/createQuestion.*$")
 
+    const regex4=new RegExp("^/course/createPath.*$")
+
     // 如果至少有一个模式匹配，则 isMatched 为 true
     if (
       reqUrl === "/python/getContent" ||
       reqUrl === "/course/createPPT" ||
+      reqUrl==="/python/voiceChat"||
       regex1.test(reqUrl)||
       regex2.test(reqUrl)||
-      regex3.test(reqUrl)
+      regex3.test(reqUrl)||
+      regex4.test(reqUrl)
     ) {
       console.log(config.url);
     } else {

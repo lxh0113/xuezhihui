@@ -169,7 +169,7 @@ export const teacherGetAllImagesAPI = (classId: number, image: FormData) => {
     url: "/activity/getFaceImageVos",
     method: "POST",
     params: {
-      classId,
+      classId
     },
     data: {
       image,

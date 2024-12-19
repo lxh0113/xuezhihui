@@ -84,7 +84,6 @@ import {
 } from "../../../../../apis/course";
 import { useRoute } from "vue-router";
 
-import { ElLoading } from "element-plus";
 
 const route = useRoute();
 const editDialog = ref(false);

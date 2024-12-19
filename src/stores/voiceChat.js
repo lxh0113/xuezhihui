@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { h, ref } from 'vue'
 import { ElMessage, ElNotification } from "element-plus";
-import { getUrlAPI } from '../apis/activity.ts'
+import { getUrlAPI, getYYUrlAPI } from '../apis/activity.ts'
 import { getContentAPI, voiceChatAPI } from '../apis/ai.ts'
 import { init } from "echarts";
 
@@ -19,15 +19,28 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
     ])
 
     const data = ref({
-        topN: 3,
-        fileIds: ["3b04e2db66cb430eb251c6aaefd567fd"],
-        messages: [
-            {
-                "role": "user",
-                "content": "你好"
+        "header": {
+            "app_id": "061a30a7"
+        },
+        "parameter": {
+            "chat": {
+                "domain": "generalv3.5",
+                "temperature": 0.5,
+                "max_tokens": 1024,
             }
-        ]
+        },
+        "payload": {
+            "message": {
+                "text": [
+                    { "role": "system", "content": "你现在是一个语言小助手" },
+                    { "role": "user", "content": "你是谁" },
+                    { "role": "assistant", "content": "我是你的语言小助手" }
+                ]
+            }
+        }
     })
+
+
     let count=0
     const wsInit = async () => {
         console.log(++count)
@@ -58,18 +71,22 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
         console.log("ws连接已经建立")
 
         ws.onmessage = (event) => {
+
             let newMessage = JSON.parse(event.data)
+            // console.log(newMessage)
+            newMessage=newMessage.payload.choices
+
+            
             console.log("状态" + newMessage.status)
 
-            if(newMessage.status===2)
-            {
-                // 这是新的修改新消息
-                currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
-                // ws.close()
-            }
+            // if (newMessage.t.content) {
+                putAIContent(newMessage.text[0].content)
+            // }
 
-            if (newMessage.content) {
-                putAIContent(newMessage.content)
+            if (newMessage.status === 2) {
+                // 这是新的修改新消息
+                // currentMessage.value = myMessage.value[myMessage.value.length - 1].data.text
+                currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
             }
 
         }
@@ -129,7 +146,7 @@ export const useVoiceChatStore = defineStore("voiceChat", () => {
                 ElMessage.error('网络出错了，请重新连接')
             }
             else {
-                data.value.messages.push({
+               data.value.payload.message.text.push({
                     "role": "user",
                     "content": content
                 })

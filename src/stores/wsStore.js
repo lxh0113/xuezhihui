@@ -11,25 +11,36 @@ export const useWsStore = defineStore("ws", () => {
 
     let status = '未开始'
 
-    let currentMessage=ref('')
+    let currentMessage = ref('')
 
     let myMessage = ref([
         { type: 'text', author: `me`, data: { text: `你好!` } },
-        { type: 'text', author: `ai`, data: { text: `你好，我是您的语言小助手.` } }
+        { type: 'text', author: `assistant`, data: { text: `你好，我是您的语言小助手.` } }
     ])
 
     const data = ref({
-        topN: 3,
-        fileIds: ["3b04e2db66cb430eb251c6aaefd567fd"],
-        messages: [
-            {
-                "role": "user",
-                "content": "你好"
+        "header": {
+            "app_id": "061a30a7"
+        },
+        "parameter": {
+            "chat": {
+                "domain": "generalv3.5",
+                "temperature": 0.5,
+                "max_tokens": 1024,
             }
-        ]
+        },
+        "payload": {
+            "message": {
+                "text": [
+                    { "role": "system", "content": "你现在是一个语言小助手" },
+                    { "role": "user", "content": "你是谁" },
+                    { "role": "assistant", "content": "我是你的语言小助手" }
+                ]
+            }
+        }
     })
 
-    const wsInit = async (flag=0) => {
+    const wsInit = async (flag = 0) => {
 
 
         if (ws && ws.readyState === WebSocket.OPEN) {
@@ -44,7 +55,7 @@ export const useWsStore = defineStore("ws", () => {
 
         // 发送请求得到  url
         const res = await getUrlAPI()
-        
+
         let url = ''
 
         if (res.data.code === 200) {
@@ -61,18 +72,20 @@ export const useWsStore = defineStore("ws", () => {
             console.log("收到了消息" + event.data)
 
             let newMessage = JSON.parse(event.data)
+            // console.log(newMessage)
+            newMessage=newMessage.payload.choices
 
-            //console.log("收到了消息" + newMessage)
+            
             console.log("状态" + newMessage.status)
 
-            if(newMessage.status===2)
-            {
-                // 这是新的修改新消息
-                currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
-            }
+            // if (newMessage.t.content) {
+                putAIContent(newMessage.text[0].content)
+            // }
 
-            if (newMessage.content) {
-                putAIContent(newMessage.content)
+            if (newMessage.status === 2) {
+                // 这是新的修改新消息
+                // currentMessage.value = myMessage.value[myMessage.value.length - 1].data.text
+                currentMessage.value=myMessage.value[myMessage.value.length-1].data.text
             }
 
         }
@@ -101,6 +114,7 @@ export const useWsStore = defineStore("ws", () => {
 
     const putAIContent = (message) => {
         myMessage.value[myMessage.value.length - 1].data.text += message
+        
         console.log(myMessage.value)
     }
 
@@ -118,7 +132,7 @@ export const useWsStore = defineStore("ws", () => {
     const sendMessage = async (question) => {
 
         let flag = await wsInit()
-        
+
 
         if (flag) {
             putMyContent(question)
@@ -126,8 +140,6 @@ export const useWsStore = defineStore("ws", () => {
             myMessage.value.push({
                 type: 'text', author: `ai`, data: { text: '' }
             })
-
-            // console.log(JSON.stringify(data.value))
 
             const content = await getContent(question);
 
@@ -137,7 +149,7 @@ export const useWsStore = defineStore("ws", () => {
                 ElMessage.error('网络出错了，请重新连接')
             }
             else {
-                data.value.messages.push({
+                data.value.payload.message.text.push({
                     "role": "user",
                     "content": content
                 })
@@ -148,7 +160,7 @@ export const useWsStore = defineStore("ws", () => {
 
     }
 
-    const getMyMessage=()=>{
+    const getMyMessage = () => {
         return myMessage.value
     }
 

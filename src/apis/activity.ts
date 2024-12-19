@@ -192,3 +192,10 @@ export const getUrlAPI=()=>{
     method:"GET"
   })
 }
+
+export const getYYUrlAPI=()=>{
+  return http({
+    url:"/activity/getSignature2",
+    method:"GET"
+  })
+}
